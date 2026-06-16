@@ -58,7 +58,7 @@ export function PreviewPage({
 
   const shareTextNoUrl = buildShareCaption(event);
   const shareText = buildShareCaption(event, shareableUrl);
-  const facebookShareText = buildFacebookShareCaption(event, shareableUrl);
+  const facebookShareText = buildFacebookShareCaption(event);
 
   useEffect(() => {
     const url = getShareablePageUrl();

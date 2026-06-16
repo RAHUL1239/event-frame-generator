@@ -112,15 +112,17 @@ export function FacebookPostGuide({
             <>
               <li>
                 Tap <strong>Share poster to Facebook</strong> below and choose{" "}
-                <strong>Facebook</strong> from the share menu
+                <strong>Facebook</strong> from the share menu (image only — no
+                link)
               </li>
               <li>
                 Facebook should open with your poster attached — if not, tap the{" "}
-                <strong>Photo</strong> icon and select <strong>{filename}</strong>
+                <strong>Photo</strong> icon and select <strong>{filename}</strong>{" "}
+                from Downloads
               </li>
               <li>
-                Long-press and <strong>paste</strong> your caption if it is not
-                already filled in
+                Long-press and <strong>paste</strong> your caption (already copied
+                to clipboard)
               </li>
               {facebookGroupName ? (
                 <li>
@@ -147,7 +149,6 @@ export function FacebookPostGuide({
             onClick={() =>
               void openFacebookPostFlow(
                 posterDataUrl,
-                caption,
                 filename,
                 facebookGroupUrl
               )

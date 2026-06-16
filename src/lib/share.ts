@@ -91,11 +91,8 @@ export function buildShareCaption(event: EventShareInfo, pageUrl?: string): stri
   return lines.join("\n");
 }
 
-/** Caption tuned for Facebook posts — encourages @-tagging the configured group. */
-export function buildFacebookShareCaption(
-  event: EventShareInfo,
-  pageUrl?: string
-): string {
+/** Caption for Facebook — no page URL (URLs make Facebook create a link post, not an image post). */
+export function buildFacebookShareCaption(event: EventShareInfo): string {
   const lines = [`Join me at ${event.name}! ${event.dateLabel}`];
 
   if (event.facebookGroupName) {
@@ -104,7 +101,6 @@ export function buildFacebookShareCaption(
     lines.push(event.facebookGroupUrl);
   }
 
-  if (pageUrl) lines.push(pageUrl);
   return lines.join("\n");
 }
 
@@ -180,12 +176,12 @@ export function openFacebookComposer() {
 }
 
 /**
- * Share the poster via the system sheet so Facebook opens with the image attached.
- * Returns cancelled when the user dismisses the sheet.
+ * Share the poster file only via the system sheet.
+ * Caption must be pasted separately — including text/URLs in navigator.share
+ * makes Facebook attach a link preview instead of the image.
  */
 export async function sharePosterForFacebook(
   dataUrl: string,
-  caption: string,
   filename: string
 ): Promise<"shared" | "cancelled" | "unsupported"> {
   if (!isMobileDevice() || !navigator.share) return "unsupported";
@@ -194,15 +190,10 @@ export async function sharePosterForFacebook(
   const file = new File([blob], filename, { type: "image/png" });
 
   try {
-    if (navigator.canShare?.({ files: [file], text: caption })) {
-      await navigator.share({ title: "Event poster", text: caption, files: [file] });
-      return "shared";
+    if (!navigator.canShare?.({ files: [file] })) {
+      return "unsupported";
     }
-    if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ title: "Event poster", text: caption, files: [file] });
-      return "shared";
-    }
-    await navigator.share({ title: "Event poster", text: caption });
+    await navigator.share({ files: [file] });
     return "shared";
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") return "cancelled";
@@ -210,10 +201,9 @@ export async function sharePosterForFacebook(
   }
 }
 
-/** Mobile: share poster to Facebook app; desktop: open browser. */
+/** Mobile: share poster image to Facebook app; desktop: open browser. */
 export async function openFacebookPostFlow(
   posterDataUrl: string | null,
-  caption: string,
   filename: string,
   facebookGroupUrl?: string | null
 ): Promise<"shared" | "opened" | "cancelled"> {
@@ -223,7 +213,7 @@ export async function openFacebookPostFlow(
   }
 
   if (posterDataUrl) {
-    const shared = await sharePosterForFacebook(posterDataUrl, caption, filename);
+    const shared = await sharePosterForFacebook(posterDataUrl, filename);
     if (shared === "shared" || shared === "cancelled") return shared;
   }
 
