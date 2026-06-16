@@ -75,18 +75,9 @@ export function openMobileApp(appUrl: string, webUrl: string) {
   window.location.href = appUrl;
 }
 
+/** Caption for Twitter, WhatsApp, copy-link, and other non-Facebook shares. */
 export function buildShareCaption(event: EventShareInfo, pageUrl?: string): string {
   const lines = [`Join me at ${event.name}! ${event.dateLabel}`];
-
-  if (event.facebookGroupName || event.facebookGroupUrl) {
-    if (event.facebookGroupName) {
-      lines.push(`Share in our Facebook group: ${event.facebookGroupName}`);
-    }
-    if (event.facebookGroupUrl) {
-      lines.push(event.facebookGroupUrl);
-    }
-  }
-
   if (pageUrl) lines.push(pageUrl);
   return lines.join("\n");
 }
