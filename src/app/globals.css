@@ -12,3 +12,23 @@ body {
   background: var(--background);
   font-family: system-ui, -apple-system, sans-serif;
 }
+
+/* Optional/suggested form fields — grey text even when browser autofills */
+.input-suggested {
+  color: #6b7280 !important;
+}
+
+.input-suggested::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+
+.input-suggested:-webkit-autofill,
+.input-suggested:-webkit-autofill:hover,
+.input-suggested:-webkit-autofill:focus,
+.input-suggested:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #f5f0e8 inset !important;
+  box-shadow: 0 0 0 1000px #f5f0e8 inset !important;
+  -webkit-text-fill-color: #6b7280 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}

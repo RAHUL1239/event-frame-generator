@@ -265,12 +265,15 @@ export function GroupDpForm({ event, slug }: Props) {
             </label>
             <input
               type="text"
-              name="event-city"
+              name="frameCity"
+              id="frame-city"
               autoComplete="off"
+              data-lpignore="true"
+              data-1p-ignore
               value={city}
               onChange={(e) => setCity(e.target.value)}
               placeholder={event.location ?? "e.g. Washington DC"}
-              className="w-full rounded-xl border border-gray-200 bg-brand-cream px-4 py-3 text-gray-500 placeholder:text-gray-400 outline-none focus:border-brand-teal"
+              className="input-suggested w-full rounded-xl border border-gray-200 bg-brand-cream px-4 py-3 outline-none focus:border-brand-teal"
             />
           </div>
 
