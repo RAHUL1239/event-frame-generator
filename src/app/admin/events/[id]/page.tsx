@@ -78,7 +78,6 @@ export default function AdminEventPage({
       body: JSON.stringify({
         name: event.name,
         subtitle: event.subtitle,
-        subtitle: event.subtitle,
         tagline: event.tagline,
         dateLabel: event.dateLabel,
         location: event.location,
