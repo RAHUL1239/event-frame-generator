@@ -161,10 +161,11 @@ export async function copyImageToClipboard(dataUrl: string): Promise<boolean> {
 export async function shareImageNative(
   dataUrl: string,
   title: string,
-  text: string
+  text: string,
+  filename = "event-frame.png"
 ): Promise<"shared" | "unsupported"> {
   const blob = await (await fetch(dataUrl)).blob();
-  const file = new File([blob], "event-frame.png", { type: "image/png" });
+  const file = new File([blob], filename, { type: "image/png" });
 
   if (navigator.share) {
     try {
@@ -205,9 +206,9 @@ export type FacebookPostResult = {
 
 /**
  * Facebook cannot pre-fill posts or auto-tag groups from a website.
- * On mobile we try the native share sheet / FB app. On desktop (Windows/Mac)
- * the OS share menu does not list Facebook or browsers, so we download the
- * image, copy the caption, and show step-by-step instructions.
+ * Always download the chosen image and copy the caption. On desktop we also
+ * try copying the image to the clipboard. Native mobile share is skipped
+ * because it often attaches the wrong image (e.g. WhatsApp DP instead of poster).
  */
 export async function prepareFacebookPost(
   dataUrl: string,
@@ -216,23 +217,11 @@ export async function prepareFacebookPost(
   facebookGroupUrl?: string | null,
   facebookGroupName?: string | null
 ): Promise<FacebookPostResult> {
-  if (isMobileDevice()) {
-    const native = await shareImageNative(dataUrl, caption, caption);
-    if (native === "shared") {
-      return {
-        mode: "native",
-        captionCopied: false,
-        imageCopied: false,
-        downloaded: false,
-        facebookGroupName,
-        facebookGroupUrl,
-      };
-    }
-  }
-
   downloadDataUrl(dataUrl, filename);
   const captionCopied = await copyTextToClipboard(caption);
-  const imageCopied = await copyImageToClipboard(dataUrl);
+  const imageCopied = isMobileDevice()
+    ? false
+    : await copyImageToClipboard(dataUrl);
 
   return {
     mode: "guided",

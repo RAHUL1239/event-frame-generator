@@ -97,18 +97,24 @@ export function PreviewPage({
     );
   }
 
-  async function handlePostToFacebook(imageType: "poster" | "dp" = "poster") {
-    const dataUrl = imageType === "poster" ? posterDataUrl : dpDataUrl;
-    if (!dataUrl) return;
+  async function handlePostToFacebook() {
+    if (!posterDataUrl) {
+      showToast("Poster not ready yet. Please wait or regenerate your frames.");
+      return;
+    }
 
-    const filename = `${slug}-${imageType}.png`;
+    const filename = `${slug}-poster.png`;
     const result = await prepareFacebookPost(
-      dataUrl,
+      posterDataUrl,
       filename,
       shareText,
       event.facebookGroupUrl,
       event.facebookGroupName
     );
+
+    if (isMobileDevice()) {
+      openFacebook(event.facebookGroupUrl);
+    }
 
     setFacebookGuide({ result, filename });
   }
@@ -129,7 +135,8 @@ export function PreviewPage({
       const result = await shareImageNative(
         dataUrl,
         `${event.name} - ${displayName}`,
-        shareText
+        shareText,
+        `${slug}-${imageType}.png`
       );
       if (result === "shared") return;
     }
@@ -180,9 +187,8 @@ export function PreviewPage({
           Share with friends
         </h2>
         <p className="mt-1 text-sm text-gray-600">
-          WhatsApp and X share your event caption. For Facebook, your poster
-          is downloaded and Facebook opens in your browser (Windows does not
-          list Facebook in the system share menu).
+          For Facebook, the social media poster is downloaded (not the WhatsApp
+          DP). Paste the caption and attach the poster from your Downloads folder.
         </p>
 
         {onLocalhost && (
@@ -198,7 +204,7 @@ export function PreviewPage({
             label="Post to Facebook"
             sublabel="Download + instructions"
             color="#1877F2"
-            onClick={() => handlePostToFacebook("poster")}
+            onClick={handlePostToFacebook}
           />
           <ShareButton
             label="WhatsApp"
@@ -232,7 +238,7 @@ export function PreviewPage({
             posterDataUrl &&
             downloadDataUrl(posterDataUrl, `${slug}-poster.png`)
           }
-          onPostFacebook={() => handlePostToFacebook("poster")}
+          onPostFacebook={handlePostToFacebook}
           onShareMore={() => handleShareMore("poster")}
         />
         <PreviewCard
@@ -244,7 +250,6 @@ export function PreviewPage({
           onDownload={() =>
             dpDataUrl && downloadDataUrl(dpDataUrl, `${slug}-dp.png`)
           }
-          onPostFacebook={() => handlePostToFacebook("dp")}
           onShareMore={() => handleShareMore("dp")}
         />
       </div>
@@ -293,7 +298,7 @@ function PreviewCard({
   accentColor: string;
   primaryColor: string;
   onDownload: () => void;
-  onPostFacebook: () => void;
+  onPostFacebook?: () => void;
   onShareMore: () => void;
 }) {
   return (
@@ -332,15 +337,17 @@ function PreviewCard({
         >
           Download PNG
         </button>
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={onPostFacebook}
-            className="rounded-xl py-3 text-sm font-semibold text-white transition hover:opacity-90"
-            style={{ backgroundColor: "#1877F2" }}
-          >
-            Post to Facebook
-          </button>
+        <div className={`grid gap-2 ${onPostFacebook ? "grid-cols-2" : "grid-cols-1"}`}>
+          {onPostFacebook && (
+            <button
+              type="button"
+              onClick={onPostFacebook}
+              className="rounded-xl py-3 text-sm font-semibold text-white transition hover:opacity-90"
+              style={{ backgroundColor: "#1877F2" }}
+            >
+              Post to Facebook
+            </button>
+          )}
           <button
             type="button"
             onClick={onShareMore}

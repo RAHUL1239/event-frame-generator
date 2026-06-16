@@ -95,7 +95,7 @@ export function FacebookPostGuide({
           </li>
           <li>
             {onDesktop ? "Click" : "Tap"} the <strong>Photo</strong> icon and select{" "}
-            <strong>{filename}</strong> from Downloads
+            <strong>{filename}</strong> from your Downloads / gallery
           </li>
           <li>
             {onDesktop ? "Click" : "Tap"} <strong>Post</strong>
