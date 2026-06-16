@@ -20,7 +20,7 @@ export function PersonalDpForm({ event, slug }: Props) {
   const [genderKey, setGenderKey] = useState(
     event.genderOptions[0]?.key ?? ""
   );
-  const [city, setCity] = useState(event.location ?? "");
+  const [city, setCity] = useState("");
   const [role, setRole] = useState("Attendee");
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -230,20 +230,15 @@ export function PersonalDpForm({ event, slug }: Props) {
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                City
+                City <span className="font-normal normal-case text-gray-400">(suggested)</span>
               </label>
               <input
                 type="text"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 placeholder={event.location ?? "e.g. Washington DC"}
-                className="w-full rounded-xl border border-gray-200 bg-brand-cream px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-brand-teal"
+                className="w-full rounded-xl border border-gray-200 bg-brand-cream px-4 py-3 text-gray-500 placeholder:text-gray-400 outline-none focus:border-brand-teal"
               />
-              {event.location && !city && (
-                <p className="mt-1 text-xs text-gray-400">
-                  Suggested: {event.location}
-                </p>
-              )}
             </div>
             <div>
               <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">

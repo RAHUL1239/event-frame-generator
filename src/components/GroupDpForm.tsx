@@ -22,7 +22,7 @@ export function GroupDpForm({ event, slug }: Props) {
   const router = useRouter();
   const [memberCount, setMemberCount] = useState<2 | 3 | 4>(2);
   const [groupName, setGroupName] = useState("");
-  const [city, setCity] = useState(event.location ?? "");
+  const [city, setCity] = useState("");
   const [photos, setPhotos] = useState<(File | null)[]>([null, null, null, null]);
   const [previews, setPreviews] = useState<(string | null)[]>([
     null,
@@ -261,20 +261,15 @@ export function GroupDpForm({ event, slug }: Props) {
 
           <div>
             <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-              City
+              City <span className="font-normal normal-case text-gray-400">(suggested)</span>
             </label>
             <input
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
               placeholder={event.location ?? "e.g. Washington DC"}
-              className="w-full rounded-xl border border-gray-200 bg-brand-cream px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-brand-teal"
+              className="w-full rounded-xl border border-gray-200 bg-brand-cream px-4 py-3 text-gray-500 placeholder:text-gray-400 outline-none focus:border-brand-teal"
             />
-            {event.location && !city && (
-              <p className="mt-1 text-xs text-gray-400">
-                Suggested: {event.location}
-              </p>
-            )}
           </div>
 
           <div
