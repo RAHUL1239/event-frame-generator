@@ -37,7 +37,8 @@ export default function AdminLoginPage() {
         onSubmit={handleSubmit}
         className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg"
       >
-        <h1 className="text-2xl font-bold text-brand-teal">Admin Login</h1>
+        <h1 className="text-2xl font-bold text-brand-teal">RSVPShare</h1>
+        <p className="mt-1 text-sm text-gray-500">Admin login</p>
         <p className="mt-2 text-sm text-gray-500">
           Sign in to manage events and view submissions
         </p>

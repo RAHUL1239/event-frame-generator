@@ -15,12 +15,10 @@ export default async function HomePage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-brand-cream px-4">
       <div className="max-w-lg text-center">
-        <h1 className="text-4xl font-bold text-brand-teal">
-          Event Frame Generator
-        </h1>
+        <h1 className="text-4xl font-bold text-brand-teal">RSVPShare</h1>
         <p className="mt-4 text-gray-600">
-          Create personalised profile frames, posters, and WhatsApp DPs for your
-          community events.
+          Create personalised profile frames, posters, and WhatsApp DPs — then
+          share your RSVP with friends on Facebook, Instagram, and WhatsApp.
         </p>
 
         {events.length > 0 ? (

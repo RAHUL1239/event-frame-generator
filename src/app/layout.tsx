@@ -2,8 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Event Frame Generator",
-  description: "Profile frame and poster generator for community events",
+  metadataBase: new URL("https://rsvpshare.com"),
+  title: {
+    default: "RSVPShare",
+    template: "%s | RSVPShare",
+  },
+  description:
+    "Create and share event profile frames, posters, and WhatsApp DPs for your community.",
 };
 
 export default function RootLayout({
