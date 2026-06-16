@@ -4,6 +4,16 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/server-utils";
 
+const eventDetailInclude = {
+  genderOptions: { orderBy: { sortOrder: "asc" as const } },
+  submissions: {
+    include: { fileUploads: true },
+    orderBy: { createdAt: "desc" as const },
+    take: 100,
+  },
+  auditLogs: { orderBy: { createdAt: "desc" as const }, take: 100 },
+};
+
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -16,15 +26,7 @@ export async function GET(
   const { id } = await params;
   const event = await prisma.event.findUnique({
     where: { id },
-    include: {
-      genderOptions: { orderBy: { sortOrder: "asc" } },
-      submissions: {
-        include: { fileUploads: true },
-        orderBy: { createdAt: "desc" },
-        take: 100,
-      },
-      auditLogs: { orderBy: { createdAt: "desc" }, take: 100 },
-    },
+    include: eventDetailInclude,
   });
 
   if (!event) {
@@ -102,7 +104,7 @@ export async function PATCH(
 
   const updated = await prisma.event.findUnique({
     where: { id },
-    include: { genderOptions: { orderBy: { sortOrder: "asc" } } },
+    include: eventDetailInclude,
   });
 
   return NextResponse.json(updated);

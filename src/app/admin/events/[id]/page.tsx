@@ -55,6 +55,7 @@ export default function AdminEventPage({
 }) {
   const [eventId, setEventId] = useState<string>("");
   const [event, setEvent] = useState<EventDetail | null>(null);
+  const [loadError, setLoadError] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -63,8 +64,21 @@ export default function AdminEventPage({
     params.then(({ id }) => {
       setEventId(id);
       fetch(`/api/admin/events/${id}`)
-        .then((r) => r.json())
-        .then(setEvent);
+        .then(async (r) => {
+          const data = await r.json();
+          if (!r.ok) {
+            setLoadError(data.error ?? "Failed to load event");
+            return;
+          }
+          setEvent({
+            ...data,
+            facebookGroupName: data.facebookGroupName ?? null,
+            facebookGroupUrl: data.facebookGroupUrl ?? null,
+            genderOptions: data.genderOptions ?? [],
+            submissions: data.submissions ?? [],
+          });
+        })
+        .catch(() => setLoadError("Failed to load event"));
     });
   }, [params]);
 
@@ -97,9 +111,21 @@ export default function AdminEventPage({
     if (res.ok) {
       setMessage("Saved successfully");
       const updated = await res.json();
-      setEvent(updated);
+      setEvent((prev) =>
+        prev
+          ? {
+              ...prev,
+              ...updated,
+              genderOptions: updated.genderOptions ?? prev.genderOptions,
+              submissions: updated.submissions ?? prev.submissions,
+              facebookGroupName: updated.facebookGroupName ?? null,
+              facebookGroupUrl: updated.facebookGroupUrl ?? null,
+            }
+          : updated
+      );
     } else {
-      setMessage("Failed to save");
+      const data = await res.json().catch(() => ({}));
+      setMessage(data.error ?? "Failed to save");
     }
   }
 
@@ -112,7 +138,7 @@ export default function AdminEventPage({
 
   function getSortedSubmissions() {
     if (!event) return [];
-    const subs = [...event.submissions];
+    const subs = [...(event.submissions ?? [])];
 
     if (sortBy === "firstName") {
       return subs.sort((a, b) =>
@@ -131,6 +157,17 @@ export default function AdminEventPage({
     return subs.sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4">
+        <p className="text-red-600">{loadError}</p>
+        <Link href="/admin" className="text-brand-teal underline">
+          Back to admin
+        </Link>
+      </div>
     );
   }
 
@@ -247,7 +284,7 @@ export default function AdminEventPage({
         <section className="mt-10 rounded-xl border bg-white p-6">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
             <h2 className="font-semibold">
-              Submissions ({event.submissions.length})
+              Submissions ({event.submissions?.length ?? 0})
             </h2>
             <label className="flex items-center gap-2 text-sm">
               <span className="text-gray-500">Sort by</span>
