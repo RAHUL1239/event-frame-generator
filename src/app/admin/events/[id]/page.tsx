@@ -21,6 +21,8 @@ type EventDetail = {
   tagline: string;
   dateLabel: string;
   location: string | null;
+  facebookGroupName: string | null;
+  facebookGroupUrl: string | null;
   logoUrl: string | null;
   isActive: boolean;
   primaryColor: string;
@@ -81,6 +83,8 @@ export default function AdminEventPage({
         tagline: event.tagline,
         dateLabel: event.dateLabel,
         location: event.location,
+        facebookGroupName: event.facebookGroupName,
+        facebookGroupUrl: event.facebookGroupUrl,
         isActive: event.isActive,
         primaryColor: event.primaryColor,
         accentColor: event.accentColor,
@@ -181,7 +185,9 @@ export default function AdminEventPage({
               <Field label="Subtitle" value={event.subtitle} onChange={(v) => setEvent({ ...event, subtitle: v })} />
               <Field label="Date Label" value={event.dateLabel} onChange={(v) => setEvent({ ...event, dateLabel: v })} />
               <Field label="Tagline (footer)" value={event.tagline} onChange={(v) => setEvent({ ...event, tagline: v })} />
-              <Field label="Location" value={event.location ?? ""} onChange={(v) => setEvent({ ...event, location: v })} />
+              <Field label="Location (default city)" value={event.location ?? ""} onChange={(v) => setEvent({ ...event, location: v })} />
+              <Field label="Facebook Group Name" value={event.facebookGroupName ?? ""} onChange={(v) => setEvent({ ...event, facebookGroupName: v })} />
+              <Field label="Facebook Group URL" value={event.facebookGroupUrl ?? ""} onChange={(v) => setEvent({ ...event, facebookGroupUrl: v })} hint="e.g. https://www.facebook.com/groups/your-group" />
               <ColorField label="Primary Color" value={event.primaryColor} onChange={(v) => setEvent({ ...event, primaryColor: v })} />
               <ColorField label="Accent Color" value={event.accentColor} onChange={(v) => setEvent({ ...event, accentColor: v })} />
               <ColorField label="Background Color" value={event.backgroundColor} onChange={(v) => setEvent({ ...event, backgroundColor: v })} />
@@ -302,10 +308,12 @@ function Field({
   label,
   value,
   onChange,
+  hint,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
+  hint?: string;
 }) {
   return (
     <div>
@@ -315,6 +323,7 @@ function Field({
         onChange={(e) => onChange(e.target.value)}
         className="mt-1 w-full rounded-lg border px-3 py-2"
       />
+      {hint && <p className="mt-1 text-xs text-gray-400">{hint}</p>}
     </div>
   );
 }

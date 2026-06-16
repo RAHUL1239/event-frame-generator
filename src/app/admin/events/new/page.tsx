@@ -17,6 +17,8 @@ export default function CreateEventPage() {
     tagline: "",
     dateLabel: "",
     location: "",
+    facebookGroupName: "",
+    facebookGroupUrl: "",
     primaryColor: "#1a4d4a",
     accentColor: "#c9a227",
     backgroundColor: "#f5f0e8",
@@ -132,10 +134,23 @@ export default function CreateEventPage() {
                 onChange={(v) => updateField("subtitle", v)}
               />
               <Field
-                label="Default location"
+                label="Default location (city suggestion)"
                 value={form.location}
                 onChange={(v) => updateField("location", v)}
                 placeholder="Washington DC"
+              />
+              <Field
+                label="Facebook group name"
+                value={form.facebookGroupName}
+                onChange={(v) => updateField("facebookGroupName", v)}
+                placeholder="MKM Washington DC"
+              />
+              <Field
+                label="Facebook group URL"
+                value={form.facebookGroupUrl}
+                onChange={(v) => updateField("facebookGroupUrl", v)}
+                placeholder="https://www.facebook.com/groups/your-group"
+                hint="Used when attendees share to Facebook"
               />
             </div>
           </section>

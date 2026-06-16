@@ -7,12 +7,14 @@ import { formatDisplayName } from "@/lib/utils";
 import { loadPreviewAssets } from "@/lib/preview-storage";
 import type { EventWithOptions } from "@/lib/types";
 import {
+  buildShareCaption,
   copyTextToClipboard,
   downloadDataUrl,
   getPreviewPageUrl,
   getShareablePageUrl,
-  getTwitterShareUrl,
-  getWhatsAppShareUrl,
+  openFacebook,
+  openTwitterShare,
+  openWhatsAppShare,
   prepareFacebookPost,
   shareImageNative,
   type FacebookPostResult,
@@ -43,7 +45,6 @@ export function PreviewPage({
     formatDisplayName(submission.firstName, submission.lastName) ||
     submission.groupName ||
     "Guest";
-  const shareText = `Join me at ${event.name}! ${event.dateLabel}`;
   const [shareableUrl, setShareableUrl] = useState<string | undefined>();
   const [onLocalhost, setOnLocalhost] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -53,6 +54,9 @@ export function PreviewPage({
     result: FacebookPostResult;
     filename: string;
   } | null>(null);
+
+  const shareTextNoUrl = buildShareCaption(event);
+  const shareText = buildShareCaption(event, shareableUrl);
 
   useEffect(() => {
     const url = getShareablePageUrl();
@@ -84,7 +88,7 @@ export function PreviewPage({
       );
       return;
     }
-    const copied = await copyTextToClipboard(`${shareText}\n${pageUrl}`);
+    const copied = await copyTextToClipboard(shareText);
     showToast(
       copied
         ? "Link copied! Paste it in a message to share with friends."
@@ -97,7 +101,13 @@ export function PreviewPage({
     if (!dataUrl) return;
 
     const filename = `${slug}-${imageType}.png`;
-    const result = await prepareFacebookPost(dataUrl, filename, shareText);
+    const result = await prepareFacebookPost(
+      dataUrl,
+      filename,
+      shareText,
+      event.facebookGroupUrl,
+      event.facebookGroupName
+    );
 
     if (result.mode === "native") {
       showToast("Shared via your device share menu.");
@@ -108,19 +118,11 @@ export function PreviewPage({
   }
 
   function handleShareTwitter() {
-    window.open(
-      getTwitterShareUrl(shareText, shareableUrl),
-      "_blank",
-      "noopener,noreferrer,width=600,height=500"
-    );
+    openTwitterShare(shareTextNoUrl, shareableUrl);
   }
 
   function handleShareWhatsApp() {
-    window.open(
-      getWhatsAppShareUrl(shareText, shareableUrl),
-      "_blank",
-      "noopener,noreferrer"
-    );
+    openWhatsAppShare(shareTextNoUrl, shareableUrl);
   }
 
   async function handleShareMore(imageType: "poster" | "dp") {
@@ -157,6 +159,8 @@ export function PreviewPage({
           result={facebookGuide.result}
           caption={shareText}
           filename={facebookGuide.filename}
+          facebookGroupName={event.facebookGroupName}
+          facebookGroupUrl={event.facebookGroupUrl}
           onClose={() => setFacebookGuide(null)}
           primaryColor={event.primaryColor}
         />

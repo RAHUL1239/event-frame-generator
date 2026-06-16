@@ -66,6 +66,8 @@ export async function POST(request: Request) {
       tagline,
       dateLabel,
       location: body.location?.trim() || null,
+      facebookGroupName: body.facebookGroupName?.trim() || null,
+      facebookGroupUrl: body.facebookGroupUrl?.trim() || null,
       isActive: body.isActive ?? true,
       primaryColor: body.primaryColor ?? "#1a4d4a",
       accentColor: body.accentColor ?? "#c9a227",

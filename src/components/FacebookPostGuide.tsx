@@ -6,6 +6,8 @@ type Props = {
   result: FacebookPostResult;
   caption: string;
   filename: string;
+  facebookGroupName?: string | null;
+  facebookGroupUrl?: string | null;
   onClose: () => void;
   primaryColor?: string;
 };
@@ -14,12 +16,16 @@ export function FacebookPostGuide({
   result,
   caption,
   filename,
+  facebookGroupName,
+  facebookGroupUrl,
   onClose,
   primaryColor = "#1a4d4a",
 }: Props) {
   if (result.mode === "native") {
     return null;
   }
+
+  const groupLabel = facebookGroupName || "your Facebook group";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -39,8 +45,9 @@ export function FacebookPostGuide({
         </div>
 
         <p className="mt-2 text-sm text-gray-600">
-          Facebook does not let websites upload photos or pre-fill posts. We
-          have prepared everything for you — follow these steps:
+          Facebook does not let websites upload photos or auto-tag groups. We
+          have prepared your caption{facebookGroupUrl ? " and group link" : ""}{" "}
+          — follow these steps:
         </p>
 
         <ul className="mt-4 space-y-2 text-sm">
@@ -68,16 +75,16 @@ export function FacebookPostGuide({
 
         <div className="mt-4 rounded-lg bg-gray-50 p-3 text-sm text-gray-700">
           <p className="font-medium">Your caption:</p>
-          <p className="mt-1 italic">&quot;{caption}&quot;</p>
+          <p className="mt-1 whitespace-pre-line italic">&quot;{caption}&quot;</p>
         </div>
 
         <ol className="mt-5 list-decimal space-y-3 pl-5 text-sm text-gray-700">
           <li>
-            Click <strong>Open Facebook</strong> below
+            Click <strong>Open Facebook Group</strong> below
+            {facebookGroupName ? ` (${groupLabel})` : ""}
           </li>
           <li>
-            Click <strong>&quot;What&apos;s on your mind?&quot;</strong> to
-            create a post
+            Tap <strong>&quot;Write something...&quot;</strong> in the group
           </li>
           <li>
             Paste your caption — press{" "}
@@ -85,26 +92,22 @@ export function FacebookPostGuide({
             <kbd className="rounded bg-gray-200 px-1">Cmd+V</kbd> on Mac)
           </li>
           <li>
-            Click the green <strong>Photo/Video</strong> icon at the bottom
+            Tap the <strong>Photo</strong> icon and select{" "}
+            <strong>{filename}</strong>
           </li>
           <li>
-            Select <strong>{filename}</strong> from your Downloads folder
-          </li>
-          <li>
-            Click <strong>Share</strong>
+            Tap <strong>Post</strong>
           </li>
         </ol>
 
         <div className="mt-6 flex flex-col gap-2">
           <button
             type="button"
-            onClick={() => {
-              openFacebook();
-            }}
+            onClick={() => openFacebook(facebookGroupUrl)}
             className="w-full rounded-xl py-3 font-semibold text-white"
             style={{ backgroundColor: "#1877F2" }}
           >
-            Open Facebook
+            {facebookGroupUrl ? "Open Facebook Group" : "Open Facebook"}
           </button>
           <button
             type="button"

@@ -1,5 +1,12 @@
 export type ShareTarget = "facebook" | "whatsapp" | "twitter" | "native" | "copy-link";
 
+export type EventShareInfo = {
+  name: string;
+  dateLabel: string;
+  facebookGroupName?: string | null;
+  facebookGroupUrl?: string | null;
+};
+
 export function getPreviewPageUrl(): string {
   if (typeof window !== "undefined") return window.location.href;
   return "";
@@ -26,15 +33,100 @@ export function getShareablePageUrl(): string | undefined {
   return url;
 }
 
+export function isMobileDevice(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+/** Try to open the native app on mobile; fall back to the web URL. */
+export function openMobileApp(appUrl: string, webUrl: string) {
+  if (typeof window === "undefined") return;
+
+  if (!isMobileDevice()) {
+    window.open(webUrl, "_blank", "noopener,noreferrer");
+    return;
+  }
+
+  let fallbackTimer: ReturnType<typeof setTimeout> | undefined;
+  const clearFallback = () => {
+    if (fallbackTimer) clearTimeout(fallbackTimer);
+    document.removeEventListener("visibilitychange", onHide);
+  };
+  const onHide = () => {
+    if (document.hidden) clearFallback();
+  };
+
+  document.addEventListener("visibilitychange", onHide);
+  fallbackTimer = setTimeout(() => {
+    document.removeEventListener("visibilitychange", onHide);
+    window.location.href = webUrl;
+  }, 1500);
+
+  window.location.href = appUrl;
+}
+
+export function buildShareCaption(event: EventShareInfo, pageUrl?: string): string {
+  const lines = [`Join me at ${event.name}! ${event.dateLabel}`];
+
+  if (event.facebookGroupName || event.facebookGroupUrl) {
+    if (event.facebookGroupName) {
+      lines.push(`Share in our Facebook group: ${event.facebookGroupName}`);
+    }
+    if (event.facebookGroupUrl) {
+      lines.push(event.facebookGroupUrl);
+    }
+  }
+
+  if (pageUrl) lines.push(pageUrl);
+  return lines.join("\n");
+}
+
 export function getTwitterShareUrl(text: string, pageUrl?: string) {
   const params = new URLSearchParams({ text });
   if (pageUrl) params.set("url", pageUrl);
   return `https://twitter.com/intent/tweet?${params.toString()}`;
 }
 
+export function getTwitterAppUrl(text: string, pageUrl?: string) {
+  const message = pageUrl ? `${text} ${pageUrl}` : text;
+  return `twitter://post?message=${encodeURIComponent(message)}`;
+}
+
+export function openTwitterShare(text: string, pageUrl?: string) {
+  openMobileApp(
+    getTwitterAppUrl(text, pageUrl),
+    getTwitterShareUrl(text, pageUrl)
+  );
+}
+
 export function getWhatsAppShareUrl(text: string, pageUrl?: string) {
   const message = pageUrl ? `${text}\n\n${pageUrl}` : text;
   return `https://wa.me/?text=${encodeURIComponent(message)}`;
+}
+
+export function getWhatsAppAppUrl(text: string, pageUrl?: string) {
+  const message = pageUrl ? `${text}\n\n${pageUrl}` : text;
+  return `whatsapp://send?text=${encodeURIComponent(message)}`;
+}
+
+export function openWhatsAppShare(text: string, pageUrl?: string) {
+  openMobileApp(
+    getWhatsAppAppUrl(text, pageUrl),
+    getWhatsAppShareUrl(text, pageUrl)
+  );
+}
+
+export function getFacebookWebUrl(groupUrl?: string | null) {
+  return groupUrl || "https://www.facebook.com/";
+}
+
+export function getFacebookAppUrl(groupUrl?: string | null) {
+  const target = getFacebookWebUrl(groupUrl);
+  return `fb://facewebmodal/f?href=${encodeURIComponent(target)}`;
+}
+
+export function openFacebook(groupUrl?: string | null) {
+  openMobileApp(getFacebookAppUrl(groupUrl), getFacebookWebUrl(groupUrl));
 }
 
 export async function copyTextToClipboard(text: string): Promise<boolean> {
@@ -102,26 +194,25 @@ export function downloadDataUrl(dataUrl: string, filename: string) {
   link.click();
 }
 
-export function openFacebook() {
-  window.open("https://www.facebook.com/", "_blank", "noopener,noreferrer");
-}
-
 export type FacebookPostResult = {
   mode: "native" | "guided";
   captionCopied: boolean;
   imageCopied: boolean;
   downloaded: boolean;
+  facebookGroupName?: string | null;
+  facebookGroupUrl?: string | null;
 };
 
 /**
- * Facebook's website cannot accept images or pre-filled text from other apps.
- * On mobile we try the native share sheet first; on desktop we download the
- * image, copy the caption, and show step-by-step instructions.
+ * Facebook cannot pre-fill posts or auto-tag groups from a website.
+ * We copy a caption that includes the group name/URL and open the group in the FB app when possible.
  */
 export async function prepareFacebookPost(
   dataUrl: string,
   filename: string,
-  caption: string
+  caption: string,
+  facebookGroupUrl?: string | null,
+  facebookGroupName?: string | null
 ): Promise<FacebookPostResult> {
   const native = await shareImageNative(dataUrl, caption, caption);
   if (native === "shared") {
@@ -130,6 +221,8 @@ export async function prepareFacebookPost(
       captionCopied: false,
       imageCopied: false,
       downloaded: false,
+      facebookGroupName,
+      facebookGroupUrl,
     };
   }
 
@@ -142,5 +235,7 @@ export async function prepareFacebookPost(
     captionCopied,
     imageCopied,
     downloaded: true,
+    facebookGroupName,
+    facebookGroupUrl,
   };
 }

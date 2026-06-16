@@ -22,7 +22,7 @@ export function GroupDpForm({ event, slug }: Props) {
   const router = useRouter();
   const [memberCount, setMemberCount] = useState<2 | 3 | 4>(2);
   const [groupName, setGroupName] = useState("");
-  const [city, setCity] = useState("Washington DC");
+  const [city, setCity] = useState(event.location ?? "");
   const [photos, setPhotos] = useState<(File | null)[]>([null, null, null, null]);
   const [previews, setPreviews] = useState<(string | null)[]>([
     null,
@@ -91,7 +91,7 @@ export function GroupDpForm({ event, slug }: Props) {
       const assets = await generateGroupAssets({
         event,
         groupName: groupName.trim(),
-        city: city.trim(),
+        city: city.trim() || event.location || "",
         memberCount,
         photos: activePhotos as File[],
         members: Array.from({ length: memberCount }, (_, i) => ({
@@ -103,7 +103,7 @@ export function GroupDpForm({ event, slug }: Props) {
       const formData = new FormData();
       formData.append("type", "group");
       formData.append("groupName", groupName.trim());
-      formData.append("city", city.trim());
+      formData.append("city", city.trim() || event.location || "");
       formData.append("memberCount", String(memberCount));
       formData.append("members", JSON.stringify([]));
       formData.append(
@@ -267,9 +267,14 @@ export function GroupDpForm({ event, slug }: Props) {
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              placeholder="e.g. Washington DC"
-              className="w-full rounded-xl border border-gray-200 bg-brand-cream px-4 py-3 outline-none focus:border-brand-teal"
+              placeholder={event.location ?? "e.g. Washington DC"}
+              className="w-full rounded-xl border border-gray-200 bg-brand-cream px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-brand-teal"
             />
+            {event.location && !city && (
+              <p className="mt-1 text-xs text-gray-400">
+                Suggested: {event.location}
+              </p>
+            )}
           </div>
 
           <div

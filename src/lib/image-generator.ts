@@ -51,6 +51,8 @@ function wrapCanvasText(
   maxWidth: number,
   lineHeight: number
 ): number {
+  ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
   const words = text.split(" ");
   let line = "";
   let currentY = y;
@@ -66,6 +68,23 @@ function wrapCanvasText(
   }
   if (line) ctx.fillText(line, x, currentY);
   return currentY + lineHeight;
+}
+
+function drawCenteredTagline(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  centerX: number,
+  y: number,
+  maxWidth: number,
+  fontSize: number,
+  lineHeight: number,
+  color: string
+): number {
+  ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = color;
+  ctx.font = `${fontSize}px system-ui, sans-serif`;
+  return wrapCanvasText(ctx, text, centerX, y, maxWidth, lineHeight);
 }
 
 export async function generatePersonalAssets(
@@ -119,14 +138,14 @@ export async function generatePersonalAssets(
     pCtx.fillText(input.role.toUpperCase(), 540, textY);
     textY += 36;
   }
-  if (input.city) {
-    pCtx.fillText(input.city.toUpperCase(), 540, textY);
+  const cityLabel = (input.city?.trim() || input.event.location || "").toUpperCase();
+  if (cityLabel) {
+    pCtx.fillStyle = "#9ca3af";
+    pCtx.fillText(cityLabel, 540, textY);
     textY += 36;
   }
 
-  pCtx.fillStyle = input.event.accentColor;
-  pCtx.font = "32px system-ui, sans-serif";
-  wrapCanvasText(pCtx, tagline, 540, textY + 16, 920, 40);
+  drawCenteredTagline(pCtx, tagline, 540, textY + 16, 900, 32, 40, input.event.accentColor);
 
   const dp = document.createElement("canvas");
   dp.width = 640;
@@ -200,22 +219,23 @@ export async function generateGroupAssets(
   pCtx.fillText(input.groupName.toUpperCase(), 540, textY);
   textY += 42;
 
-  if (input.city) {
+  const groupCity = (input.city?.trim() || input.event.location || "").toUpperCase();
+  if (groupCity) {
     pCtx.font = "22px system-ui, sans-serif";
-    pCtx.fillStyle = "#e8e8e8";
-    pCtx.fillText(input.city.toUpperCase(), 540, textY);
+    pCtx.fillStyle = "#9ca3af";
+    pCtx.fillText(groupCity, 540, textY);
     textY += 36;
   }
 
-  pCtx.fillStyle = input.event.accentColor;
-  pCtx.font = "30px system-ui, sans-serif";
-  wrapCanvasText(
+  drawCenteredTagline(
     pCtx,
     getGenderTagline(input.event, "group"),
     540,
     textY + 12,
-    920,
-    38
+    900,
+    30,
+    38,
+    input.event.accentColor
   );
 
   const dp = document.createElement("canvas");

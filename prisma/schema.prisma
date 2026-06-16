@@ -25,6 +25,8 @@ model Event {
   tagline         String
   dateLabel       String
   location        String?
+  facebookGroupName String?
+  facebookGroupUrl  String?
   isActive        Boolean  @default(true)
   primaryColor    String   @default("#1a4d4a")
   accentColor     String   @default("#c9a227")

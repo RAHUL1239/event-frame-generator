@@ -54,6 +54,8 @@ export async function PATCH(
       tagline: body.tagline,
       dateLabel: body.dateLabel,
       location: body.location,
+      facebookGroupName: body.facebookGroupName || null,
+      facebookGroupUrl: body.facebookGroupUrl || null,
       isActive: body.isActive,
       primaryColor: body.primaryColor,
       accentColor: body.accentColor,
