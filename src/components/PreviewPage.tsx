@@ -12,6 +12,7 @@ import {
   downloadDataUrl,
   getPreviewPageUrl,
   getShareablePageUrl,
+  isMobileDevice,
   openFacebook,
   openTwitterShare,
   openWhatsAppShare,
@@ -109,11 +110,6 @@ export function PreviewPage({
       event.facebookGroupName
     );
 
-    if (result.mode === "native") {
-      showToast("Shared via your device share menu.");
-      return;
-    }
-
     setFacebookGuide({ result, filename });
   }
 
@@ -129,18 +125,19 @@ export function PreviewPage({
     const dataUrl = imageType === "poster" ? posterDataUrl : dpDataUrl;
     if (!dataUrl) return;
 
-    const result = await shareImageNative(
-      dataUrl,
-      `${event.name} - ${displayName}`,
-      shareText
-    );
-
-    if (result === "unsupported") {
-      downloadDataUrl(dataUrl, `${slug}-${imageType}.png`);
-      showToast(
-        "Image downloaded. Attach it in Instagram, Messages, or any app."
+    if (isMobileDevice()) {
+      const result = await shareImageNative(
+        dataUrl,
+        `${event.name} - ${displayName}`,
+        shareText
       );
+      if (result === "shared") return;
     }
+
+    downloadDataUrl(dataUrl, `${slug}-${imageType}.png`);
+    showToast(
+      "Image downloaded. Attach it in Instagram, Messages, or any app."
+    );
   }
 
   return (
@@ -183,8 +180,9 @@ export function PreviewPage({
           Share with friends
         </h2>
         <p className="mt-1 text-sm text-gray-600">
-          WhatsApp and X share your event caption. For Facebook &amp; Instagram,
-          download your poster and upload it manually.
+          WhatsApp and X share your event caption. For Facebook, your poster
+          is downloaded and Facebook opens in your browser (Windows does not
+          list Facebook in the system share menu).
         </p>
 
         {onLocalhost && (

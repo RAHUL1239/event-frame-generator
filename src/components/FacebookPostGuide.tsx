@@ -1,6 +1,6 @@
 "use client";
 
-import { openFacebook, type FacebookPostResult } from "@/lib/share";
+import { isMobileDevice, openFacebook, type FacebookPostResult } from "@/lib/share";
 
 type Props = {
   result: FacebookPostResult;
@@ -26,6 +26,7 @@ export function FacebookPostGuide({
   }
 
   const groupLabel = facebookGroupName || "your Facebook group";
+  const onDesktop = !isMobileDevice();
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -45,9 +46,9 @@ export function FacebookPostGuide({
         </div>
 
         <p className="mt-2 text-sm text-gray-600">
-          Facebook does not let websites upload photos or auto-tag groups. We
-          have prepared your caption{facebookGroupUrl ? " and group link" : ""}{" "}
-          — follow these steps:
+          {onDesktop
+            ? "On Windows and Mac, Facebook is not available in the system share menu. Your poster has been downloaded and the caption copied — open Facebook in your browser to post."
+            : "Facebook does not let websites upload photos or auto-tag groups. We have prepared your caption — follow these steps:"}
         </p>
 
         <ul className="mt-4 space-y-2 text-sm">
@@ -80,11 +81,12 @@ export function FacebookPostGuide({
 
         <ol className="mt-5 list-decimal space-y-3 pl-5 text-sm text-gray-700">
           <li>
-            Click <strong>Open Facebook Group</strong> below
+            Click <strong>{onDesktop ? "Open Facebook in Browser" : "Open Facebook Group"}</strong> below
             {facebookGroupName ? ` (${groupLabel})` : ""}
           </li>
           <li>
-            Tap <strong>&quot;Write something...&quot;</strong> in the group
+            {onDesktop ? "Click" : "Tap"}{" "}
+            <strong>&quot;Write something...&quot;</strong> in the group
           </li>
           <li>
             Paste your caption — press{" "}
@@ -92,11 +94,11 @@ export function FacebookPostGuide({
             <kbd className="rounded bg-gray-200 px-1">Cmd+V</kbd> on Mac)
           </li>
           <li>
-            Tap the <strong>Photo</strong> icon and select{" "}
-            <strong>{filename}</strong>
+            {onDesktop ? "Click" : "Tap"} the <strong>Photo</strong> icon and select{" "}
+            <strong>{filename}</strong> from Downloads
           </li>
           <li>
-            Tap <strong>Post</strong>
+            {onDesktop ? "Click" : "Tap"} <strong>Post</strong>
           </li>
         </ol>
 
@@ -107,7 +109,13 @@ export function FacebookPostGuide({
             className="w-full rounded-xl py-3 font-semibold text-white"
             style={{ backgroundColor: "#1877F2" }}
           >
-            {facebookGroupUrl ? "Open Facebook Group" : "Open Facebook"}
+            {facebookGroupUrl
+              ? onDesktop
+                ? "Open Facebook in Browser"
+                : "Open Facebook Group"
+              : onDesktop
+                ? "Open Facebook in Browser"
+                : "Open Facebook"}
           </button>
           <button
             type="button"

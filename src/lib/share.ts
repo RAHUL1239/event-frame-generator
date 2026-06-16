@@ -205,7 +205,9 @@ export type FacebookPostResult = {
 
 /**
  * Facebook cannot pre-fill posts or auto-tag groups from a website.
- * We copy a caption that includes the group name/URL and open the group in the FB app when possible.
+ * On mobile we try the native share sheet / FB app. On desktop (Windows/Mac)
+ * the OS share menu does not list Facebook or browsers, so we download the
+ * image, copy the caption, and show step-by-step instructions.
  */
 export async function prepareFacebookPost(
   dataUrl: string,
@@ -214,16 +216,18 @@ export async function prepareFacebookPost(
   facebookGroupUrl?: string | null,
   facebookGroupName?: string | null
 ): Promise<FacebookPostResult> {
-  const native = await shareImageNative(dataUrl, caption, caption);
-  if (native === "shared") {
-    return {
-      mode: "native",
-      captionCopied: false,
-      imageCopied: false,
-      downloaded: false,
-      facebookGroupName,
-      facebookGroupUrl,
-    };
+  if (isMobileDevice()) {
+    const native = await shareImageNative(dataUrl, caption, caption);
+    if (native === "shared") {
+      return {
+        mode: "native",
+        captionCopied: false,
+        imageCopied: false,
+        downloaded: false,
+        facebookGroupName,
+        facebookGroupUrl,
+      };
+    }
   }
 
   downloadDataUrl(dataUrl, filename);
