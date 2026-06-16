@@ -87,9 +87,9 @@ export function buildInstagramShareCaption(event: EventShareInfo): string {
   return `Join me at ${event.name}! ${event.dateLabel}`;
 }
 
-/** Caption for Facebook — no page URL (URLs make Facebook create a link post, not an image post). */
+/** Caption for Facebook — no app page URL (URLs make Facebook create a link post). */
 export function buildFacebookShareCaption(event: EventShareInfo): string {
-  const lines = [`Join me at ${event.name}! ${event.dateLabel}`];
+  const lines = [`Please join us at ${event.name}! ${event.dateLabel}`];
 
   if (event.facebookGroupName) {
     lines.push(`Tag our Facebook group: @${event.facebookGroupName}`);
@@ -154,8 +154,37 @@ export function openFacebookComposer() {
 }
 
 /**
- * Share an image file only via the system sheet.
- * Caption must be pasted separately in the target app.
+ * Share poster + caption to Facebook via the system sheet.
+ * Falls back to image-only if the device cannot share text with files.
+ */
+export async function sharePosterToFacebook(
+  dataUrl: string,
+  filename: string,
+  caption: string
+): Promise<"shared" | "cancelled" | "unsupported"> {
+  if (!isMobileDevice() || !navigator.share) return "unsupported";
+
+  const blob = await (await fetch(dataUrl)).blob();
+  const file = new File([blob], filename, { type: "image/png" });
+
+  try {
+    if (navigator.canShare?.({ files: [file], text: caption })) {
+      await navigator.share({ files: [file], text: caption });
+      return "shared";
+    }
+    if (navigator.canShare?.({ files: [file] })) {
+      await navigator.share({ files: [file] });
+      return "shared";
+    }
+    return "unsupported";
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") return "cancelled";
+    return "unsupported";
+  }
+}
+
+/**
+ * Share an image file only via the system sheet (Instagram and generic shares).
  */
 export async function sharePosterImage(
   dataUrl: string,
@@ -201,10 +230,11 @@ export async function openInstagramPostFlow(
   return "opened";
 }
 
-/** Mobile: share poster image to Facebook app; desktop: open browser. */
+/** Mobile: share poster + caption to Facebook app; desktop: open browser. */
 export async function openFacebookPostFlow(
   posterDataUrl: string | null,
   filename: string,
+  caption: string,
   facebookGroupUrl?: string | null
 ): Promise<"shared" | "opened" | "cancelled"> {
   if (!isMobileDevice()) {
@@ -213,7 +243,11 @@ export async function openFacebookPostFlow(
   }
 
   if (posterDataUrl) {
-    const shared = await sharePosterImage(posterDataUrl, filename);
+    const shared = await sharePosterToFacebook(
+      posterDataUrl,
+      filename,
+      caption
+    );
     if (shared === "shared" || shared === "cancelled") return shared;
   }
 

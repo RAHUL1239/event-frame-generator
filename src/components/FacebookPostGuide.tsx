@@ -108,17 +108,16 @@ export function FacebookPostGuide({
             <>
               <li>
                 Tap <strong>Share poster to Facebook</strong> below and choose{" "}
-                <strong>Facebook</strong> from the share menu (image only — no
-                link)
+                <strong>Facebook</strong> from the share menu — your poster and
+                &quot;Please join us…&quot; caption should appear together
               </li>
               <li>
-                Facebook should open with your poster attached — if not, tap the{" "}
-                <strong>Photo</strong> icon and select <strong>{filename}</strong>{" "}
-                from Downloads
+                If the image is missing, tap the <strong>Photo</strong> icon and
+                select <strong>{filename}</strong> from Downloads
               </li>
               <li>
-                Long-press and <strong>paste</strong> your caption (already copied
-                to clipboard)
+                If the caption is missing, long-press and <strong>paste</strong>{" "}
+                (already copied to clipboard)
               </li>
               {facebookGroupName ? (
                 <li>
@@ -146,6 +145,7 @@ export function FacebookPostGuide({
               void openFacebookPostFlow(
                 posterDataUrl,
                 filename,
+                caption,
                 facebookGroupUrl
               )
             }
