@@ -265,6 +265,8 @@ export function GroupDpForm({ event, slug }: Props) {
             </label>
             <input
               type="text"
+              name="event-city"
+              autoComplete="off"
               value={city}
               onChange={(e) => setCity(e.target.value)}
               placeholder={event.location ?? "e.g. Washington DC"}
