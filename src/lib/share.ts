@@ -38,6 +38,16 @@ export function isMobileDevice(): boolean {
   return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
+export function isAndroidDevice(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /Android/i.test(navigator.userAgent);
+}
+
+export function isIOSDevice(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
 /** Try to open the native app on mobile; fall back to the web URL. */
 export function openMobileApp(appUrl: string, webUrl: string) {
   if (typeof window === "undefined") return;
@@ -148,15 +158,77 @@ export function openFacebook(groupUrl?: string | null) {
 
 /** Open the Facebook post composer (feed), not a group page. */
 export function getFacebookComposerWebUrl() {
-  return "https://m.facebook.com/";
+  return "https://www.facebook.com/";
 }
 
 export function getFacebookComposerAppUrl() {
-  return "fb://composer";
+  // Most reliable native scheme for the create-post screen.
+  return "fb://publish/profile/me";
 }
 
 export function openFacebookComposer() {
-  openMobileApp(getFacebookComposerAppUrl(), getFacebookComposerWebUrl());
+  const webUrl = getFacebookComposerWebUrl();
+  const appUrl = getFacebookComposerAppUrl();
+
+  if (isAndroidDevice()) {
+    // Android FB builds often ignore bare fb://composer; publish/profile works better.
+    openMobileApp(appUrl, webUrl);
+    return;
+  }
+
+  openMobileApp(appUrl, webUrl);
+}
+
+/**
+ * Share the poster via the system sheet so Facebook opens with the image attached.
+ * Returns cancelled when the user dismisses the sheet.
+ */
+export async function sharePosterForFacebook(
+  dataUrl: string,
+  caption: string,
+  filename: string
+): Promise<"shared" | "cancelled" | "unsupported"> {
+  if (!isMobileDevice() || !navigator.share) return "unsupported";
+
+  const blob = await (await fetch(dataUrl)).blob();
+  const file = new File([blob], filename, { type: "image/png" });
+
+  try {
+    if (navigator.canShare?.({ files: [file], text: caption })) {
+      await navigator.share({ title: "Event poster", text: caption, files: [file] });
+      return "shared";
+    }
+    if (navigator.canShare?.({ files: [file] })) {
+      await navigator.share({ title: "Event poster", text: caption, files: [file] });
+      return "shared";
+    }
+    await navigator.share({ title: "Event poster", text: caption });
+    return "shared";
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") return "cancelled";
+    return "unsupported";
+  }
+}
+
+/** Mobile: share poster to Facebook app; desktop: open browser. */
+export async function openFacebookPostFlow(
+  posterDataUrl: string | null,
+  caption: string,
+  filename: string,
+  facebookGroupUrl?: string | null
+): Promise<"shared" | "opened" | "cancelled"> {
+  if (!isMobileDevice()) {
+    openFacebook(facebookGroupUrl);
+    return "opened";
+  }
+
+  if (posterDataUrl) {
+    const shared = await sharePosterForFacebook(posterDataUrl, caption, filename);
+    if (shared === "shared" || shared === "cancelled") return shared;
+  }
+
+  openFacebookComposer();
+  return "opened";
 }
 
 export async function copyTextToClipboard(text: string): Promise<boolean> {

@@ -14,7 +14,6 @@ import {
   getPreviewPageUrl,
   getShareablePageUrl,
   isMobileDevice,
-  openFacebookComposer,
   openTwitterShare,
   openWhatsAppShare,
   prepareFacebookPost,
@@ -114,10 +113,6 @@ export function PreviewPage({
       event.facebookGroupName
     );
 
-    if (isMobileDevice()) {
-      openFacebookComposer();
-    }
-
     setFacebookGuide({ result, filename });
   }
 
@@ -165,6 +160,7 @@ export function PreviewPage({
           result={facebookGuide.result}
           caption={facebookShareText}
           filename={facebookGuide.filename}
+          posterDataUrl={posterDataUrl}
           facebookGroupName={event.facebookGroupName}
           facebookGroupUrl={event.facebookGroupUrl}
           onClose={() => setFacebookGuide(null)}

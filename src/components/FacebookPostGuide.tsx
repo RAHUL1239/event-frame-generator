@@ -2,8 +2,7 @@
 
 import {
   isMobileDevice,
-  openFacebook,
-  openFacebookComposer,
+  openFacebookPostFlow,
   type FacebookPostResult,
 } from "@/lib/share";
 
@@ -11,6 +10,7 @@ type Props = {
   result: FacebookPostResult;
   caption: string;
   filename: string;
+  posterDataUrl: string | null;
   facebookGroupName?: string | null;
   facebookGroupUrl?: string | null;
   onClose: () => void;
@@ -21,6 +21,7 @@ export function FacebookPostGuide({
   result,
   caption,
   filename,
+  posterDataUrl,
   facebookGroupName,
   facebookGroupUrl,
   onClose,
@@ -110,15 +111,16 @@ export function FacebookPostGuide({
           ) : (
             <>
               <li>
-                Tap <strong>Open Facebook to Post</strong> below to open the post
-                composer
+                Tap <strong>Share poster to Facebook</strong> below and choose{" "}
+                <strong>Facebook</strong> from the share menu
               </li>
               <li>
-                Tap <strong>&quot;What&apos;s on your mind?&quot;</strong> if the
-                composer is not already open
+                Facebook should open with your poster attached — if not, tap the{" "}
+                <strong>Photo</strong> icon and select <strong>{filename}</strong>
               </li>
               <li>
-                Long-press and <strong>paste</strong> your caption
+                Long-press and <strong>paste</strong> your caption if it is not
+                already filled in
               </li>
               {facebookGroupName ? (
                 <li>
@@ -133,10 +135,6 @@ export function FacebookPostGuide({
                 </li>
               )}
               <li>
-                Tap the <strong>Photo</strong> icon and select{" "}
-                <strong>{filename}</strong> from your Downloads / gallery
-              </li>
-              <li>
                 Tap <strong>Post</strong>
               </li>
             </>
@@ -147,16 +145,17 @@ export function FacebookPostGuide({
           <button
             type="button"
             onClick={() =>
-              onDesktop ? openFacebook(facebookGroupUrl) : openFacebookComposer()
+              void openFacebookPostFlow(
+                posterDataUrl,
+                caption,
+                filename,
+                facebookGroupUrl
+              )
             }
             className="w-full rounded-xl py-3 font-semibold text-white"
             style={{ backgroundColor: "#1877F2" }}
           >
-            {onDesktop
-              ? facebookGroupUrl
-                ? "Open Facebook in Browser"
-                : "Open Facebook in Browser"
-              : "Open Facebook to Post"}
+            {onDesktop ? "Open Facebook in Browser" : "Share poster to Facebook"}
           </button>
           <button
             type="button"
