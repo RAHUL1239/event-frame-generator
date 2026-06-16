@@ -140,7 +140,7 @@ export async function generatePersonalAssets(
   }
   const cityLabel = (input.city?.trim() || input.event.location || "").toUpperCase();
   if (cityLabel) {
-    pCtx.fillStyle = "#9ca3af";
+    pCtx.fillStyle = "#e8e8e8";
     pCtx.fillText(cityLabel, 540, textY);
     textY += 36;
   }
@@ -222,7 +222,7 @@ export async function generateGroupAssets(
   const groupCity = (input.city?.trim() || input.event.location || "").toUpperCase();
   if (groupCity) {
     pCtx.font = "22px system-ui, sans-serif";
-    pCtx.fillStyle = "#9ca3af";
+    pCtx.fillStyle = "#e8e8e8";
     pCtx.fillText(groupCity, 540, textY);
     textY += 36;
   }
