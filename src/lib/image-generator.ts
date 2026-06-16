@@ -133,14 +133,13 @@ export async function generatePersonalAssets(
   textY += 46;
 
   pCtx.font = "24px system-ui, sans-serif";
-  pCtx.fillStyle = "#e8e8e8";
+  pCtx.fillStyle = "#ffffff";
   if (input.role) {
     pCtx.fillText(input.role.toUpperCase(), 540, textY);
     textY += 36;
   }
   const cityLabel = (input.city?.trim() || input.event.location || "").toUpperCase();
   if (cityLabel) {
-    pCtx.fillStyle = "#e8e8e8";
     pCtx.fillText(cityLabel, 540, textY);
     textY += 36;
   }
@@ -222,7 +221,7 @@ export async function generateGroupAssets(
   const groupCity = (input.city?.trim() || input.event.location || "").toUpperCase();
   if (groupCity) {
     pCtx.font = "22px system-ui, sans-serif";
-    pCtx.fillStyle = "#e8e8e8";
+    pCtx.fillStyle = "#ffffff";
     pCtx.fillText(groupCity, 540, textY);
     textY += 36;
   }
