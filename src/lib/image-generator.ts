@@ -43,6 +43,19 @@ function drawEventNameBelow(
   return wrapCanvasText(ctx, event.name.toUpperCase(), centerX, y, 880, 34);
 }
 
+function fillCenteredLine(
+  ctx: CanvasRenderingContext2D,
+  line: string,
+  centerX: number,
+  y: number
+) {
+  // Manual centering avoids right-alignment bugs with mixed Devanagari/Latin text.
+  ctx.direction = "ltr";
+  ctx.textAlign = "left";
+  const width = ctx.measureText(line).width;
+  ctx.fillText(line, centerX - width / 2, y);
+}
+
 function wrapCanvasText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -51,7 +64,6 @@ function wrapCanvasText(
   maxWidth: number,
   lineHeight: number
 ): number {
-  ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
   const words = text.split(" ");
   let line = "";
@@ -59,14 +71,14 @@ function wrapCanvasText(
   for (const word of words) {
     const test = line ? `${line} ${word}` : word;
     if (ctx.measureText(test).width > maxWidth && line) {
-      ctx.fillText(line, x, currentY);
+      fillCenteredLine(ctx, line, x, currentY);
       line = word;
       currentY += lineHeight;
     } else {
       line = test;
     }
   }
-  if (line) ctx.fillText(line, x, currentY);
+  if (line) fillCenteredLine(ctx, line, x, currentY);
   return currentY + lineHeight;
 }
 

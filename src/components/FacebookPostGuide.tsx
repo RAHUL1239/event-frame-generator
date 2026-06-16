@@ -1,6 +1,11 @@
 "use client";
 
-import { isMobileDevice, openFacebook, type FacebookPostResult } from "@/lib/share";
+import {
+  isMobileDevice,
+  openFacebook,
+  openFacebookComposer,
+  type FacebookPostResult,
+} from "@/lib/share";
 
 type Props = {
   result: FacebookPostResult;
@@ -80,42 +85,78 @@ export function FacebookPostGuide({
         </div>
 
         <ol className="mt-5 list-decimal space-y-3 pl-5 text-sm text-gray-700">
-          <li>
-            Click <strong>{onDesktop ? "Open Facebook in Browser" : "Open Facebook Group"}</strong> below
-            {facebookGroupName ? ` (${groupLabel})` : ""}
-          </li>
-          <li>
-            {onDesktop ? "Click" : "Tap"}{" "}
-            <strong>&quot;Write something...&quot;</strong> in the group
-          </li>
-          <li>
-            Paste your caption — press{" "}
-            <kbd className="rounded bg-gray-200 px-1">Ctrl+V</kbd> (or{" "}
-            <kbd className="rounded bg-gray-200 px-1">Cmd+V</kbd> on Mac)
-          </li>
-          <li>
-            {onDesktop ? "Click" : "Tap"} the <strong>Photo</strong> icon and select{" "}
-            <strong>{filename}</strong> from your Downloads / gallery
-          </li>
-          <li>
-            {onDesktop ? "Click" : "Tap"} <strong>Post</strong>
-          </li>
+          {onDesktop ? (
+            <>
+              <li>
+                Click <strong>Open Facebook in Browser</strong> below
+                {facebookGroupName ? ` (${groupLabel})` : ""}
+              </li>
+              <li>
+                Click <strong>&quot;Write something...&quot;</strong> in the group
+              </li>
+              <li>
+                Paste your caption — press{" "}
+                <kbd className="rounded bg-gray-200 px-1">Ctrl+V</kbd> (or{" "}
+                <kbd className="rounded bg-gray-200 px-1">Cmd+V</kbd> on Mac)
+              </li>
+              <li>
+                Click the <strong>Photo</strong> icon and select{" "}
+                <strong>{filename}</strong> from Downloads
+              </li>
+              <li>
+                Click <strong>Post</strong>
+              </li>
+            </>
+          ) : (
+            <>
+              <li>
+                Tap <strong>Open Facebook to Post</strong> below to open the post
+                composer
+              </li>
+              <li>
+                Tap <strong>&quot;What&apos;s on your mind?&quot;</strong> if the
+                composer is not already open
+              </li>
+              <li>
+                Long-press and <strong>paste</strong> your caption
+              </li>
+              {facebookGroupName ? (
+                <li>
+                  Type <strong>@</strong> and select{" "}
+                  <strong>{facebookGroupName}</strong> to tag the group in your
+                  post
+                </li>
+              ) : (
+                <li>
+                  Add your group name or link from the caption to tag your
+                  community
+                </li>
+              )}
+              <li>
+                Tap the <strong>Photo</strong> icon and select{" "}
+                <strong>{filename}</strong> from your Downloads / gallery
+              </li>
+              <li>
+                Tap <strong>Post</strong>
+              </li>
+            </>
+          )}
         </ol>
 
         <div className="mt-6 flex flex-col gap-2">
           <button
             type="button"
-            onClick={() => openFacebook(facebookGroupUrl)}
+            onClick={() =>
+              onDesktop ? openFacebook(facebookGroupUrl) : openFacebookComposer()
+            }
             className="w-full rounded-xl py-3 font-semibold text-white"
             style={{ backgroundColor: "#1877F2" }}
           >
-            {facebookGroupUrl
-              ? onDesktop
+            {onDesktop
+              ? facebookGroupUrl
                 ? "Open Facebook in Browser"
-                : "Open Facebook Group"
-              : onDesktop
-                ? "Open Facebook in Browser"
-                : "Open Facebook"}
+                : "Open Facebook in Browser"
+              : "Open Facebook to Post"}
           </button>
           <button
             type="button"

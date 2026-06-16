@@ -7,13 +7,14 @@ import { formatDisplayName } from "@/lib/utils";
 import { loadPreviewAssets } from "@/lib/preview-storage";
 import type { EventWithOptions } from "@/lib/types";
 import {
+  buildFacebookShareCaption,
   buildShareCaption,
   copyTextToClipboard,
   downloadDataUrl,
   getPreviewPageUrl,
   getShareablePageUrl,
   isMobileDevice,
-  openFacebook,
+  openFacebookComposer,
   openTwitterShare,
   openWhatsAppShare,
   prepareFacebookPost,
@@ -58,6 +59,7 @@ export function PreviewPage({
 
   const shareTextNoUrl = buildShareCaption(event);
   const shareText = buildShareCaption(event, shareableUrl);
+  const facebookShareText = buildFacebookShareCaption(event, shareableUrl);
 
   useEffect(() => {
     const url = getShareablePageUrl();
@@ -107,13 +109,13 @@ export function PreviewPage({
     const result = await prepareFacebookPost(
       posterDataUrl,
       filename,
-      shareText,
+      facebookShareText,
       event.facebookGroupUrl,
       event.facebookGroupName
     );
 
     if (isMobileDevice()) {
-      openFacebook(event.facebookGroupUrl);
+      openFacebookComposer();
     }
 
     setFacebookGuide({ result, filename });
@@ -161,7 +163,7 @@ export function PreviewPage({
       {facebookGuide && (
         <FacebookPostGuide
           result={facebookGuide.result}
-          caption={shareText}
+          caption={facebookShareText}
           filename={facebookGuide.filename}
           facebookGroupName={event.facebookGroupName}
           facebookGroupUrl={event.facebookGroupUrl}

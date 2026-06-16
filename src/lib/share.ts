@@ -81,6 +81,23 @@ export function buildShareCaption(event: EventShareInfo, pageUrl?: string): stri
   return lines.join("\n");
 }
 
+/** Caption tuned for Facebook posts — encourages @-tagging the configured group. */
+export function buildFacebookShareCaption(
+  event: EventShareInfo,
+  pageUrl?: string
+): string {
+  const lines = [`Join me at ${event.name}! ${event.dateLabel}`];
+
+  if (event.facebookGroupName) {
+    lines.push(`Tag our Facebook group: @${event.facebookGroupName}`);
+  } else if (event.facebookGroupUrl) {
+    lines.push(event.facebookGroupUrl);
+  }
+
+  if (pageUrl) lines.push(pageUrl);
+  return lines.join("\n");
+}
+
 export function getTwitterShareUrl(text: string, pageUrl?: string) {
   const params = new URLSearchParams({ text });
   if (pageUrl) params.set("url", pageUrl);
@@ -127,6 +144,19 @@ export function getFacebookAppUrl(groupUrl?: string | null) {
 
 export function openFacebook(groupUrl?: string | null) {
   openMobileApp(getFacebookAppUrl(groupUrl), getFacebookWebUrl(groupUrl));
+}
+
+/** Open the Facebook post composer (feed), not a group page. */
+export function getFacebookComposerWebUrl() {
+  return "https://m.facebook.com/";
+}
+
+export function getFacebookComposerAppUrl() {
+  return "fb://composer";
+}
+
+export function openFacebookComposer() {
+  openMobileApp(getFacebookComposerAppUrl(), getFacebookComposerWebUrl());
 }
 
 export async function copyTextToClipboard(text: string): Promise<boolean> {
