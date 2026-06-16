@@ -1,4 +1,4 @@
-export type ShareTarget = "facebook" | "whatsapp" | "twitter" | "native" | "copy-link";
+export type ShareTarget = "facebook" | "instagram" | "whatsapp" | "native" | "copy-link";
 
 export type EventShareInfo = {
   name: string;
@@ -75,11 +75,16 @@ export function openMobileApp(appUrl: string, webUrl: string) {
   window.location.href = appUrl;
 }
 
-/** Caption for Twitter, WhatsApp, copy-link, and other non-Facebook shares. */
+/** Caption for WhatsApp, copy-link, Instagram, and other non-Facebook shares. */
 export function buildShareCaption(event: EventShareInfo, pageUrl?: string): string {
   const lines = [`Join me at ${event.name}! ${event.dateLabel}`];
   if (pageUrl) lines.push(pageUrl);
   return lines.join("\n");
+}
+
+/** Caption for Instagram image posts — no page URL. */
+export function buildInstagramShareCaption(event: EventShareInfo): string {
+  return `Join me at ${event.name}! ${event.dateLabel}`;
 }
 
 /** Caption for Facebook — no page URL (URLs make Facebook create a link post, not an image post). */
@@ -93,24 +98,6 @@ export function buildFacebookShareCaption(event: EventShareInfo): string {
   }
 
   return lines.join("\n");
-}
-
-export function getTwitterShareUrl(text: string, pageUrl?: string) {
-  const params = new URLSearchParams({ text });
-  if (pageUrl) params.set("url", pageUrl);
-  return `https://twitter.com/intent/tweet?${params.toString()}`;
-}
-
-export function getTwitterAppUrl(text: string, pageUrl?: string) {
-  const message = pageUrl ? `${text} ${pageUrl}` : text;
-  return `twitter://post?message=${encodeURIComponent(message)}`;
-}
-
-export function openTwitterShare(text: string, pageUrl?: string) {
-  openMobileApp(
-    getTwitterAppUrl(text, pageUrl),
-    getTwitterShareUrl(text, pageUrl)
-  );
 }
 
 export function getWhatsAppShareUrl(text: string, pageUrl?: string) {
@@ -167,11 +154,10 @@ export function openFacebookComposer() {
 }
 
 /**
- * Share the poster file only via the system sheet.
- * Caption must be pasted separately — including text/URLs in navigator.share
- * makes Facebook attach a link preview instead of the image.
+ * Share an image file only via the system sheet.
+ * Caption must be pasted separately in the target app.
  */
-export async function sharePosterForFacebook(
+export async function sharePosterImage(
   dataUrl: string,
   filename: string
 ): Promise<"shared" | "cancelled" | "unsupported"> {
@@ -192,6 +178,29 @@ export async function sharePosterForFacebook(
   }
 }
 
+export function openInstagram() {
+  openMobileApp("instagram://app", "https://www.instagram.com/");
+}
+
+/** Mobile: share poster image to Instagram app; desktop: open instagram.com. */
+export async function openInstagramPostFlow(
+  posterDataUrl: string | null,
+  filename: string
+): Promise<"shared" | "opened" | "cancelled"> {
+  if (!isMobileDevice()) {
+    window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+    return "opened";
+  }
+
+  if (posterDataUrl) {
+    const shared = await sharePosterImage(posterDataUrl, filename);
+    if (shared === "shared" || shared === "cancelled") return shared;
+  }
+
+  openInstagram();
+  return "opened";
+}
+
 /** Mobile: share poster image to Facebook app; desktop: open browser. */
 export async function openFacebookPostFlow(
   posterDataUrl: string | null,
@@ -204,7 +213,7 @@ export async function openFacebookPostFlow(
   }
 
   if (posterDataUrl) {
-    const shared = await sharePosterForFacebook(posterDataUrl, filename);
+    const shared = await sharePosterImage(posterDataUrl, filename);
     if (shared === "shared" || shared === "cancelled") return shared;
   }
 
@@ -278,28 +287,23 @@ export function downloadDataUrl(dataUrl: string, filename: string) {
   link.click();
 }
 
-export type FacebookPostResult = {
-  mode: "native" | "guided";
+export type SocialPostResult = {
+  mode: "guided";
   captionCopied: boolean;
   imageCopied: boolean;
   downloaded: boolean;
+};
+
+export type FacebookPostResult = SocialPostResult & {
   facebookGroupName?: string | null;
   facebookGroupUrl?: string | null;
 };
 
-/**
- * Facebook cannot pre-fill posts or auto-tag groups from a website.
- * Always download the chosen image and copy the caption. On desktop we also
- * try copying the image to the clipboard. Native mobile share is skipped
- * because it often attaches the wrong image (e.g. WhatsApp DP instead of poster).
- */
-export async function prepareFacebookPost(
+async function prepareSocialImagePost(
   dataUrl: string,
   filename: string,
-  caption: string,
-  facebookGroupUrl?: string | null,
-  facebookGroupName?: string | null
-): Promise<FacebookPostResult> {
+  caption: string
+): Promise<SocialPostResult> {
   downloadDataUrl(dataUrl, filename);
   const captionCopied = await copyTextToClipboard(caption);
   const imageCopied = isMobileDevice()
@@ -311,6 +315,31 @@ export async function prepareFacebookPost(
     captionCopied,
     imageCopied,
     downloaded: true,
+  };
+}
+
+export async function prepareInstagramPost(
+  dataUrl: string,
+  filename: string,
+  caption: string
+): Promise<SocialPostResult> {
+  return prepareSocialImagePost(dataUrl, filename, caption);
+}
+
+/**
+ * Facebook cannot pre-fill posts or auto-tag groups from a website.
+ * Always download the poster and copy the caption.
+ */
+export async function prepareFacebookPost(
+  dataUrl: string,
+  filename: string,
+  caption: string,
+  facebookGroupUrl?: string | null,
+  facebookGroupName?: string | null
+): Promise<FacebookPostResult> {
+  const base = await prepareSocialImagePost(dataUrl, filename, caption);
+  return {
+    ...base,
     facebookGroupName,
     facebookGroupUrl,
   };

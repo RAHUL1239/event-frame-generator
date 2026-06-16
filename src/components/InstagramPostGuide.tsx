@@ -2,32 +2,27 @@
 
 import {
   isMobileDevice,
-  openFacebookPostFlow,
-  type FacebookPostResult,
+  openInstagramPostFlow,
+  type SocialPostResult,
 } from "@/lib/share";
 
 type Props = {
-  result: FacebookPostResult;
+  result: SocialPostResult;
   caption: string;
   filename: string;
   posterDataUrl: string | null;
-  facebookGroupName?: string | null;
-  facebookGroupUrl?: string | null;
   onClose: () => void;
   primaryColor?: string;
 };
 
-export function FacebookPostGuide({
+export function InstagramPostGuide({
   result,
   caption,
   filename,
   posterDataUrl,
-  facebookGroupName,
-  facebookGroupUrl,
   onClose,
   primaryColor = "#1a4d4a",
 }: Props) {
-  const groupLabel = facebookGroupName || "your Facebook group";
   const onDesktop = !isMobileDevice();
 
   return (
@@ -35,7 +30,7 @@ export function FacebookPostGuide({
       <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
         <div className="flex items-start justify-between gap-4">
           <h3 className="text-lg font-bold" style={{ color: primaryColor }}>
-            How to post on Facebook
+            How to post on Instagram
           </h3>
           <button
             type="button"
@@ -49,8 +44,8 @@ export function FacebookPostGuide({
 
         <p className="mt-2 text-sm text-gray-600">
           {onDesktop
-            ? "On Windows and Mac, Facebook is not available in the system share menu. Your poster has been downloaded and the caption copied — open Facebook in your browser to post."
-            : "Facebook does not let websites upload photos or auto-tag groups. We have prepared your caption — follow these steps:"}
+            ? "Your poster has been downloaded and the caption copied. Open Instagram on your phone or upload from instagram.com on desktop."
+            : "Instagram does not let websites upload photos directly. We have prepared your poster — follow these steps:"}
         </p>
 
         <ul className="mt-4 space-y-2 text-sm">
@@ -85,11 +80,12 @@ export function FacebookPostGuide({
           {onDesktop ? (
             <>
               <li>
-                Click <strong>Open Facebook in Browser</strong> below
-                {facebookGroupName ? ` (${groupLabel})` : ""}
+                Open <strong>instagram.com</strong> and sign in, or use the
+                Instagram app on your phone
               </li>
               <li>
-                Click <strong>&quot;Write something...&quot;</strong> in the group
+                Start a new post and upload <strong>{filename}</strong> from
+                Downloads
               </li>
               <li>
                 Paste your caption — press{" "}
@@ -97,43 +93,29 @@ export function FacebookPostGuide({
                 <kbd className="rounded bg-gray-200 px-1">Cmd+V</kbd> on Mac)
               </li>
               <li>
-                Click the <strong>Photo</strong> icon and select{" "}
-                <strong>{filename}</strong> from Downloads
-              </li>
-              <li>
-                Click <strong>Post</strong>
+                Tap <strong>Share</strong>
               </li>
             </>
           ) : (
             <>
               <li>
-                Tap <strong>Share poster to Facebook</strong> below and choose{" "}
-                <strong>Facebook</strong> from the share menu (image only — no
-                link)
+                Tap <strong>Share poster to Instagram</strong> below and choose{" "}
+                <strong>Instagram</strong> from the share menu
               </li>
               <li>
-                Facebook should open with your poster attached — if not, tap the{" "}
-                <strong>Photo</strong> icon and select <strong>{filename}</strong>{" "}
-                from Downloads
+                Choose <strong>Feed</strong> or <strong>Story</strong> in
+                Instagram
+              </li>
+              <li>
+                If the image is not attached, tap <strong>+</strong> and select{" "}
+                <strong>{filename}</strong> from Downloads
               </li>
               <li>
                 Long-press and <strong>paste</strong> your caption (already copied
                 to clipboard)
               </li>
-              {facebookGroupName ? (
-                <li>
-                  Type <strong>@</strong> and select{" "}
-                  <strong>{facebookGroupName}</strong> to tag the group in your
-                  post
-                </li>
-              ) : (
-                <li>
-                  Add your group name or link from the caption to tag your
-                  community
-                </li>
-              )}
               <li>
-                Tap <strong>Post</strong>
+                Tap <strong>Share</strong>
               </li>
             </>
           )}
@@ -143,16 +125,15 @@ export function FacebookPostGuide({
           <button
             type="button"
             onClick={() =>
-              void openFacebookPostFlow(
-                posterDataUrl,
-                filename,
-                facebookGroupUrl
-              )
+              void openInstagramPostFlow(posterDataUrl, filename)
             }
             className="w-full rounded-xl py-3 font-semibold text-white"
-            style={{ backgroundColor: "#1877F2" }}
+            style={{
+              background:
+                "linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)",
+            }}
           >
-            {onDesktop ? "Open Facebook in Browser" : "Share poster to Facebook"}
+            {onDesktop ? "Open Instagram" : "Share poster to Instagram"}
           </button>
           <button
             type="button"

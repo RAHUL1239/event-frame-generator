@@ -3,22 +3,25 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FacebookPostGuide } from "@/components/FacebookPostGuide";
+import { InstagramPostGuide } from "@/components/InstagramPostGuide";
 import { formatDisplayName } from "@/lib/utils";
 import { loadPreviewAssets } from "@/lib/preview-storage";
 import type { EventWithOptions } from "@/lib/types";
 import {
   buildFacebookShareCaption,
+  buildInstagramShareCaption,
   buildShareCaption,
   copyTextToClipboard,
   downloadDataUrl,
   getPreviewPageUrl,
   getShareablePageUrl,
   isMobileDevice,
-  openTwitterShare,
   openWhatsAppShare,
   prepareFacebookPost,
+  prepareInstagramPost,
   shareImageNative,
   type FacebookPostResult,
+  type SocialPostResult,
 } from "@/lib/share";
 
 type Submission = {
@@ -55,10 +58,15 @@ export function PreviewPage({
     result: FacebookPostResult;
     filename: string;
   } | null>(null);
+  const [instagramGuide, setInstagramGuide] = useState<{
+    result: SocialPostResult;
+    filename: string;
+  } | null>(null);
 
   const shareTextNoUrl = buildShareCaption(event);
   const shareText = buildShareCaption(event, shareableUrl);
   const facebookShareText = buildFacebookShareCaption(event);
+  const instagramShareText = buildInstagramShareCaption(event);
 
   useEffect(() => {
     const url = getShareablePageUrl();
@@ -116,8 +124,20 @@ export function PreviewPage({
     setFacebookGuide({ result, filename });
   }
 
-  function handleShareTwitter() {
-    openTwitterShare(shareTextNoUrl, shareableUrl);
+  async function handlePostToInstagram() {
+    if (!posterDataUrl) {
+      showToast("Poster not ready yet. Please wait or regenerate your frames.");
+      return;
+    }
+
+    const filename = `${slug}-poster.png`;
+    const result = await prepareInstagramPost(
+      posterDataUrl,
+      filename,
+      instagramShareText
+    );
+
+    setInstagramGuide({ result, filename });
   }
 
   function handleShareWhatsApp() {
@@ -168,6 +188,17 @@ export function PreviewPage({
         />
       )}
 
+      {instagramGuide && (
+        <InstagramPostGuide
+          result={instagramGuide.result}
+          caption={instagramShareText}
+          filename={instagramGuide.filename}
+          posterDataUrl={posterDataUrl}
+          onClose={() => setInstagramGuide(null)}
+          primaryColor={event.primaryColor}
+        />
+      )}
+
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <Link
           href={backPath}
@@ -185,8 +216,8 @@ export function PreviewPage({
           Share with friends
         </h2>
         <p className="mt-1 text-sm text-gray-600">
-          For Facebook, the social media poster is downloaded (not the WhatsApp
-          DP). Paste the caption and attach the poster from your Downloads folder.
+          Post your social media poster to Facebook or Instagram. The WhatsApp DP
+          is for profile photos only.
         </p>
 
         {onLocalhost && (
@@ -205,16 +236,16 @@ export function PreviewPage({
             onClick={handlePostToFacebook}
           />
           <ShareButton
+            label="Post to Instagram"
+            sublabel="Download + instructions"
+            color="#E1306C"
+            onClick={handlePostToInstagram}
+          />
+          <ShareButton
             label="WhatsApp"
             sublabel="Send to contacts"
             color="#25D366"
             onClick={handleShareWhatsApp}
-          />
-          <ShareButton
-            label="X / Twitter"
-            sublabel="Post update"
-            color="#000000"
-            onClick={handleShareTwitter}
           />
           <ShareButton
             label="Copy link"
@@ -237,6 +268,7 @@ export function PreviewPage({
             downloadDataUrl(posterDataUrl, `${slug}-poster.png`)
           }
           onPostFacebook={handlePostToFacebook}
+          onPostInstagram={handlePostToInstagram}
           onShareMore={() => handleShareMore("poster")}
         />
         <PreviewCard
@@ -288,6 +320,7 @@ function PreviewCard({
   primaryColor,
   onDownload,
   onPostFacebook,
+  onPostInstagram,
   onShareMore,
 }: {
   title: string;
@@ -297,6 +330,7 @@ function PreviewCard({
   primaryColor: string;
   onDownload: () => void;
   onPostFacebook?: () => void;
+  onPostInstagram?: () => void;
   onShareMore: () => void;
 }) {
   return (
@@ -335,28 +369,47 @@ function PreviewCard({
         >
           Download PNG
         </button>
-        <div className={`grid gap-2 ${onPostFacebook ? "grid-cols-2" : "grid-cols-1"}`}>
-          {onPostFacebook && (
-            <button
-              type="button"
-              onClick={onPostFacebook}
-              className="rounded-xl py-3 text-sm font-semibold text-white transition hover:opacity-90"
-              style={{ backgroundColor: "#1877F2" }}
-            >
-              Post to Facebook
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={onShareMore}
-            className="rounded-xl border-2 py-3 text-sm font-semibold transition hover:bg-gray-50"
-            style={{ borderColor: primaryColor, color: primaryColor }}
+        {(onPostFacebook || onPostInstagram) && (
+          <div
+            className={`grid gap-2 ${
+              onPostFacebook && onPostInstagram ? "grid-cols-2" : "grid-cols-1"
+            }`}
           >
-            Share image
-          </button>
-        </div>
+            {onPostFacebook && (
+              <button
+                type="button"
+                onClick={onPostFacebook}
+                className="rounded-xl py-3 text-sm font-semibold text-white transition hover:opacity-90"
+                style={{ backgroundColor: "#1877F2" }}
+              >
+                Facebook
+              </button>
+            )}
+            {onPostInstagram && (
+              <button
+                type="button"
+                onClick={onPostInstagram}
+                className="rounded-xl py-3 text-sm font-semibold text-white transition hover:opacity-90"
+                style={{
+                  background:
+                    "linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)",
+                }}
+              >
+                Instagram
+              </button>
+            )}
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={onShareMore}
+          className="rounded-xl border-2 py-3 text-sm font-semibold transition hover:bg-gray-50"
+          style={{ borderColor: primaryColor, color: primaryColor }}
+        >
+          Share image
+        </button>
         <p className="text-center text-xs text-gray-500">
-          Facebook: download poster, then upload via Photo/Video button.
+          Facebook &amp; Instagram: download poster, then upload from the app.
         </p>
       </div>
     </div>
