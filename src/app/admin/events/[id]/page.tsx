@@ -75,7 +75,12 @@ export default function AdminEventPage({
             facebookGroupName: data.facebookGroupName ?? null,
             facebookGroupUrl: data.facebookGroupUrl ?? null,
             genderOptions: data.genderOptions ?? [],
-            submissions: data.submissions ?? [],
+            submissions: (data.submissions ?? []).map(
+              (sub: EventDetail["submissions"][number]) => ({
+                ...sub,
+                fileUploads: sub.fileUploads ?? [],
+              })
+            ),
           });
         })
         .catch(() => setLoadError("Failed to load event"));
@@ -110,19 +115,33 @@ export default function AdminEventPage({
     setSaving(false);
     if (res.ok) {
       setMessage("Saved successfully");
-      const updated = await res.json();
-      setEvent((prev) =>
-        prev
-          ? {
-              ...prev,
-              ...updated,
-              genderOptions: updated.genderOptions ?? prev.genderOptions,
-              submissions: updated.submissions ?? prev.submissions,
-              facebookGroupName: updated.facebookGroupName ?? null,
-              facebookGroupUrl: updated.facebookGroupUrl ?? null,
-            }
-          : updated
-      );
+      let updated: Partial<EventDetail> | null = null;
+      try {
+        updated = await res.json();
+      } catch {
+        setMessage("Saved, but failed to refresh page data. Please reload.");
+        return;
+      }
+
+      if (!updated?.id) {
+        setMessage("Saved, but server returned unexpected data. Please reload.");
+        return;
+      }
+
+      setEvent((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          ...updated,
+          genderOptions: updated.genderOptions ?? prev.genderOptions,
+          submissions: (updated.submissions ?? prev.submissions).map((sub) => ({
+            ...sub,
+            fileUploads: sub.fileUploads ?? [],
+          })),
+          facebookGroupName: updated.facebookGroupName ?? null,
+          facebookGroupUrl: updated.facebookGroupUrl ?? null,
+        };
+      });
     } else {
       const data = await res.json().catch(() => ({}));
       setMessage(data.error ?? "Failed to save");
@@ -324,7 +343,7 @@ export default function AdminEventPage({
                     <td className="px-3 py-2">{sub.groupName ?? "—"}</td>
                     <td className="px-3 py-2">{sub.city}</td>
                     <td className="px-3 py-2">
-                      {sub.fileUploads.map((f) => (
+                      {(sub.fileUploads ?? []).map((f) => (
                         <div key={f.storedName} className="text-xs text-gray-500">
                           {f.originalName} ({formatFileSize(f.sizeBytes)})
                         </div>

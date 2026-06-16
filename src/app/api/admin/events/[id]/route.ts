@@ -7,7 +7,23 @@ import { getClientIp } from "@/lib/server-utils";
 const eventDetailInclude = {
   genderOptions: { orderBy: { sortOrder: "asc" as const } },
   submissions: {
-    include: { fileUploads: true },
+    select: {
+      id: true,
+      type: true,
+      firstName: true,
+      lastName: true,
+      groupName: true,
+      city: true,
+      createdAt: true,
+      fileUploads: {
+        select: {
+          originalName: true,
+          storedName: true,
+          sizeBytes: true,
+          memberIndex: true,
+        },
+      },
+    },
     orderBy: { createdAt: "desc" as const },
     take: 100,
   },
