@@ -4,6 +4,7 @@ import {
   resolveFrameTheme,
   type ResolvedFrameTheme,
 } from "./frame-themes";
+import { drawFrameOverlay, loadThemeFrameOverlay } from "./frame-overlays";
 import { getEventCountdown } from "./countdown";
 import {
   getPosterHashtag,
@@ -90,6 +91,27 @@ function getQrUrl(event: EventWithOptions, configQr?: string): string | undefine
 
 function resolveFrameBackground(theme: ResolvedFrameTheme): string {
   return theme.colors.primary;
+}
+
+async function paintFrameBackground(
+  ctx: CanvasRenderingContext2D,
+  theme: ResolvedFrameTheme,
+  width: number,
+  height: number
+) {
+  ctx.fillStyle = resolveFrameBackground(theme);
+  ctx.fillRect(0, 0, width, height);
+
+  const overlay = await loadThemeFrameOverlay(theme.overlayKey ?? theme.key);
+  if (overlay) {
+    drawFrameOverlay(ctx, overlay.image, overlay.config, width, height);
+    return;
+  }
+
+  drawFrameThemeDecoration(ctx, theme, width, height, {
+    onDarkBackground: true,
+    skipWhenOverlay: true,
+  });
 }
 
 function drawBmmHeader(
@@ -374,9 +396,7 @@ async function drawBmmPersonalPoster(
   const hashtag = getPosterHashtag(config, event);
   const headline = getPosterHeadline(config, event, genderTagline);
 
-  ctx.fillStyle = resolveFrameBackground(theme);
-  ctx.fillRect(0, 0, POSTER_W, POSTER_H);
-  drawFrameThemeDecoration(ctx, theme, POSTER_W, POSTER_H, { onDarkBackground: true });
+  await paintFrameBackground(ctx, theme, POSTER_W, POSTER_H);
 
   drawBmmHeader(ctx, event, logo, theme, hashtag);
 
@@ -436,9 +456,7 @@ async function drawBmmGroupPoster(
   const groupTagline = getGenderTagline(event, "group");
   const headline = getPosterHeadline(config, event, groupTagline);
 
-  ctx.fillStyle = resolveFrameBackground(theme);
-  ctx.fillRect(0, 0, POSTER_W, POSTER_H);
-  drawFrameThemeDecoration(ctx, theme, POSTER_W, POSTER_H, { onDarkBackground: true });
+  await paintFrameBackground(ctx, theme, POSTER_W, POSTER_H);
 
   drawBmmHeader(ctx, event, logo, theme, hashtag);
 
@@ -502,22 +520,21 @@ export async function renderGroupPosterCanvas(
   await drawBmmGroupPoster(ctx, input, logo, photos, theme);
 }
 
-function resolveDpBackground(theme: ResolvedFrameTheme): string {
-  return resolveFrameBackground(theme);
-}
-
 function drawPersonalDp(
   ctx: CanvasRenderingContext2D,
   input: PersonalDpRenderInput,
   logo: HTMLImageElement,
   photo: HTMLImageElement,
-  theme: ResolvedFrameTheme
+  theme: ResolvedFrameTheme,
+  framePainted = false
 ) {
   const { accent } = theme.colors;
   const { x, y, radius, ringPadding } = PERSONAL_DP_PHOTO_POSITION;
 
-  ctx.fillStyle = resolveDpBackground(theme);
-  ctx.fillRect(0, 0, DP_W, DP_H);
+  if (!framePainted) {
+    ctx.fillStyle = resolveFrameBackground(theme);
+    ctx.fillRect(0, 0, DP_W, DP_H);
+  }
 
   drawLogo(ctx, logo, 320, 10, 72, 72);
   drawCircularImage(ctx, photo, x, y, radius, input.photoCrop);
@@ -541,12 +558,15 @@ function drawGroupDp(
   input: GroupDpRenderInput,
   logo: HTMLImageElement,
   photos: HTMLImageElement[],
-  theme: ResolvedFrameTheme
+  theme: ResolvedFrameTheme,
+  framePainted = false
 ) {
   const { accent } = theme.colors;
 
-  ctx.fillStyle = resolveDpBackground(theme);
-  ctx.fillRect(0, 0, DP_W, DP_H);
+  if (!framePainted) {
+    ctx.fillStyle = resolveFrameBackground(theme);
+    ctx.fillRect(0, 0, DP_W, DP_H);
+  }
 
   drawLogo(ctx, logo, 320, 10, 68, 68);
 
@@ -584,7 +604,8 @@ export async function renderPersonalDpCanvas(
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  drawPersonalDp(ctx, input, logo, photo, theme);
+  await paintFrameBackground(ctx, theme, DP_W, DP_H);
+  drawPersonalDp(ctx, input, logo, photo, theme, true);
 }
 
 export async function renderGroupDpCanvas(
@@ -601,7 +622,8 @@ export async function renderGroupDpCanvas(
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  drawGroupDp(ctx, input, logo, photos, theme);
+  await paintFrameBackground(ctx, theme, DP_W, DP_H);
+  drawGroupDp(ctx, input, logo, photos, theme, true);
 }
 
 export async function generatePersonalAssets(

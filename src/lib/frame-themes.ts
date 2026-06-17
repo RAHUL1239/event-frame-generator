@@ -32,6 +32,7 @@ export type FrameThemeDefinition = {
   colors: FrameThemeColors;
   borderStyle: FrameBorderStyle;
   photoRingWidth: number;
+  overlayKey?: FrameThemeKey;
 };
 
 export const FRAME_THEMES: Record<FrameThemeKey, FrameThemeDefinition> = {
@@ -40,7 +41,7 @@ export const FRAME_THEMES: Record<FrameThemeKey, FrameThemeDefinition> = {
     name: "Traditional Maharashtrian",
     description: "Maroon and gold with classic ornamental borders",
     colors: {
-      primary: "#7B1E3A",
+      primary: "#5C1020",
       accent: "#D4AF37",
       background: "#f5f0e8",
       gold: "#D4AF37",
@@ -48,6 +49,7 @@ export const FRAME_THEMES: Record<FrameThemeKey, FrameThemeDefinition> = {
     },
     borderStyle: "ornate",
     photoRingWidth: 10,
+    overlayKey: "traditional-maharashtrian",
   },
   "elegant-gold": {
     key: "elegant-gold",
@@ -129,6 +131,7 @@ export type ResolvedFrameTheme = {
   colors: FrameThemeColors;
   borderStyle: FrameBorderStyle;
   photoRingWidth: number;
+  overlayKey?: FrameThemeKey;
 };
 
 export function isFrameThemeKey(value: string): value is FrameThemeKey {
@@ -210,6 +213,7 @@ export function resolveFrameTheme(
     colors: theme.colors,
     borderStyle: theme.borderStyle,
     photoRingWidth: theme.photoRingWidth,
+    overlayKey: theme.overlayKey,
   };
 }
 
@@ -218,8 +222,10 @@ export function drawFrameThemeDecoration(
   theme: ResolvedFrameTheme,
   width: number,
   height: number,
-  options?: { onDarkBackground?: boolean }
+  options?: { onDarkBackground?: boolean; skipWhenOverlay?: boolean }
 ) {
+  if (options?.skipWhenOverlay && theme.overlayKey) return;
+
   const { primary, accent } = theme.colors;
   const outerStroke = options?.onDarkBackground ? accent : primary;
   const innerStroke = accent;
