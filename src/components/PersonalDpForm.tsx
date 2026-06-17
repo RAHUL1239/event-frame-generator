@@ -4,7 +4,10 @@ import { useRef, useState } from "react";
 import { PhotoCropEditor, usePhotoCrop } from "@/components/PhotoCropEditor";
 import { AttendeeSocialProof } from "@/components/AttendeeSocialProof";
 import { EventCountdownBanner } from "@/components/EventCountdownBanner";
-import { FrameThemePicker } from "@/components/FrameThemePicker";
+import {
+  FrameThemePicker,
+  getGenerateFrameLabel,
+} from "@/components/FrameThemePicker";
 import type { EventWithOptions } from "@/lib/types";
 import {
   parseEnabledFrameThemes,
@@ -34,6 +37,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const { crop: photoCrop, setCrop: setPhotoCrop } = usePhotoCrop(photoPreview);
   const enabledThemes = parseEnabledFrameThemes(event.enabledFrameThemes);
+  const hasThemeStep = enabledThemes.length > 0;
   const [frameThemeKey, setFrameThemeKey] = useState<FrameThemeKey | "">(
     enabledThemes[0] ?? ""
   );
@@ -56,10 +60,10 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
     if (!firstName.trim()) return setError("First name is required");
     if (!lastName.trim()) return setError("Last name is required");
     if (!genderKey) return setError("Please select a tagline option");
-    if (enabledThemes.length > 0 && !frameThemeKey) {
+    if (!photo) return setError("Please upload your photo");
+    if (hasThemeStep && !frameThemeKey) {
       return setError("Please select a frame style");
     }
-    if (!photo) return setError("Please upload your photo");
 
     setLoading(true);
     try {
@@ -109,11 +113,14 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto max-w-2xl">
+    <form onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-6">
       <div className="rounded-2xl bg-white p-6 shadow-lg md:p-10">
         <span
           className="inline-block rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-wide"
-          style={{ backgroundColor: `${event.accentColor}22`, color: event.primaryColor }}
+          style={{
+            backgroundColor: `${event.accentColor}22`,
+            color: event.primaryColor,
+          }}
         >
           Step 1 of 2
         </span>
@@ -125,8 +132,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
           Enter Your Details
         </h2>
         <p className="mt-2 text-gray-600">
-          Fill in your info to generate your personalised {event.name} frame,
-          poster, and WhatsApp DP.
+          Fill in your info and upload your photo.
         </p>
 
         <div className="mt-8 space-y-6">
@@ -183,14 +189,6 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
               ))}
             </div>
           </div>
-
-          <FrameThemePicker
-            enabledFrameThemes={event.enabledFrameThemes}
-            value={frameThemeKey}
-            onChange={setFrameThemeKey}
-            primaryColor={event.primaryColor}
-            eventName={event.name}
-          />
 
           <div>
             <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
@@ -283,6 +281,43 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
               />
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl bg-white p-6 shadow-lg md:p-10">
+        <span
+          className="inline-block rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-wide"
+          style={{
+            backgroundColor: `${event.accentColor}22`,
+            color: event.primaryColor,
+          }}
+        >
+          Step 2 of 2
+        </span>
+
+        <h2
+          className="mt-4 text-3xl font-bold"
+          style={{ color: event.primaryColor }}
+        >
+          Choose Your Frame
+        </h2>
+        <p className="mt-2 text-gray-600">
+          Pick a style for your poster and WhatsApp DP.
+        </p>
+
+        <div className="mt-8 space-y-6">
+          {hasThemeStep ? (
+            <FrameThemePicker
+              enabledFrameThemes={event.enabledFrameThemes}
+              value={frameThemeKey}
+              onChange={setFrameThemeKey}
+              primaryColor={event.primaryColor}
+            />
+          ) : (
+            <p className="text-sm text-gray-600">
+              Your frame will use the default event styling.
+            </p>
+          )}
 
           {error && (
             <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">
@@ -300,12 +335,16 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
             type="submit"
             disabled={loading}
             className="w-full rounded-xl py-4 text-lg font-bold text-white transition hover:opacity-90 disabled:opacity-60"
-            style={{ backgroundColor: event.primaryColor, color: event.accentColor }}
+            style={{
+              backgroundColor: event.primaryColor,
+              color: event.accentColor,
+            }}
           >
-            {loading ? "Generating..." : "✨ Generate My Frames"}
+            {getGenerateFrameLabel(loading)}
           </button>
         </div>
       </div>
+
       <AttendeeSocialProof
         count={attendeeCount}
         primaryColor={event.primaryColor}

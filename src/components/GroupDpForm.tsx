@@ -4,7 +4,10 @@ import { useRef, useState } from "react";
 import { PhotoCropEditor } from "@/components/PhotoCropEditor";
 import { AttendeeSocialProof } from "@/components/AttendeeSocialProof";
 import { EventCountdownBanner } from "@/components/EventCountdownBanner";
-import { FrameThemePicker } from "@/components/FrameThemePicker";
+import {
+  FrameThemePicker,
+  getGenerateFrameLabel,
+} from "@/components/FrameThemePicker";
 import type { EventWithOptions } from "@/lib/types";
 import {
   parseEnabledFrameThemes,
@@ -51,6 +54,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
     useRef<HTMLInputElement>(null),
   ];
   const enabledThemes = parseEnabledFrameThemes(event.enabledFrameThemes);
+  const hasThemeStep = enabledThemes.length > 0;
   const [frameThemeKey, setFrameThemeKey] = useState<FrameThemeKey | "">(
     enabledThemes[0] ?? ""
   );
@@ -97,7 +101,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
     if (activePhotos.some((p) => !p)) {
       return setError("Please upload a photo for each member");
     }
-    if (enabledThemes.length > 0 && !frameThemeKey) {
+    if (hasThemeStep && !frameThemeKey) {
       return setError("Please select a frame style");
     }
 
@@ -152,13 +156,13 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto max-w-2xl">
+    <form onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-6">
       <div className="rounded-2xl bg-white p-6 shadow-lg md:p-10">
         <span
           className="inline-block rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-wide"
           style={{ backgroundColor: `${event.accentColor}22`, color: event.primaryColor }}
         >
-          Group DP Generator
+          Step 1 of 2
         </span>
 
         <h2
@@ -168,8 +172,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
           Enter Group Details
         </h2>
         <p className="mt-2 text-gray-600">
-          Create a custom circular collage DP for your family, group, or local
-          Mandal.
+          Add your group info and member photos.
         </p>
 
         <div className="mt-8 space-y-6">
@@ -262,14 +265,6 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
             )}
           </div>
 
-          <FrameThemePicker
-            enabledFrameThemes={event.enabledFrameThemes}
-            value={frameThemeKey}
-            onChange={setFrameThemeKey}
-            primaryColor={event.primaryColor}
-            eventName={event.name}
-          />
-
           <div>
             <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
               Group Name
@@ -310,6 +305,40 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
             <strong>Disclaimer:</strong> Photos are processed temporarily and not
             retained on the server.
           </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl bg-white p-6 shadow-lg md:p-10">
+        <span
+          className="inline-block rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-wide"
+          style={{ backgroundColor: `${event.accentColor}22`, color: event.primaryColor }}
+        >
+          Step 2 of 2
+        </span>
+
+        <h2
+          className="mt-4 text-3xl font-bold"
+          style={{ color: event.primaryColor }}
+        >
+          Choose Your Frame
+        </h2>
+        <p className="mt-2 text-gray-600">
+          Pick a style for your group poster and WhatsApp DP.
+        </p>
+
+        <div className="mt-8 space-y-6">
+          {hasThemeStep ? (
+            <FrameThemePicker
+              enabledFrameThemes={event.enabledFrameThemes}
+              value={frameThemeKey}
+              onChange={setFrameThemeKey}
+              primaryColor={event.primaryColor}
+            />
+          ) : (
+            <p className="text-sm text-gray-600">
+              Your frame will use the default event styling.
+            </p>
+          )}
 
           {error && (
             <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">
@@ -329,7 +358,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
             className="w-full rounded-xl py-4 text-lg font-bold text-white transition hover:opacity-90 disabled:opacity-60"
             style={{ backgroundColor: event.primaryColor, color: event.accentColor }}
           >
-            {loading ? "Generating..." : "✨ Generate Group DP"}
+            {getGenerateFrameLabel(loading)}
           </button>
         </div>
       </div>
