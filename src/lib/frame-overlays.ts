@@ -17,8 +17,8 @@ export const FRAME_BORDER_STRIPS: Partial<
   Record<FrameThemeKey, FrameBorderStripConfig>
 > = {
   "traditional-maharashtrian": {
-    src: "/frames/maharashtrian-paithani-border.png",
-    borderWidthRatio: 0.095,
+    src: "/frames/maharashtrian-gold-border.png",
+    borderWidthRatio: 0.12,
   },
 };
 
@@ -40,7 +40,7 @@ export function getFrameBorderWidth(
 ): number {
   const config = themeKey ? FRAME_BORDER_STRIPS[themeKey] : undefined;
   if (!config) return 0;
-  return Math.max(44, Math.round(canvasWidth * config.borderWidthRatio));
+  return Math.max(56, Math.round(canvasWidth * config.borderWidthRatio));
 }
 
 export function getFrameContentInsets(
@@ -151,6 +151,10 @@ export async function paintFrameBorderStrips(
   if (!image) return;
 
   const border = getFrameBorderWidth(themeKey, width);
+  const prevSmoothing = ctx.imageSmoothingEnabled;
+  const prevQuality = ctx.imageSmoothingQuality;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
 
   tileVerticalStrip(ctx, image, 0, 0, border, height, false);
   tileVerticalStrip(ctx, image, width - border, 0, border, height, true);
@@ -166,6 +170,9 @@ export async function paintFrameBorderStrips(
   ctx.rotate(Math.PI / 2);
   tileVerticalStrip(ctx, image, 0, 0, border, width, true);
   ctx.restore();
+
+  ctx.imageSmoothingEnabled = prevSmoothing;
+  ctx.imageSmoothingQuality = prevQuality;
 }
 
 export async function withFrameContentClip(
