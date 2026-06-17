@@ -155,10 +155,10 @@ function drawBmmHeader(
   ctx.direction = "ltr";
   ctx.fillStyle = POSTER_TEXT;
   ctx.font = posterFont(700, 46);
-  ctx.fillText(event.name.toUpperCase(), canvasW / 2, layoutY(layout, 72, canvasH));
+  ctx.fillText(event.name.toUpperCase(), canvasW / 2, layoutY(layout, 56, canvasH));
 
   ctx.font = posterFont(600, 26);
-  ctx.fillText(getPosterVenueLine(event), canvasW / 2, layoutY(layout, 112, canvasH));
+  ctx.fillText(getPosterVenueLine(event), canvasW / 2, layoutY(layout, 128, canvasH));
 
   if (hashtag) {
     ctx.textAlign = "right";
