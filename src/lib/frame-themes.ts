@@ -229,7 +229,8 @@ export function drawFrameThemeDecoration(
   const { primary, accent } = theme.colors;
   const outerStroke = options?.onDarkBackground ? accent : primary;
   const innerStroke = accent;
-  const inset = 18;
+  const inset = Math.max(8, Math.round((width * 36) / 1080));
+  const lineScale = width / 1080;
 
   switch (theme.borderStyle) {
     case "ornate": {
@@ -295,13 +296,23 @@ export function drawFrameThemeDecoration(
     }
     case "minimal":
     default: {
+      const outerWidth = Math.max(3, 8 * lineScale);
+      const innerWidth = Math.max(1, 2 * lineScale);
+      const innerGap = Math.max(4, 8 * lineScale);
+
       ctx.strokeStyle = accent;
-      ctx.lineWidth = options?.onDarkBackground ? 5 : 2;
+      ctx.lineWidth = outerWidth;
       ctx.strokeRect(inset, inset, width - inset * 2, height - inset * 2);
+
       if (options?.onDarkBackground) {
         ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(inset + 6, inset + 6, width - (inset + 6) * 2, height - (inset + 6) * 2);
+        ctx.lineWidth = innerWidth;
+        ctx.strokeRect(
+          inset + innerGap,
+          inset + innerGap,
+          width - (inset + innerGap) * 2,
+          height - (inset + innerGap) * 2
+        );
       }
       break;
     }

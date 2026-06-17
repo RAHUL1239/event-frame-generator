@@ -5,6 +5,7 @@ import {
   parseEnabledFrameThemes,
   type FrameThemeKey,
 } from "@/lib/frame-themes";
+import { FrameThemeThumbnail } from "@/components/admin/FrameThemeThumbnail";
 
 type Props = {
   enabledFrameThemes: string | null | undefined;
@@ -55,6 +56,11 @@ export function FrameThemePicker({
                     <span className="h-1.5 w-1.5 rounded-full bg-white" />
                   )}
                 </span>
+                <FrameThemeThumbnail
+                  themeKey={key}
+                  size={56}
+                  className="h-14 w-14 shrink-0 rounded-md border border-gray-200 shadow-sm"
+                />
                 <span>{theme.name}</span>
               </button>
             </li>

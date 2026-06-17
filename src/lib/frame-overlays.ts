@@ -12,6 +12,8 @@ export type FrameFullOverlayConfig = {
   src: string;
   /** Transparent hole inset as a fraction of canvas width (e.g. 130/1080). */
   holeInsetRatio: number;
+  /** Extra inner padding (px at 1080) keeping text away from the frame art. */
+  contentPadding?: number;
 };
 
 export type PosterLayoutContext = {
@@ -29,6 +31,7 @@ export const FRAME_FULL_OVERLAYS: Partial<
   "traditional-maharashtrian": {
     src: "/frames/maharashtrian-frame.png",
     holeInsetRatio: 130 / 1080,
+    contentPadding: 100,
   },
 };
 
@@ -58,6 +61,22 @@ export function getFrameOverlayInset(
   return Math.max(36, Math.round(canvasWidth * config.holeInsetRatio));
 }
 
+export function getFrameContentInset(
+  themeKey: FrameThemeKey | null | undefined,
+  canvasWidth: number
+): number {
+  if (!hasFrameOverlayTheme(themeKey)) {
+    return VECTOR_FRAME_INSET;
+  }
+
+  const config = FRAME_FULL_OVERLAYS[themeKey!]!;
+  const holeInset = getFrameOverlayInset(themeKey, canvasWidth);
+  const extraPadding = Math.round(
+    ((config.contentPadding ?? 0) * canvasWidth) / 1080
+  );
+  return holeInset + extraPadding;
+}
+
 export function getFrameBorderWidth(
   themeKey: FrameThemeKey | null | undefined,
   canvasWidth: number
@@ -70,9 +89,7 @@ export function getPosterLayout(
   canvasW: number,
   canvasH: number
 ): PosterLayoutContext {
-  const inset = hasFrameOverlayTheme(themeKey)
-    ? getFrameOverlayInset(themeKey, canvasW)
-    : VECTOR_FRAME_INSET;
+  const inset = getFrameContentInset(themeKey, canvasW);
   return {
     inset,
     innerW: canvasW - inset * 2,

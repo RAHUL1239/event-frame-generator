@@ -6,6 +6,7 @@ import {
   parseEnabledFrameThemes,
   type FrameThemeKey,
 } from "@/lib/frame-themes";
+import { FrameThemeThumbnail } from "@/components/admin/FrameThemeThumbnail";
 
 type Props = {
   value: string | null | undefined;
@@ -50,21 +51,8 @@ export function FrameThemeAdminSelect({ value, onChange }: Props) {
                 onChange={() => toggleTheme(theme.key)}
                 className="mt-1"
               />
+              <FrameThemeThumbnail themeKey={theme.key} />
               <span className="min-w-0 flex-1">
-                <span className="mb-2 flex gap-1">
-                  <span
-                    className="h-4 w-8 rounded"
-                    style={{ backgroundColor: theme.colors.primary }}
-                  />
-                  <span
-                    className="h-4 w-8 rounded"
-                    style={{ backgroundColor: theme.colors.accent }}
-                  />
-                  <span
-                    className="h-4 w-8 rounded border border-gray-200"
-                    style={{ backgroundColor: theme.colors.background }}
-                  />
-                </span>
                 <span className="block text-sm font-medium text-gray-900">
                   {theme.name}
                 </span>

@@ -125,7 +125,7 @@ async function paintFrameOverlay(
 
   drawFrameThemeDecoration(ctx, theme, width, height, {
     onDarkBackground: true,
-    skipWhenOverlay: true,
+    skipWhenOverlay: Boolean(theme.overlayKey),
   });
 }
 
