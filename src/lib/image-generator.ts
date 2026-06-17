@@ -21,6 +21,12 @@ import {
   loadEventLogo,
   loadImage,
 } from "./utils";
+import {
+  fillCenteredLine,
+  splitTextIntoLines,
+  wrapCanvasText,
+} from "./canvas-text";
+import { ensurePosterFontsLoaded, posterFont } from "./poster-fonts";
 
 type PersonalInput = PersonalFormData & { event: EventWithOptions };
 type GroupInput = GroupFormData & { event: EventWithOptions };
@@ -47,44 +53,6 @@ export const PERSONAL_PHOTO_POSITION = {
 
 function getGenderTagline(event: EventWithOptions, genderKey: string) {
   return event.genderOptions.find((o) => o.key === genderKey)?.tagline ?? "";
-}
-
-function fillCenteredLine(
-  ctx: CanvasRenderingContext2D,
-  line: string,
-  centerX: number,
-  y: number
-) {
-  ctx.direction = "ltr";
-  ctx.textAlign = "left";
-  const width = ctx.measureText(line).width;
-  ctx.fillText(line, centerX - width / 2, y);
-}
-
-function wrapCanvasText(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  x: number,
-  y: number,
-  maxWidth: number,
-  lineHeight: number
-): number {
-  ctx.textBaseline = "alphabetic";
-  const words = text.split(" ");
-  let line = "";
-  let currentY = y;
-  for (const word of words) {
-    const test = line ? `${line} ${word}` : word;
-    if (ctx.measureText(test).width > maxWidth && line) {
-      fillCenteredLine(ctx, line, x, currentY);
-      line = word;
-      currentY += lineHeight;
-    } else {
-      line = test;
-    }
-  }
-  if (line) fillCenteredLine(ctx, line, x, currentY);
-  return currentY + lineHeight;
 }
 
 async function loadQrCode(url: string): Promise<HTMLImageElement | null> {
@@ -115,18 +83,20 @@ function drawBmmHeader(
   drawLogoAt(ctx, logo, 36, 28, 96, 96);
 
   ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
+  ctx.direction = "ltr";
   ctx.fillStyle = primary;
-  ctx.font = "bold 40px system-ui, sans-serif";
+  ctx.font = posterFont(700, 40);
   ctx.fillText(event.name.toUpperCase(), POSTER_W / 2, 72);
 
   ctx.fillStyle = accent;
-  ctx.font = "600 22px system-ui, sans-serif";
+  ctx.font = posterFont(600, 22);
   ctx.fillText(getPosterVenueLine(event), POSTER_W / 2, 108);
 
   if (hashtag) {
     ctx.textAlign = "right";
     ctx.fillStyle = resolvePosterColor("green", primary, accent, theme.colors.gold, green);
-    ctx.font = "bold 26px system-ui, sans-serif";
+    ctx.font = posterFont(700, 26);
     ctx.fillText(hashtag, POSTER_W - 36, 58);
   }
 }
@@ -139,14 +109,19 @@ function drawHeadlineBlock(
   theme: ResolvedFrameTheme
 ) {
   const { primary, accent, gold, green } = theme.colors;
+  const maxWidth = POSTER_W - x - 36;
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
+  ctx.direction = "ltr";
   let currentY = y;
   for (const line of lines) {
     ctx.fillStyle = resolvePosterColor(line.color, primary, accent, gold, green);
-    ctx.font = "bold 34px system-ui, sans-serif";
-    ctx.fillText(line.text, x, currentY);
-    currentY += 42;
+    ctx.font = posterFont(700, 34);
+    const wrapped = splitTextIntoLines(ctx, line.text, maxWidth);
+    for (const segment of wrapped) {
+      ctx.fillText(segment, x, currentY);
+      currentY += 42;
+    }
   }
 }
 
@@ -160,7 +135,11 @@ function drawAttendeeBlock(
   theme: ResolvedFrameTheme
 ) {
   const { primary, accent } = theme.colors;
-  ctx.font = "bold 36px system-ui, sans-serif";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+  ctx.direction = "ltr";
+  ctx.fillStyle = primary;
+  ctx.font = posterFont(700, 36);
   const upperName = name.toUpperCase();
   ctx.fillText(upperName, x, y);
 
@@ -172,7 +151,7 @@ function drawAttendeeBlock(
   ctx.stroke();
 
   ctx.fillStyle = primary;
-  ctx.font = "600 22px system-ui, sans-serif";
+  ctx.font = posterFont(600, 22);
   let lineY = y + 44;
   if (role) {
     ctx.fillText(role.toUpperCase(), x, lineY);
@@ -199,8 +178,9 @@ function drawMiddleSection(
 
   const textY = y + 58;
   ctx.fillStyle = primary;
-  ctx.font = "600 28px system-ui, sans-serif";
-  wrapCanvasText(ctx, slogan, POSTER_W / 2, textY, 720, 36);
+  ctx.font = posterFont(600, 28);
+  const textMaxWidth = qr ? POSTER_W - 180 : 720;
+  wrapCanvasText(ctx, slogan, POSTER_W / 2, textY, textMaxWidth, 36);
 
   if (qr) {
     const size = 96;
@@ -228,11 +208,13 @@ function drawStatsBar(
     ctx.fillRect(x, y, blockW, barH);
 
     ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+    ctx.direction = "ltr";
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 34px system-ui, sans-serif";
+    ctx.font = posterFont(700, 34);
     ctx.fillText(stat.value, x + blockW / 2, y + 52);
 
-    ctx.font = "500 18px system-ui, sans-serif";
+    ctx.font = posterFont(500, 18);
     ctx.fillText(stat.label, x + blockW / 2, y + 86);
   });
 }
@@ -249,8 +231,9 @@ function drawFooter(
   ctx.fillRect(0, y, POSTER_W, height);
 
   ctx.fillStyle = "#ffffff";
-  ctx.font = "500 22px system-ui, sans-serif";
+  ctx.font = posterFont(500, 22);
   ctx.textBaseline = "middle";
+  ctx.direction = "ltr";
   if (website) {
     ctx.textAlign = "left";
     ctx.fillText(`🌐 ${website}`, 40, y + height / 2);
@@ -279,11 +262,12 @@ function drawCountdownBanner(
   ctx.fillStyle = "#ffffff";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
+  ctx.direction = "ltr";
   let fontSize = 22;
-  ctx.font = `bold ${fontSize}px system-ui, sans-serif`;
+  ctx.font = posterFont(700, fontSize);
   while (ctx.measureText(message).width > barW - 24 && fontSize > 14) {
     fontSize -= 1;
-    ctx.font = `bold ${fontSize}px system-ui, sans-serif`;
+    ctx.font = posterFont(700, fontSize);
   }
   ctx.fillText(message, POSTER_W / 2, y + COUNTDOWN_BAR_H / 2);
 
@@ -372,6 +356,7 @@ export async function renderPersonalPosterCanvas(
   input: PersonalPosterRenderInput,
   photo: HTMLImageElement
 ): Promise<void> {
+  await ensurePosterFontsLoaded();
   const theme = resolveFrameTheme(input.event, input.frameThemeKey);
   const logo = await loadEventLogo(input.event);
 
@@ -414,14 +399,16 @@ async function drawBmmGroupPoster(
   });
 
   ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
+  ctx.direction = "ltr";
   ctx.fillStyle = accent;
-  ctx.font = "bold 34px system-ui, sans-serif";
+  ctx.font = posterFont(700, 34);
   ctx.fillText(input.groupName.toUpperCase(), POSTER_W / 2, 500);
 
   const groupCity = (input.city?.trim() || event.location || "").toUpperCase();
   if (groupCity) {
     ctx.fillStyle = primary;
-    ctx.font = "600 22px system-ui, sans-serif";
+    ctx.font = posterFont(600, 22);
     ctx.fillText(groupCity, POSTER_W / 2, 538);
   }
 
@@ -439,6 +426,7 @@ export async function renderGroupPosterCanvas(
   input: GroupPosterRenderInput,
   photos: HTMLImageElement[]
 ): Promise<void> {
+  await ensurePosterFontsLoaded();
   const theme = resolveFrameTheme(input.event, input.frameThemeKey);
   const logo = await loadEventLogo(input.event);
 
@@ -481,8 +469,9 @@ export async function generatePersonalAssets(
   dCtx.stroke();
 
   dCtx.fillStyle = "#ffffff";
-  dCtx.font = "bold 15px system-ui, sans-serif";
+  dCtx.font = posterFont("bold", 15);
   dCtx.textAlign = "center";
+  dCtx.direction = "ltr";
   const ringText = `I am Attending ${input.event.name}`;
   wrapCanvasText(dCtx, ringText, 320, 490, 520, 18);
 
@@ -527,8 +516,9 @@ export async function generateGroupAssets(
   });
 
   dCtx.fillStyle = "#ffffff";
-  dCtx.font = "bold 16px system-ui, sans-serif";
+  dCtx.font = posterFont("bold", 16);
   dCtx.textAlign = "center";
+  dCtx.direction = "ltr";
   wrapCanvasText(dCtx, input.groupName, 320, 530, 560, 18);
 
   return {

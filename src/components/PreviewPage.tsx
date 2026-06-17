@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { InstagramPostGuide } from "@/components/InstagramPostGuide";
 import { EventHighlightsList } from "@/components/EventHighlightsList";
 import { formatDisplayName } from "@/lib/utils";
 import { loadPreviewAssets } from "@/lib/preview-storage";
@@ -18,11 +17,11 @@ import {
   isMobileDevice,
   openFacebook,
   openFacebookPostFlow,
+  openInstagramPostFlow,
   openWhatsAppShare,
   prepareInstagramPost,
   prepareFacebookPost,
   shareImageNative,
-  type SocialPostResult,
 } from "@/lib/share";
 
 type Submission = {
@@ -57,10 +56,6 @@ export function PreviewPage({
   const [toast, setToast] = useState<string | null>(null);
   const [posterDataUrl, setPosterDataUrl] = useState(submission.posterDataUrl);
   const [dpDataUrl, setDpDataUrl] = useState(submission.dpDataUrl);
-  const [instagramGuide, setInstagramGuide] = useState<{
-    result: SocialPostResult;
-    filename: string;
-  } | null>(null);
 
   const invitationText = buildShareCaption(event);
   const invitationMessage = buildShareCaption(event, invitationUrl);
@@ -136,13 +131,12 @@ export function PreviewPage({
     }
 
     const filename = `${slug}-poster.png`;
-    const result = await prepareInstagramPost(
-      posterDataUrl,
-      filename,
-      instagramShareText
-    );
+    const direct = await openInstagramPostFlow(posterDataUrl, filename);
 
-    setInstagramGuide({ result, filename });
+    if (direct === "opened") {
+      await prepareInstagramPost(posterDataUrl, filename, instagramShareText);
+      showToast("Poster downloaded. Open Instagram to share to your story.");
+    }
   }
 
   async function handleShareWhatsApp() {
@@ -188,17 +182,6 @@ export function PreviewPage({
         >
           {toast}
         </div>
-      )}
-
-      {instagramGuide && (
-        <InstagramPostGuide
-          result={instagramGuide.result}
-          caption={instagramShareText}
-          filename={instagramGuide.filename}
-          posterDataUrl={posterDataUrl}
-          onClose={() => setInstagramGuide(null)}
-          primaryColor={event.primaryColor}
-        />
       )}
 
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
@@ -261,7 +244,6 @@ export function PreviewPage({
           />
           <ShareButton
             label="Share to Instagram Story"
-            sublabel="Download + instructions"
             color="#E1306C"
             onClick={() => void handleShareInstagramStory()}
           />

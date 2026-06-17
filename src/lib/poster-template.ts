@@ -71,7 +71,7 @@ export function getPosterHeadline(
 
   return [
     { text: "JOIN ME AT THE", color: "accent" },
-    { text: genderTagline.toUpperCase(), color: "primary" },
+    { text: genderTagline, color: "primary" },
   ];
 }
 

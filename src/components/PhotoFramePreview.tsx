@@ -154,9 +154,10 @@ export function PhotoFramePreview({
           ref={canvasRef}
           width={1080}
           height={1080}
-          className={`aspect-square w-full rounded-lg shadow-md ${
+          className={`block w-full rounded-lg shadow-md ${
             interactive ? "cursor-grab touch-none active:cursor-grabbing" : ""
           }`}
+          style={{ height: "auto" }}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}

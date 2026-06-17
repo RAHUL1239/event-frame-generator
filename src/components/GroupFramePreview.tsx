@@ -40,7 +40,6 @@ export function GroupFramePreview({
   const activeIndex = useRef(0);
   const lastPos = useRef({ x: 0, y: 0 });
   const [rendering, setRendering] = useState(true);
-  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const renderPreview = useCallback(async () => {
     const canvas = canvasRef.current;
@@ -124,7 +123,6 @@ export function GroupFramePreview({
     if (index === null) return;
 
     activeIndex.current = index;
-    setSelectedIndex(index);
     dragging.current = true;
     lastPos.current = { x: e.clientX, y: e.clientY };
     canvasRef.current?.setPointerCapture(e.pointerId);
@@ -153,8 +151,6 @@ export function GroupFramePreview({
     canvasRef.current?.releasePointerCapture(e.pointerId);
   }
 
-  const activeCrop = photoCrops[selectedIndex] ?? DEFAULT_PHOTO_CROP;
-
   return (
     <div className="space-y-4">
       <div className="relative mx-auto w-full max-w-md">
@@ -162,7 +158,8 @@ export function GroupFramePreview({
           ref={canvasRef}
           width={1080}
           height={1080}
-          className="aspect-square w-full cursor-grab touch-none rounded-lg shadow-md active:cursor-grabbing"
+          className="block w-full cursor-grab touch-none rounded-lg shadow-md active:cursor-grabbing"
+          style={{ height: "auto" }}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -175,38 +172,43 @@ export function GroupFramePreview({
         )}
       </div>
 
-      <div className="mx-auto max-w-md space-y-3">
+      <div className="mx-auto max-w-md space-y-4">
         <p className="text-center text-xs text-gray-500">
-          Tap a member photo in the preview, then drag to reposition · matches
-          your final frame
+          Drag a member photo in the preview to reposition · matches your final
+          frame
         </p>
-        <div>
-          <label className="mb-1 flex items-center justify-between text-xs font-medium text-gray-500">
-            <span>Zoom · Member {selectedIndex + 1}</span>
-            <span>{Math.round(activeCrop.scale * 100)}%</span>
-          </label>
-          <input
-            type="range"
-            min={0.5}
-            max={2.5}
-            step={0.05}
-            value={activeCrop.scale}
-            onChange={(e) =>
-              onCropChange(selectedIndex, {
-                ...activeCrop,
-                scale: Number(e.target.value),
-              })
-            }
-            className="w-full accent-brand-teal"
-          />
-        </div>
-        <button
-          type="button"
-          onClick={() => onCropChange(selectedIndex, DEFAULT_PHOTO_CROP)}
-          className="text-xs text-gray-500 underline hover:text-gray-700"
-        >
-          Reset member {selectedIndex + 1} position
-        </button>
+        {Array.from({ length: memberCount }).map((_, index) => {
+          const crop = photoCrops[index] ?? DEFAULT_PHOTO_CROP;
+          return (
+            <div key={index} className="space-y-2">
+              <label className="mb-1 flex items-center justify-between text-xs font-medium text-gray-500">
+                <span>Zoom · Member {index + 1}</span>
+                <span>{Math.round(crop.scale * 100)}%</span>
+              </label>
+              <input
+                type="range"
+                min={0.5}
+                max={2.5}
+                step={0.05}
+                value={crop.scale}
+                onChange={(e) =>
+                  onCropChange(index, {
+                    ...crop,
+                    scale: Number(e.target.value),
+                  })
+                }
+                className="w-full accent-brand-teal"
+              />
+              <button
+                type="button"
+                onClick={() => onCropChange(index, DEFAULT_PHOTO_CROP)}
+                className="text-xs text-gray-500 underline hover:text-gray-700"
+              >
+                Reset member {index + 1} position
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
