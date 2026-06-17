@@ -33,6 +33,11 @@ export const FRAME_FULL_OVERLAYS: Partial<
     holeInsetRatio: 62 / 1080,
     contentPadding: 50,
   },
+  "elegant-gold": {
+    src: "/frames/elegant-gold-frame.jpg",
+    holeInsetRatio: 60 / 1080,
+    contentPadding: 65,
+  },
 };
 
 const overlayCache = new Map<FrameThemeKey, Promise<HTMLImageElement>>();

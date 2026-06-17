@@ -54,7 +54,7 @@ export const FRAME_THEMES: Record<FrameThemeKey, FrameThemeDefinition> = {
   "elegant-gold": {
     key: "elegant-gold",
     name: "Elegant Gold",
-    description: "Navy and gold with a refined, minimal frame",
+    description: "Navy and gold with an ornate artisan frame",
     colors: {
       primary: "#1E3A6E",
       accent: "#C9A227",
@@ -64,6 +64,7 @@ export const FRAME_THEMES: Record<FrameThemeKey, FrameThemeDefinition> = {
     },
     borderStyle: "minimal",
     photoRingWidth: 6,
+    overlayKey: "elegant-gold",
   },
   youth: {
     key: "youth",
