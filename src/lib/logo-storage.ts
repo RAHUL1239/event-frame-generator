@@ -4,14 +4,6 @@ import path from "path";
 
 const LOCAL_DIR = path.join(process.cwd(), "public", "uploads", "logos");
 
-function getBlobAccess(): "public" | "private" {
-  return process.env.BLOB_ACCESS_MODE === "public" ? "public" : "private";
-}
-
-export function isPrivateBlobUrl(url: string): boolean {
-  return url.includes("private.blob.vercel-storage.com");
-}
-
 export async function saveEventLogo(
   eventSlug: string,
   file: File,
@@ -23,7 +15,7 @@ export async function saveEventLogo(
   if (process.env.BLOB_READ_WRITE_TOKEN) {
     try {
       const blob = await put(`logos/${filename}`, bytes, {
-        access: getBlobAccess(),
+        access: "private",
         contentType: file.type || `image/${ext === "jpg" ? "jpeg" : ext}`,
         addRandomSuffix: false,
       });

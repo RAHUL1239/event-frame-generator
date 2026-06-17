@@ -1,6 +1,6 @@
 import { get } from "@vercel/blob";
 import { NextRequest, NextResponse } from "next/server";
-import { isPrivateBlobUrl } from "@/lib/logo-storage";
+import { isPrivateBlobUrl } from "@/lib/logo-url";
 
 export async function GET(request: NextRequest) {
   const url = request.nextUrl.searchParams.get("url");

@@ -1,7 +1,7 @@
 import type { EventWithOptions } from "./types";
 import type { PhotoCrop } from "./photo-crop";
 import { DEFAULT_PHOTO_CROP } from "./photo-crop";
-import { isPrivateBlobUrl } from "./logo-storage";
+import { isPrivateBlobUrl } from "./logo-url";
 
 export const DEFAULT_EVENT_LOGO = "/mkm-logo.png";
 
