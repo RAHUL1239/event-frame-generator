@@ -53,6 +53,27 @@ export function resolvePosterColor(
   }
 }
 
+/** Text colors for posters rendered on a dark (primary) background. */
+export function resolvePosterTextColor(
+  token: string | undefined,
+  primary: string,
+  accent: string,
+  gold = POSTER_GOLD,
+  green = POSTER_GREEN
+): string {
+  switch (token) {
+    case "accent":
+      return accent;
+    case "gold":
+      return gold;
+    case "green":
+      return green;
+    case "primary":
+    default:
+      return "#ffffff";
+  }
+}
+
 export function getPosterHeadline(
   config: PosterTemplateConfig,
   event: EventWithOptions,
@@ -66,14 +87,14 @@ export function getPosterHeadline(
 
   const eventWords = event.name.toUpperCase().split(/\s+/).filter(Boolean);
   if (eventWords.length >= 3) {
-    lines.push({ text: eventWords[0], color: "primary" });
+    lines.push({ text: eventWords[0], color: "gold" });
     lines.push({ text: eventWords.slice(1).join(" "), color: "gold" });
   }
 
   if (genderTagline.trim()) {
-    lines.push({ text: genderTagline, color: "primary" });
+    lines.push({ text: genderTagline, color: "accent" });
   } else if (eventWords.length < 3) {
-    lines.push({ text: event.name.toUpperCase(), color: "primary" });
+    lines.push({ text: event.name.toUpperCase(), color: "gold" });
   }
 
   return lines;

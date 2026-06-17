@@ -262,6 +262,7 @@ export function PreviewPage({
           dataUrl={posterDataUrl}
           accentColor={event.accentColor}
           primaryColor={event.primaryColor}
+          previewBackground={event.primaryColor}
           highlights={event.eventHighlights}
           onDownload={() =>
             posterDataUrl &&

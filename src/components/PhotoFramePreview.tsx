@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  PERSONAL_DP_PHOTO_POSITION,
-  renderPersonalDpCanvas,
+  PERSONAL_PHOTO_POSITION,
+  renderPersonalPosterCanvas,
 } from "@/lib/image-generator";
 import {
   DEFAULT_PHOTO_CROP,
@@ -50,7 +50,7 @@ export function PhotoFramePreview({
     setRendering(true);
     try {
       const photo = await loadImage(src);
-      await renderPersonalDpCanvas(
+      await renderPersonalPosterCanvas(
         canvas,
         {
           event,
@@ -109,7 +109,7 @@ export function PhotoFramePreview({
   }
 
   function isOnPhoto(point: { x: number; y: number }) {
-    const { x, y, radius, ringPadding } = PERSONAL_DP_PHOTO_POSITION;
+    const { x, y, radius, ringPadding } = PERSONAL_PHOTO_POSITION;
     const dx = point.x - x;
     const dy = point.y - y;
     return Math.sqrt(dx * dx + dy * dy) <= radius + ringPadding + 12;
@@ -152,8 +152,8 @@ export function PhotoFramePreview({
       <div className="relative mx-auto w-full max-w-md">
         <canvas
           ref={canvasRef}
-          width={640}
-          height={640}
+          width={1080}
+          height={1080}
           className={`block w-full rounded-lg shadow-md ${
             interactive ? "cursor-grab touch-none active:cursor-grabbing" : ""
           }`}
@@ -173,7 +173,7 @@ export function PhotoFramePreview({
       {interactive && (
         <div className="mx-auto max-w-md space-y-3">
           <p className="text-center text-xs text-gray-500">
-            Drag your photo to reposition · preview matches your WhatsApp DP
+            Drag your photo to reposition · preview matches your final frame
           </p>
           <div>
             <label className="mb-1 flex items-center justify-between text-xs font-medium text-gray-500">

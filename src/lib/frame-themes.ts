@@ -217,44 +217,47 @@ export function drawFrameThemeDecoration(
   ctx: CanvasRenderingContext2D,
   theme: ResolvedFrameTheme,
   width: number,
-  height: number
+  height: number,
+  options?: { onDarkBackground?: boolean }
 ) {
   const { primary, accent } = theme.colors;
+  const outerStroke = options?.onDarkBackground ? accent : primary;
+  const innerStroke = accent;
   const inset = 18;
 
   switch (theme.borderStyle) {
     case "ornate": {
-      ctx.strokeStyle = primary;
+      ctx.strokeStyle = outerStroke;
       ctx.lineWidth = 5;
       ctx.strokeRect(inset, inset, width - inset * 2, height - inset * 2);
-      ctx.strokeStyle = accent;
+      ctx.strokeStyle = innerStroke;
       ctx.lineWidth = 2;
       ctx.strokeRect(inset + 10, inset + 10, width - (inset + 10) * 2, height - (inset + 10) * 2);
       break;
     }
     case "bold": {
-      ctx.strokeStyle = primary;
+      ctx.strokeStyle = outerStroke;
       ctx.lineWidth = 14;
       ctx.strokeRect(8, 8, width - 16, height - 16);
-      ctx.strokeStyle = accent;
+      ctx.strokeStyle = innerStroke;
       ctx.lineWidth = 4;
       ctx.strokeRect(22, 22, width - 44, height - 44);
       break;
     }
     case "double": {
-      ctx.strokeStyle = primary;
+      ctx.strokeStyle = outerStroke;
       ctx.lineWidth = 4;
       ctx.strokeRect(inset, inset, width - inset * 2, height - inset * 2);
-      ctx.strokeStyle = accent;
+      ctx.strokeStyle = innerStroke;
       ctx.lineWidth = 2;
       ctx.strokeRect(inset + 8, inset + 8, width - (inset + 8) * 2, height - (inset + 8) * 2);
       break;
     }
     case "premium": {
-      ctx.strokeStyle = accent;
+      ctx.strokeStyle = innerStroke;
       ctx.lineWidth = 3;
       ctx.strokeRect(inset, inset, width - inset * 2, height - inset * 2);
-      ctx.strokeStyle = primary;
+      ctx.strokeStyle = options?.onDarkBackground ? "#ffffff" : primary;
       ctx.lineWidth = 1;
       ctx.strokeRect(inset + 6, inset + 6, width - (inset + 6) * 2, height - (inset + 6) * 2);
       break;
