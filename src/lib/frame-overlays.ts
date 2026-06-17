@@ -8,9 +8,10 @@ export type FrameContentInsets = {
   left: number;
 };
 
-export type FrameBorderStripConfig = {
+export type FrameFullOverlayConfig = {
   src: string;
-  borderWidthRatio: number;
+  /** Transparent hole inset as a fraction of canvas width (e.g. 130/1080). */
+  holeInsetRatio: number;
 };
 
 export type PosterLayoutContext = {
@@ -22,16 +23,16 @@ export type PosterLayoutContext = {
 /** Inset used for vector-drawn frames (elegant gold, youth, etc.). */
 export const VECTOR_FRAME_INSET = 36;
 
-export const FRAME_BORDER_STRIPS: Partial<
-  Record<FrameThemeKey, FrameBorderStripConfig>
+export const FRAME_FULL_OVERLAYS: Partial<
+  Record<FrameThemeKey, FrameFullOverlayConfig>
 > = {
   "traditional-maharashtrian": {
-    src: "/frames/maharashtrian-gold-border.png",
-    borderWidthRatio: 0.12,
+    src: "/frames/maharashtrian-frame.png",
+    holeInsetRatio: 130 / 1080,
   },
 };
 
-const stripCache = new Map<FrameThemeKey, Promise<HTMLImageElement>>();
+const overlayCache = new Map<FrameThemeKey, Promise<HTMLImageElement>>();
 
 function overlayImageUrl(src: string): string {
   return src.startsWith("http")
@@ -39,17 +40,29 @@ function overlayImageUrl(src: string): string {
     : `${typeof window !== "undefined" ? window.location.origin : ""}${src}`;
 }
 
+export function hasFrameOverlayTheme(themeKey: FrameThemeKey | null | undefined) {
+  return Boolean(themeKey && FRAME_FULL_OVERLAYS[themeKey]);
+}
+
+/** @deprecated Use hasFrameOverlayTheme */
 export function hasBorderStripTheme(themeKey: FrameThemeKey | null | undefined) {
-  return Boolean(themeKey && FRAME_BORDER_STRIPS[themeKey]);
+  return hasFrameOverlayTheme(themeKey);
+}
+
+export function getFrameOverlayInset(
+  themeKey: FrameThemeKey | null | undefined,
+  canvasWidth: number
+): number {
+  const config = themeKey ? FRAME_FULL_OVERLAYS[themeKey] : undefined;
+  if (!config) return 0;
+  return Math.max(36, Math.round(canvasWidth * config.holeInsetRatio));
 }
 
 export function getFrameBorderWidth(
   themeKey: FrameThemeKey | null | undefined,
   canvasWidth: number
 ): number {
-  const config = themeKey ? FRAME_BORDER_STRIPS[themeKey] : undefined;
-  if (!config) return 0;
-  return Math.max(56, Math.round(canvasWidth * config.borderWidthRatio));
+  return getFrameOverlayInset(themeKey, canvasWidth);
 }
 
 export function getPosterLayout(
@@ -57,8 +70,8 @@ export function getPosterLayout(
   canvasW: number,
   canvasH: number
 ): PosterLayoutContext {
-  const inset = hasBorderStripTheme(themeKey)
-    ? getFrameBorderWidth(themeKey, canvasW)
+  const inset = hasFrameOverlayTheme(themeKey)
+    ? getFrameOverlayInset(themeKey, canvasW)
     : VECTOR_FRAME_INSET;
   return {
     inset,
@@ -123,119 +136,75 @@ export function getFrameContentBox(
   };
 }
 
-async function loadBorderStripImage(
+async function loadFrameOverlayImage(
   key: FrameThemeKey
 ): Promise<HTMLImageElement | null> {
-  const config = FRAME_BORDER_STRIPS[key];
+  const config = FRAME_FULL_OVERLAYS[key];
   if (!config) return null;
 
-  let pending = stripCache.get(key);
+  let pending = overlayCache.get(key);
   if (!pending) {
-    pending = loadImage(overlayImageUrl(config.src));
-    stripCache.set(key, pending);
+    pending = prepareOverlayWithHole(key, config);
+    overlayCache.set(key, pending);
   }
 
   try {
     return await pending;
   } catch {
-    stripCache.delete(key);
+    overlayCache.delete(key);
     return null;
   }
 }
 
-function drawStretchVerticalStrip(
-  ctx: CanvasRenderingContext2D,
-  image: HTMLImageElement,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  flipX: boolean
-) {
-  ctx.save();
-  if (flipX) {
-    ctx.translate(x + width, y);
-    ctx.scale(-1, 1);
-    ctx.drawImage(
-      image,
-      0,
-      0,
-      image.naturalWidth,
-      image.naturalHeight,
-      0,
-      0,
-      width,
-      height
-    );
-  } else {
-    ctx.drawImage(
-      image,
-      0,
-      0,
-      image.naturalWidth,
-      image.naturalHeight,
-      x,
-      y,
-      width,
-      height
-    );
+async function prepareOverlayWithHole(
+  key: FrameThemeKey,
+  config: FrameFullOverlayConfig
+): Promise<HTMLImageElement> {
+  const source = await loadImage(overlayImageUrl(config.src));
+  const width = source.naturalWidth;
+  const height = source.naturalHeight;
+  const inset = Math.round(width * config.holeInsetRatio);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    throw new Error(`Failed to prepare frame overlay for ${key}`);
   }
-  ctx.restore();
+
+  ctx.drawImage(source, 0, 0);
+  ctx.clearRect(inset, inset, width - inset * 2, height - inset * 2);
+
+  return loadImage(canvas.toDataURL("image/png"));
 }
 
+export async function paintFrameFullOverlay(
+  ctx: CanvasRenderingContext2D,
+  themeKey: FrameThemeKey | null | undefined,
+  width: number,
+  height: number
+) {
+  if (!themeKey || !FRAME_FULL_OVERLAYS[themeKey]) return;
+
+  const image = await loadFrameOverlayImage(themeKey);
+  if (!image) return;
+
+  const prevSmoothing = ctx.imageSmoothingEnabled;
+  const prevQuality = ctx.imageSmoothingQuality;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(image, 0, 0, width, height);
+  ctx.imageSmoothingEnabled = prevSmoothing;
+  ctx.imageSmoothingQuality = prevQuality;
+}
+
+/** @deprecated Use paintFrameFullOverlay */
 export async function paintFrameBorderStrips(
   ctx: CanvasRenderingContext2D,
   themeKey: FrameThemeKey | null | undefined,
   width: number,
   height: number
 ) {
-  if (!themeKey || !FRAME_BORDER_STRIPS[themeKey]) return;
-
-  const image = await loadBorderStripImage(themeKey);
-  if (!image) return;
-
-  const border = getFrameBorderWidth(themeKey, width);
-  const prevSmoothing = ctx.imageSmoothingEnabled;
-  const prevQuality = ctx.imageSmoothingQuality;
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
-
-  drawStretchVerticalStrip(ctx, image, 0, 0, border, height, false);
-  drawStretchVerticalStrip(ctx, image, width - border, 0, border, height, true);
-
-  ctx.save();
-  ctx.translate(0, border);
-  ctx.rotate(-Math.PI / 2);
-  ctx.drawImage(
-    image,
-    0,
-    0,
-    image.naturalWidth,
-    image.naturalHeight,
-    0,
-    0,
-    height,
-    border
-  );
-  ctx.restore();
-
-  ctx.save();
-  ctx.translate(width, height - border);
-  ctx.rotate(Math.PI / 2);
-  ctx.scale(-1, 1);
-  ctx.drawImage(
-    image,
-    0,
-    0,
-    image.naturalWidth,
-    image.naturalHeight,
-    0,
-    0,
-    height,
-    border
-  );
-  ctx.restore();
-
-  ctx.imageSmoothingEnabled = prevSmoothing;
-  ctx.imageSmoothingQuality = prevQuality;
+  await paintFrameFullOverlay(ctx, themeKey, width, height);
 }

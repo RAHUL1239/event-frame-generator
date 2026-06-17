@@ -6,11 +6,11 @@ import {
 } from "./frame-themes";
 import {
   getPosterLayout,
-  hasBorderStripTheme,
+  hasFrameOverlayTheme,
   layoutScale,
   layoutX,
   layoutY,
-  paintFrameBorderStrips,
+  paintFrameFullOverlay,
   type PosterLayoutContext,
 } from "./frame-overlays";
 import { getEventCountdown } from "./countdown";
@@ -118,8 +118,8 @@ async function paintFrameOverlay(
   height: number
 ) {
   const themeKey = theme.overlayKey ?? theme.key;
-  if (hasBorderStripTheme(themeKey)) {
-    await paintFrameBorderStrips(ctx, themeKey, width, height);
+  if (hasFrameOverlayTheme(themeKey)) {
+    await paintFrameFullOverlay(ctx, themeKey, width, height);
     return;
   }
 
