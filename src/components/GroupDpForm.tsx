@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { PhotoCropEditor } from "@/components/PhotoCropEditor";
+import { GroupFramePreview } from "@/components/GroupFramePreview";
 import { AttendeeSocialProof } from "@/components/AttendeeSocialProof";
 import {
   FrameThemePicker,
@@ -59,6 +59,9 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const activePreviews = previews.slice(0, memberCount);
+  const allPhotosUploaded = activePreviews.every(Boolean);
 
   async function handlePhotoChange(index: number, file: File | null) {
     const nextPhotos = [...photos];
@@ -245,23 +248,6 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
                 </div>
               ))}
             </div>
-            {Array.from({ length: memberCount }).map(
-              (_, i) =>
-                previews[i] && (
-                  <div
-                    key={`crop-${i}`}
-                    className="mt-4 rounded-xl border border-gray-200 bg-brand-cream p-4"
-                  >
-                    <PhotoCropEditor
-                      src={previews[i]!}
-                      crop={photoCrops[i]}
-                      onCropChange={(crop) => updateCrop(i, crop)}
-                      accentColor={event.accentColor}
-                      label={`Adjust Member ${i + 1}`}
-                    />
-                  </div>
-                )
-            )}
           </div>
 
           <div>
@@ -295,6 +281,21 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
               className="input-suggested w-full rounded-xl border border-gray-200 bg-brand-cream px-4 py-3 outline-none focus:border-brand-teal"
             />
           </div>
+
+          {allPhotosUploaded && (
+            <div className="rounded-xl border-2 border-dashed border-gray-300 bg-brand-cream p-4">
+              <GroupFramePreview
+                event={event}
+                frameThemeKey={frameThemeKey || undefined}
+                groupName={groupName}
+                city={city}
+                memberCount={memberCount}
+                photoSrcs={activePreviews as string[]}
+                photoCrops={photoCrops.slice(0, memberCount)}
+                onCropChange={updateCrop}
+              />
+            </div>
+          )}
 
           <div
             className="rounded-xl px-4 py-3 text-sm"

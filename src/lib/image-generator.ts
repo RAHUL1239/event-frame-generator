@@ -32,6 +32,10 @@ export type PersonalPosterRenderInput = Omit<PersonalFormData, "photo"> & {
   event: EventWithOptions;
 };
 
+export type GroupPosterRenderInput = Omit<GroupFormData, "photos" | "members"> & {
+  event: EventWithOptions;
+};
+
 export const PERSONAL_POSTER_W = POSTER_W;
 export const PERSONAL_POSTER_H = POSTER_H;
 export const PERSONAL_PHOTO_POSITION = {
@@ -379,6 +383,73 @@ export async function renderPersonalPosterCanvas(
   await drawBmmPersonalPoster(ctx, input, logo, photo, theme);
 }
 
+async function drawBmmGroupPoster(
+  ctx: CanvasRenderingContext2D,
+  input: GroupPosterRenderInput,
+  logo: HTMLImageElement,
+  photos: HTMLImageElement[],
+  theme: ResolvedFrameTheme
+) {
+  const { event } = input;
+  const { primary, accent, background } = theme.colors;
+  const config = parsePosterTemplate(event);
+  const hashtag = getPosterHashtag(config, event);
+
+  ctx.fillStyle = background || "#ffffff";
+  ctx.fillRect(0, 0, POSTER_W, POSTER_H);
+  drawFrameThemeDecoration(ctx, theme, POSTER_W, POSTER_H);
+
+  drawBmmHeader(ctx, event, logo, theme, hashtag);
+
+  const positions = getGroupPhotoPositions(input.memberCount);
+  photos.forEach((photo, i) => {
+    const pos = positions[i];
+    const crop = input.photoCrops[i];
+    drawCircularImage(ctx, photo, pos.x, pos.y, pos.r, crop);
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = theme.photoRingWidth;
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, pos.r + 5, 0, Math.PI * 2);
+    ctx.stroke();
+  });
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = accent;
+  ctx.font = "bold 34px system-ui, sans-serif";
+  ctx.fillText(input.groupName.toUpperCase(), POSTER_W / 2, 500);
+
+  const groupCity = (input.city?.trim() || event.location || "").toUpperCase();
+  if (groupCity) {
+    ctx.fillStyle = primary;
+    ctx.font = "600 22px system-ui, sans-serif";
+    ctx.fillText(groupCity, POSTER_W / 2, 538);
+  }
+
+  const middleY = 560;
+  const tagline = getGenderTagline(event, "group");
+  const qrUrl = getQrUrl(event, config.qrUrl);
+  const qr = qrUrl ? await loadQrCode(qrUrl) : null;
+  drawMiddleSection(ctx, tagline || event.tagline, qr, middleY, primary);
+
+  drawPosterFooterSection(ctx, event, theme, middleY + 118);
+}
+
+export async function renderGroupPosterCanvas(
+  canvas: HTMLCanvasElement,
+  input: GroupPosterRenderInput,
+  photos: HTMLImageElement[]
+): Promise<void> {
+  const theme = resolveFrameTheme(input.event, input.frameThemeKey);
+  const logo = await loadEventLogo(input.event);
+
+  canvas.width = POSTER_W;
+  canvas.height = POSTER_H;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  await drawBmmGroupPoster(ctx, input, logo, photos, theme);
+}
+
 export async function generatePersonalAssets(
   input: PersonalInput
 ): Promise<GeneratedAssets> {
@@ -425,56 +496,13 @@ export async function generateGroupAssets(
   input: GroupInput
 ): Promise<GeneratedAssets> {
   const theme = resolveFrameTheme(input.event, input.frameThemeKey);
+  const { accent } = theme.colors;
   const photoDataUrls = await Promise.all(input.photos.map(fileToDataUrl));
   const photos = await Promise.all(photoDataUrls.map(loadImage));
   const logo = await loadEventLogo(input.event);
-  const { event } = input;
-  const { primary, accent, background } = theme.colors;
-  const config = parsePosterTemplate(event);
-  const hashtag = getPosterHashtag(config, event);
 
   const poster = document.createElement("canvas");
-  poster.width = POSTER_W;
-  poster.height = POSTER_H;
-  const pCtx = poster.getContext("2d")!;
-
-  pCtx.fillStyle = background || "#ffffff";
-  pCtx.fillRect(0, 0, POSTER_W, POSTER_H);
-  drawFrameThemeDecoration(pCtx, theme, POSTER_W, POSTER_H);
-
-  drawBmmHeader(pCtx, event, logo, theme, hashtag);
-
-  const positions = getGroupPhotoPositions(input.memberCount);
-  photos.forEach((photo, i) => {
-    const pos = positions[i];
-    const crop = input.photoCrops[i];
-    drawCircularImage(pCtx, photo, pos.x, pos.y, pos.r, crop);
-    pCtx.strokeStyle = accent;
-    pCtx.lineWidth = theme.photoRingWidth;
-    pCtx.beginPath();
-    pCtx.arc(pos.x, pos.y, pos.r + 5, 0, Math.PI * 2);
-    pCtx.stroke();
-  });
-
-  pCtx.textAlign = "center";
-  pCtx.fillStyle = accent;
-  pCtx.font = "bold 34px system-ui, sans-serif";
-  pCtx.fillText(input.groupName.toUpperCase(), POSTER_W / 2, 500);
-
-  const groupCity = (input.city?.trim() || event.location || "").toUpperCase();
-  if (groupCity) {
-    pCtx.fillStyle = primary;
-    pCtx.font = "600 22px system-ui, sans-serif";
-    pCtx.fillText(groupCity, POSTER_W / 2, 538);
-  }
-
-  const middleY = 560;
-  const tagline = getGenderTagline(event, "group");
-  const qrUrl = getQrUrl(event, config.qrUrl);
-  const qr = qrUrl ? await loadQrCode(qrUrl) : null;
-  drawMiddleSection(pCtx, tagline || event.tagline, qr, middleY, primary);
-
-  drawPosterFooterSection(pCtx, event, theme, middleY + 118);
+  await renderGroupPosterCanvas(poster, input, photos);
 
   const dp = document.createElement("canvas");
   dp.width = 640;
@@ -507,6 +535,10 @@ export async function generateGroupAssets(
     posterDataUrl: poster.toDataURL("image/png"),
     dpDataUrl: dp.toDataURL("image/png"),
   };
+}
+
+export function getGroupPosterPhotoPositions(count: 2 | 3 | 4) {
+  return getGroupPhotoPositions(count);
 }
 
 function getGroupPhotoPositions(count: number) {

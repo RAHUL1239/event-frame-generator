@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FacebookPostGuide } from "@/components/FacebookPostGuide";
 import { InstagramPostGuide } from "@/components/InstagramPostGuide";
 import { EventHighlightsList } from "@/components/EventHighlightsList";
 import { formatDisplayName } from "@/lib/utils";
@@ -17,12 +16,12 @@ import {
   getPreviewPageUrl,
   getShareableInvitationUrl,
   isMobileDevice,
+  openFacebook,
   openFacebookPostFlow,
   openWhatsAppShare,
-  prepareFacebookPost,
   prepareInstagramPost,
+  prepareFacebookPost,
   shareImageNative,
-  type FacebookPostResult,
   type SocialPostResult,
 } from "@/lib/share";
 
@@ -58,10 +57,6 @@ export function PreviewPage({
   const [toast, setToast] = useState<string | null>(null);
   const [posterDataUrl, setPosterDataUrl] = useState(submission.posterDataUrl);
   const [dpDataUrl, setDpDataUrl] = useState(submission.dpDataUrl);
-  const [facebookGuide, setFacebookGuide] = useState<{
-    result: FacebookPostResult;
-    filename: string;
-  } | null>(null);
   const [instagramGuide, setInstagramGuide] = useState<{
     result: SocialPostResult;
     filename: string;
@@ -129,14 +124,9 @@ export function PreviewPage({
     }
     if (direct === "cancelled") return;
 
-    const result = await prepareFacebookPost(
-      posterDataUrl,
-      filename,
-      facebookShareText,
-      event.facebookGroupUrl,
-      event.facebookGroupName
-    );
-    setFacebookGuide({ result, filename });
+    await prepareFacebookPost(posterDataUrl, filename, facebookShareText);
+    openFacebook(event.facebookGroupUrl);
+    showToast("Poster downloaded and caption copied. Open Facebook to post.");
   }
 
   async function handleShareInstagramStory() {
@@ -198,19 +188,6 @@ export function PreviewPage({
         >
           {toast}
         </div>
-      )}
-
-      {facebookGuide && (
-        <FacebookPostGuide
-          result={facebookGuide.result}
-          caption={facebookShareText}
-          filename={facebookGuide.filename}
-          posterDataUrl={posterDataUrl}
-          facebookGroupName={event.facebookGroupName}
-          facebookGroupUrl={event.facebookGroupUrl}
-          onClose={() => setFacebookGuide(null)}
-          primaryColor={event.primaryColor}
-        />
       )}
 
       {instagramGuide && (

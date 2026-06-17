@@ -340,11 +340,6 @@ export type SocialPostResult = {
   downloaded: boolean;
 };
 
-export type FacebookPostResult = SocialPostResult & {
-  facebookGroupName?: string | null;
-  facebookGroupUrl?: string | null;
-};
-
 async function prepareSocialImagePost(
   dataUrl: string,
   filename: string,
@@ -372,21 +367,11 @@ export async function prepareInstagramPost(
   return prepareSocialImagePost(dataUrl, filename, caption);
 }
 
-/**
- * Facebook cannot pre-fill posts or auto-tag groups from a website.
- * Always download the poster and copy the caption.
- */
+/** Download poster and copy caption for manual Facebook posting. */
 export async function prepareFacebookPost(
   dataUrl: string,
   filename: string,
-  caption: string,
-  facebookGroupUrl?: string | null,
-  facebookGroupName?: string | null
-): Promise<FacebookPostResult> {
-  const base = await prepareSocialImagePost(dataUrl, filename, caption);
-  return {
-    ...base,
-    facebookGroupName,
-    facebookGroupUrl,
-  };
+  caption: string
+): Promise<SocialPostResult> {
+  return prepareSocialImagePost(dataUrl, filename, caption);
 }
