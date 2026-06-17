@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   MAX_EVENT_HIGHLIGHTS,
   parseEventHighlights,
@@ -11,24 +12,39 @@ type Props = {
   onChange: (serialized: string | null) => void;
 };
 
+function rowsFromValue(value: string | null | undefined): string[] {
+  const parsed = parseEventHighlights(value);
+  return parsed.length > 0 ? parsed : [""];
+}
+
 export function EventHighlightsAdmin({ value, onChange }: Props) {
-  const highlights = parseEventHighlights(value);
-  const rows = highlights.length > 0 ? highlights : [""];
+  const [rows, setRows] = useState<string[]>(() => rowsFromValue(value));
+
+  useEffect(() => {
+    setRows(rowsFromValue(value));
+  }, [value]);
+
+  function syncToParent(next: string[]) {
+    onChange(serializeEventHighlights(next));
+  }
 
   function updateRow(index: number, text: string) {
     const next = [...rows];
     next[index] = text;
-    onChange(serializeEventHighlights(next));
+    setRows(next);
+    syncToParent(next);
   }
 
   function addRow() {
     if (rows.length >= MAX_EVENT_HIGHLIGHTS) return;
-    onChange(serializeEventHighlights([...rows, ""]));
+    setRows([...rows, ""]);
   }
 
   function removeRow(index: number) {
     const next = rows.filter((_, i) => i !== index);
-    onChange(serializeEventHighlights(next));
+    const normalized = next.length > 0 ? next : [""];
+    setRows(normalized);
+    syncToParent(normalized);
   }
 
   return (
