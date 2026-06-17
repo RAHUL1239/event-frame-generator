@@ -275,6 +275,7 @@ export function PreviewPage({
           dataUrl={dpDataUrl}
           accentColor={event.accentColor}
           primaryColor={event.primaryColor}
+          previewBackground={event.primaryColor}
           onDownload={() =>
             dpDataUrl && downloadDataUrl(dpDataUrl, `${slug}-dp.png`)
           }
@@ -317,6 +318,7 @@ function PreviewCard({
   accentColor,
   primaryColor,
   highlights,
+  previewBackground,
   onDownload,
   onShareMore,
 }: {
@@ -326,6 +328,7 @@ function PreviewCard({
   accentColor: string;
   primaryColor: string;
   highlights?: string | null;
+  previewBackground?: string;
   onDownload: () => void;
   onShareMore: () => void;
 }) {
@@ -342,7 +345,7 @@ function PreviewCard({
           {subtitle}
         </p>
       </div>
-      <div className="flex justify-center bg-gray-100 p-6">
+      <div className="flex justify-center p-6" style={{ backgroundColor: primaryColor }}>
         {dataUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img

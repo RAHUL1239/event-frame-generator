@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  getGroupPosterPhotoPositions,
-  renderGroupPosterCanvas,
+  getGroupDpPhotoPositions,
+  renderGroupDpCanvas,
 } from "@/lib/image-generator";
 import {
   DEFAULT_PHOTO_CROP,
@@ -48,7 +48,7 @@ export function GroupFramePreview({
     setRendering(true);
     try {
       const photos = await Promise.all(photoSrcs.map((src) => loadImage(src)));
-      await renderGroupPosterCanvas(
+      await renderGroupDpCanvas(
         canvas,
         {
           event,
@@ -103,7 +103,7 @@ export function GroupFramePreview({
   }
 
   function findPhotoIndexAtPoint(point: { x: number; y: number }) {
-    const positions = getGroupPosterPhotoPositions(memberCount);
+    const positions = getGroupDpPhotoPositions(memberCount);
     for (let i = positions.length - 1; i >= 0; i--) {
       const { x, y, r } = positions[i];
       const dx = point.x - x;
@@ -156,8 +156,8 @@ export function GroupFramePreview({
       <div className="relative mx-auto w-full max-w-md">
         <canvas
           ref={canvasRef}
-          width={1080}
-          height={1080}
+          width={640}
+          height={640}
           className="block w-full cursor-grab touch-none rounded-lg shadow-md active:cursor-grabbing"
           style={{ height: "auto" }}
           onPointerDown={handlePointerDown}
@@ -174,8 +174,8 @@ export function GroupFramePreview({
 
       <div className="mx-auto max-w-md space-y-4">
         <p className="text-center text-xs text-gray-500">
-          Drag a member photo in the preview to reposition · matches your final
-          frame
+          Drag a member photo in the preview to reposition · matches your WhatsApp
+          DP
         </p>
         {Array.from({ length: memberCount }).map((_, index) => {
           const crop = photoCrops[index] ?? DEFAULT_PHOTO_CROP;

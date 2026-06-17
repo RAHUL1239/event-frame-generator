@@ -51,6 +51,21 @@ export const PERSONAL_PHOTO_POSITION = {
   ringPadding: 6,
 };
 
+const DP_W = 640;
+const DP_H = 640;
+
+export const PERSONAL_DP_W = DP_W;
+export const PERSONAL_DP_H = DP_H;
+export const PERSONAL_DP_PHOTO_POSITION = {
+  x: 320,
+  y: 300,
+  radius: 155,
+  ringPadding: 8,
+};
+
+export type PersonalDpRenderInput = PersonalPosterRenderInput;
+export type GroupDpRenderInput = GroupPosterRenderInput;
+
 function getGenderTagline(event: EventWithOptions, genderKey: string) {
   return event.genderOptions.find((o) => o.key === genderKey)?.tagline ?? "";
 }
@@ -484,42 +499,119 @@ export async function renderGroupPosterCanvas(
   await drawBmmGroupPoster(ctx, input, logo, photos, theme);
 }
 
+function resolveDpBackground(theme: ResolvedFrameTheme): string {
+  return theme.colors.primary;
+}
+
+function drawPersonalDp(
+  ctx: CanvasRenderingContext2D,
+  input: PersonalDpRenderInput,
+  logo: HTMLImageElement,
+  photo: HTMLImageElement,
+  theme: ResolvedFrameTheme
+) {
+  const { accent } = theme.colors;
+  const { x, y, radius, ringPadding } = PERSONAL_DP_PHOTO_POSITION;
+
+  ctx.fillStyle = resolveDpBackground(theme);
+  ctx.fillRect(0, 0, DP_W, DP_H);
+
+  drawLogo(ctx, logo, 320, 10, 72, 72);
+  drawCircularImage(ctx, photo, x, y, radius, input.photoCrop);
+
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = theme.photoRingWidth;
+  ctx.beginPath();
+  ctx.arc(x, y, radius + ringPadding, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = posterFont("bold", 15);
+  ctx.textAlign = "center";
+  ctx.direction = "ltr";
+  const ringText = `I am Attending ${input.event.name}`;
+  wrapCanvasText(ctx, ringText, 320, 490, 520, 18);
+}
+
+function drawGroupDp(
+  ctx: CanvasRenderingContext2D,
+  input: GroupDpRenderInput,
+  logo: HTMLImageElement,
+  photos: HTMLImageElement[],
+  theme: ResolvedFrameTheme
+) {
+  const { accent } = theme.colors;
+
+  ctx.fillStyle = resolveDpBackground(theme);
+  ctx.fillRect(0, 0, DP_W, DP_H);
+
+  drawLogo(ctx, logo, 320, 10, 68, 68);
+
+  const dpPositions = getGroupDpPositions(input.memberCount);
+  photos.forEach((photo, i) => {
+    const pos = dpPositions[i];
+    const crop = input.photoCrops[i];
+    drawCircularImage(ctx, photo, pos.x, pos.y, pos.r, crop);
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = Math.max(4, theme.photoRingWidth - 2);
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, pos.r + 3, 0, Math.PI * 2);
+    ctx.stroke();
+  });
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = posterFont("bold", 16);
+  ctx.textAlign = "center";
+  ctx.direction = "ltr";
+  const groupName = input.groupName.trim() || "Our Group";
+  wrapCanvasText(ctx, groupName, 320, 530, 560, 18);
+}
+
+export async function renderPersonalDpCanvas(
+  canvas: HTMLCanvasElement,
+  input: PersonalDpRenderInput,
+  photo: HTMLImageElement
+): Promise<void> {
+  await ensurePosterFontsLoaded();
+  const theme = resolveFrameTheme(input.event, input.frameThemeKey);
+  const logo = await loadEventLogo(input.event);
+
+  canvas.width = DP_W;
+  canvas.height = DP_H;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  drawPersonalDp(ctx, input, logo, photo, theme);
+}
+
+export async function renderGroupDpCanvas(
+  canvas: HTMLCanvasElement,
+  input: GroupDpRenderInput,
+  photos: HTMLImageElement[]
+): Promise<void> {
+  await ensurePosterFontsLoaded();
+  const theme = resolveFrameTheme(input.event, input.frameThemeKey);
+  const logo = await loadEventLogo(input.event);
+
+  canvas.width = DP_W;
+  canvas.height = DP_H;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  drawGroupDp(ctx, input, logo, photos, theme);
+}
+
 export async function generatePersonalAssets(
   input: PersonalInput
 ): Promise<GeneratedAssets> {
-  const theme = resolveFrameTheme(input.event, input.frameThemeKey);
   const photoDataUrl = await fileToDataUrl(input.photo);
   const photo = await loadImage(photoDataUrl);
-  const logo = await loadEventLogo(input.event);
 
   const poster = document.createElement("canvas");
   await renderPersonalPosterCanvas(poster, input, photo);
 
   const dp = document.createElement("canvas");
-  dp.width = 640;
-  dp.height = 640;
-  const dCtx = dp.getContext("2d")!;
-
-  dCtx.fillStyle = theme.colors.primary;
-  dCtx.fillRect(0, 0, dp.width, dp.height);
-  drawFrameThemeDecoration(dCtx, theme, dp.width, dp.height);
-
-  drawLogo(dCtx, logo, 320, 10, 72, 72);
-
-  drawCircularImage(dCtx, photo, 320, 300, 155, input.photoCrop);
-
-  dCtx.strokeStyle = theme.colors.accent;
-  dCtx.lineWidth = theme.photoRingWidth;
-  dCtx.beginPath();
-  dCtx.arc(320, 300, 163, 0, Math.PI * 2);
-  dCtx.stroke();
-
-  dCtx.fillStyle = "#ffffff";
-  dCtx.font = posterFont("bold", 15);
-  dCtx.textAlign = "center";
-  dCtx.direction = "ltr";
-  const ringText = `I am Attending ${input.event.name}`;
-  wrapCanvasText(dCtx, ringText, 320, 490, 520, 18);
+  await renderPersonalDpCanvas(dp, input, photo);
 
   return {
     posterDataUrl: poster.toDataURL("image/png"),
@@ -530,42 +622,14 @@ export async function generatePersonalAssets(
 export async function generateGroupAssets(
   input: GroupInput
 ): Promise<GeneratedAssets> {
-  const theme = resolveFrameTheme(input.event, input.frameThemeKey);
-  const { accent } = theme.colors;
   const photoDataUrls = await Promise.all(input.photos.map(fileToDataUrl));
   const photos = await Promise.all(photoDataUrls.map(loadImage));
-  const logo = await loadEventLogo(input.event);
 
   const poster = document.createElement("canvas");
   await renderGroupPosterCanvas(poster, input, photos);
 
   const dp = document.createElement("canvas");
-  dp.width = 640;
-  dp.height = 640;
-  const dCtx = dp.getContext("2d")!;
-  dCtx.fillStyle = theme.colors.primary;
-  dCtx.fillRect(0, 0, dp.width, dp.height);
-  drawFrameThemeDecoration(dCtx, theme, dp.width, dp.height);
-
-  drawLogo(dCtx, logo, 320, 10, 68, 68);
-
-  const dpPositions = getGroupDpPositions(input.memberCount);
-  photos.forEach((photo, i) => {
-    const pos = dpPositions[i];
-    const crop = input.photoCrops[i];
-    drawCircularImage(dCtx, photo, pos.x, pos.y + 20, pos.r, crop);
-    dCtx.strokeStyle = accent;
-    dCtx.lineWidth = Math.max(4, theme.photoRingWidth - 2);
-    dCtx.beginPath();
-    dCtx.arc(pos.x, pos.y + 20, pos.r + 3, 0, Math.PI * 2);
-    dCtx.stroke();
-  });
-
-  dCtx.fillStyle = "#ffffff";
-  dCtx.font = posterFont("bold", 16);
-  dCtx.textAlign = "center";
-  dCtx.direction = "ltr";
-  wrapCanvasText(dCtx, input.groupName, 320, 530, 560, 18);
+  await renderGroupDpCanvas(dp, input, photos);
 
   return {
     posterDataUrl: poster.toDataURL("image/png"),
@@ -575,6 +639,10 @@ export async function generateGroupAssets(
 
 export function getGroupPosterPhotoPositions(count: 2 | 3 | 4) {
   return getGroupPhotoPositions(count);
+}
+
+export function getGroupDpPhotoPositions(count: 2 | 3 | 4) {
+  return getGroupDpPositions(count);
 }
 
 function getGroupPhotoPositions(count: number) {
@@ -602,7 +670,7 @@ function getGroupPhotoPositions(count: number) {
 }
 
 function getGroupDpPositions(count: number) {
-  const centerY = 300;
+  const centerY = 320;
 
   if (count === 2) {
     return [
