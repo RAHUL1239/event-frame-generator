@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { calculateAttendeeCount } from "@/lib/participant-number";
 import { EventHeader } from "@/components/EventHeader";
 import { EventFooter } from "@/components/EventFooter";
 import { PersonalDpForm } from "@/components/PersonalDpForm";
@@ -17,6 +18,14 @@ export default async function PersonalPage({
 
   if (!event || !event.isActive) notFound();
 
+  const submissionCount = await prisma.submission.count({
+    where: { eventId: event.id },
+  });
+  const attendeeCount = calculateAttendeeCount(
+    event.participantCountBase,
+    submissionCount
+  );
+
   return (
     <div
       className="flex min-h-screen flex-col"
@@ -28,7 +37,11 @@ export default async function PersonalPage({
         basePath={`/events/${slug}`}
       />
       <main className="flex-1 px-4 py-8">
-        <PersonalDpForm event={event} slug={slug} />
+        <PersonalDpForm
+          event={event}
+          slug={slug}
+          attendeeCount={attendeeCount}
+        />
       </main>
       <EventFooter event={event} />
     </div>

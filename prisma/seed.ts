@@ -25,6 +25,7 @@ async function main() {
       name: "MKM 51st Gauravshali Sohla",
       tagline: "सोहळा कौतुकाचा, सन्मान ज्येष्ठांचा, उत्साह नव्या पिढीचा…",
       dateLabel: "July 17th & 18th, 2026",
+      eventDate: new Date("2026-07-17T12:00:00.000Z"),
       location: "Washington DC",
       subtitle: "#MKM51",
       isActive: true,
@@ -32,6 +33,17 @@ async function main() {
       backgroundColor: "#ffffff",
       primaryColor: "#1e3a6e",
       accentColor: "#e85d24",
+      enabledFrameThemes: JSON.stringify([
+        "traditional-maharashtrian",
+        "elegant-gold",
+        "family",
+      ]),
+      eventHighlights: JSON.stringify([
+        "Felicitation of seniors",
+        "Cultural performances",
+        "Community networking",
+        "Family activities",
+      ]),
       posterTemplate: JSON.stringify({
         hashtag: "#MKM51",
         headline: [
@@ -49,12 +61,24 @@ async function main() {
       subtitle: "#MKM51",
       tagline: "सोहळा कौतुकाचा, सन्मान ज्येष्ठांचा, उत्साह नव्या पिढीचा…",
       dateLabel: "July 17th & 18th, 2026",
+      eventDate: new Date("2026-07-17T12:00:00.000Z"),
       location: "Washington DC",
       isActive: true,
       primaryColor: "#1e3a6e",
       accentColor: "#e85d24",
       backgroundColor: "#ffffff",
       logoUrl: "/mkm-logo.png",
+      enabledFrameThemes: JSON.stringify([
+        "traditional-maharashtrian",
+        "elegant-gold",
+        "family",
+      ]),
+      eventHighlights: JSON.stringify([
+        "Felicitation of seniors",
+        "Cultural performances",
+        "Community networking",
+        "Family activities",
+      ]),
       posterTemplate: JSON.stringify({
         hashtag: "#MKM51",
         headline: [

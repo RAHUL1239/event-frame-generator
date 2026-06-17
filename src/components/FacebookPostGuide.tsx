@@ -49,8 +49,8 @@ export function FacebookPostGuide({
 
         <p className="mt-2 text-sm text-gray-600">
           {onDesktop
-            ? "On Windows and Mac, Facebook is not available in the system share menu. Your poster has been downloaded and the caption copied — open Facebook in your browser to post."
-            : "Facebook does not let websites upload photos or auto-tag groups. We have prepared your caption — follow these steps:"}
+            ? "Facebook cannot receive photos directly from a browser. Your poster has been downloaded and the caption copied — open Facebook to finish posting."
+            : "If the share menu did not open, your poster has been prepared — follow these steps:"}
         </p>
 
         <ul className="mt-4 space-y-2 text-sm">

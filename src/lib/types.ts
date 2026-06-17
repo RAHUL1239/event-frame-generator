@@ -17,6 +17,7 @@ export type PersonalFormData = {
   role: string;
   photo: File;
   photoCrop: PhotoCrop;
+  frameThemeKey?: string;
 };
 
 export type GroupFormData = {
@@ -26,6 +27,7 @@ export type GroupFormData = {
   photos: File[];
   members: MemberDetail[];
   photoCrops: PhotoCrop[];
+  frameThemeKey?: string;
 };
 
 export type GeneratedAssets = {

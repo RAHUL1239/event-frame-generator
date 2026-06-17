@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { serializeEnabledFrameThemesOrNull } from "@/lib/frame-themes";
+import { serializeEventHighlights } from "@/lib/event-highlights";
 import { getClientIp } from "@/lib/server-utils";
 
 const eventDetailInclude = {
@@ -71,6 +73,7 @@ export async function PATCH(
       subtitle: body.subtitle,
       tagline: body.tagline,
       dateLabel: body.dateLabel,
+      eventDate: body.eventDate ? new Date(body.eventDate) : null,
       location: body.location,
       facebookGroupName: body.facebookGroupName || null,
       facebookGroupUrl: body.facebookGroupUrl || null,
@@ -81,6 +84,16 @@ export async function PATCH(
       logoUrl: body.logoUrl,
       posterTemplate: body.posterTemplate || null,
       participantCountBase: Math.max(0, Number(body.participantCountBase) || 0),
+      enabledFrameThemes:
+        body.enabledFrameThemes != null
+          ? serializeEnabledFrameThemesOrNull(body.enabledFrameThemes)
+          : undefined,
+      eventHighlights:
+        body.eventHighlights != null
+          ? serializeEventHighlights(
+              Array.isArray(body.eventHighlights) ? body.eventHighlights : []
+            )
+          : undefined,
     },
     include: { genderOptions: { orderBy: { sortOrder: "asc" } } },
   });

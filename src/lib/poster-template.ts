@@ -36,15 +36,17 @@ export function parsePosterTemplate(event: EventWithOptions): PosterTemplateConf
 export function resolvePosterColor(
   token: string | undefined,
   primary: string,
-  accent: string
+  accent: string,
+  gold = POSTER_GOLD,
+  green = POSTER_GREEN
 ): string {
   switch (token) {
     case "accent":
       return accent;
     case "gold":
-      return POSTER_GOLD;
+      return gold;
     case "green":
-      return POSTER_GREEN;
+      return green;
     case "primary":
     default:
       return primary;

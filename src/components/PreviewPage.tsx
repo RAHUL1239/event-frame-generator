@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FacebookPostGuide } from "@/components/FacebookPostGuide";
 import { InstagramPostGuide } from "@/components/InstagramPostGuide";
+import { EventHighlightsList } from "@/components/EventHighlightsList";
 import { formatDisplayName } from "@/lib/utils";
 import { loadPreviewAssets } from "@/lib/preview-storage";
 import type { EventWithOptions } from "@/lib/types";
@@ -14,8 +15,9 @@ import {
   copyTextToClipboard,
   downloadDataUrl,
   getPreviewPageUrl,
-  getShareablePageUrl,
+  getShareableInvitationUrl,
   isMobileDevice,
+  openFacebookPostFlow,
   openWhatsAppShare,
   prepareFacebookPost,
   prepareInstagramPost,
@@ -51,7 +53,7 @@ export function PreviewPage({
     formatDisplayName(submission.firstName, submission.lastName) ||
     submission.groupName ||
     "Guest";
-  const [shareableUrl, setShareableUrl] = useState<string | undefined>();
+  const [invitationUrl, setInvitationUrl] = useState<string | undefined>();
   const [onLocalhost, setOnLocalhost] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [posterDataUrl, setPosterDataUrl] = useState(submission.posterDataUrl);
@@ -65,14 +67,14 @@ export function PreviewPage({
     filename: string;
   } | null>(null);
 
-  const shareTextNoUrl = buildShareCaption(event);
-  const shareText = buildShareCaption(event, shareableUrl);
+  const invitationText = buildShareCaption(event);
+  const invitationMessage = buildShareCaption(event, invitationUrl);
   const facebookShareText = buildFacebookShareCaption(event);
   const instagramShareText = buildInstagramShareCaption(event);
 
   useEffect(() => {
-    const url = getShareablePageUrl();
-    setShareableUrl(url);
+    const url = getShareableInvitationUrl(slug);
+    setInvitationUrl(url);
     setOnLocalhost(!url && !!getPreviewPageUrl());
 
     if (!posterDataUrl || !dpDataUrl) {
@@ -82,39 +84,51 @@ export function PreviewPage({
         if (!dpDataUrl) setDpDataUrl(stored.dpDataUrl);
       }
     }
-  }, [submission.id, posterDataUrl, dpDataUrl]);
+  }, [slug, submission.id, posterDataUrl, dpDataUrl]);
 
   function showToast(message: string) {
     setToast(message);
     setTimeout(() => setToast(null), 5000);
   }
 
-  async function handleCopyLink() {
-    const pageUrl = getShareablePageUrl();
-    if (!pageUrl) {
-      const copied = await copyTextToClipboard(shareText);
+  async function handleCopyInvitationLink() {
+    if (!invitationUrl) {
+      const copied = await copyTextToClipboard(invitationText);
       showToast(
         copied
-          ? "Caption copied (no public link on localhost). Download your poster to share the image."
-          : "Could not copy. Download your poster and share the image directly."
+          ? "Invitation text copied (no public link on localhost)."
+          : "Could not copy. Try again or share from your phone."
       );
       return;
     }
-    const copied = await copyTextToClipboard(shareText);
+    const copied = await copyTextToClipboard(invitationMessage);
     showToast(
       copied
-        ? "Link copied! Paste it in a message to share with friends."
+        ? "Invitation link copied! Paste it in a message to invite friends."
         : "Could not copy link. Please copy the URL from your browser."
     );
   }
 
-  async function handlePostToFacebook() {
+  async function handleShareFacebook() {
     if (!posterDataUrl) {
       showToast("Poster not ready yet. Please wait or regenerate your frames.");
       return;
     }
 
     const filename = `${slug}-poster.png`;
+    const direct = await openFacebookPostFlow(
+      posterDataUrl,
+      filename,
+      facebookShareText,
+      event.facebookGroupUrl
+    );
+
+    if (direct === "shared") {
+      showToast("Shared to Facebook!");
+      return;
+    }
+    if (direct === "cancelled") return;
+
     const result = await prepareFacebookPost(
       posterDataUrl,
       filename,
@@ -122,11 +136,10 @@ export function PreviewPage({
       event.facebookGroupUrl,
       event.facebookGroupName
     );
-
     setFacebookGuide({ result, filename });
   }
 
-  async function handlePostToInstagram() {
+  async function handleShareInstagramStory() {
     if (!posterDataUrl) {
       showToast("Poster not ready yet. Please wait or regenerate your frames.");
       return;
@@ -142,8 +155,18 @@ export function PreviewPage({
     setInstagramGuide({ result, filename });
   }
 
-  function handleShareWhatsApp() {
-    openWhatsAppShare(shareTextNoUrl, shareableUrl);
+  async function handleShareWhatsApp() {
+    if (posterDataUrl && isMobileDevice()) {
+      const shared = await shareImageNative(
+        posterDataUrl,
+        event.name,
+        invitationMessage,
+        `${slug}-poster.png`
+      );
+      if (shared === "shared") return;
+    }
+
+    openWhatsAppShare(invitationText, invitationUrl);
   }
 
   async function handleShareMore(imageType: "poster" | "dp") {
@@ -154,7 +177,7 @@ export function PreviewPage({
       const result = await shareImageNative(
         dataUrl,
         `${event.name} - ${displayName}`,
-        shareText,
+        invitationMessage,
         `${slug}-${imageType}.png`
       );
       if (result === "shared") return;
@@ -237,42 +260,38 @@ export function PreviewPage({
           Share with friends
         </h2>
         <p className="mt-1 text-sm text-gray-600">
-          Post your social media poster to Facebook or Instagram. The WhatsApp DP
-          is for profile photos only.
+          Share your poster and invite friends to create their own frame. The
+          WhatsApp DP below is for profile photos only.
         </p>
 
         {onLocalhost && (
           <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">
-            Running on localhost — preview links are not included in shares.
-            Download your poster or use &quot;Share image&quot; so friends get
-            the picture, not a broken link.
+            Running on localhost — invitation links are not included in shares.
+            Use &quot;Share image&quot; on mobile or deploy to test link sharing.
           </p>
         )}
 
         <div className="mt-4 flex flex-wrap gap-3">
           <ShareButton
-            label="Post to Facebook"
-            sublabel="Download + instructions"
-            color="#1877F2"
-            onClick={handlePostToFacebook}
+            label="Share to WhatsApp"
+            color="#25D366"
+            onClick={() => void handleShareWhatsApp()}
           />
           <ShareButton
-            label="Post to Instagram"
+            label="Share to Facebook"
+            color="#1877F2"
+            onClick={() => void handleShareFacebook()}
+          />
+          <ShareButton
+            label="Share to Instagram Story"
             sublabel="Download + instructions"
             color="#E1306C"
-            onClick={handlePostToInstagram}
+            onClick={() => void handleShareInstagramStory()}
           />
           <ShareButton
-            label="WhatsApp"
-            sublabel="Send to contacts"
-            color="#25D366"
-            onClick={handleShareWhatsApp}
-          />
-          <ShareButton
-            label="Copy link"
-            sublabel="Share with anyone"
+            label="Copy invitation link"
             color={event.primaryColor}
-            onClick={handleCopyLink}
+            onClick={() => void handleCopyInvitationLink()}
           />
         </div>
       </section>
@@ -284,12 +303,11 @@ export function PreviewPage({
           dataUrl={posterDataUrl}
           accentColor={event.accentColor}
           primaryColor={event.primaryColor}
+          highlights={event.eventHighlights}
           onDownload={() =>
             posterDataUrl &&
             downloadDataUrl(posterDataUrl, `${slug}-poster.png`)
           }
-          onPostFacebook={handlePostToFacebook}
-          onPostInstagram={handlePostToInstagram}
           onShareMore={() => handleShareMore("poster")}
         />
         <PreviewCard
@@ -316,7 +334,7 @@ function ShareButton({
   onClick,
 }: {
   label: string;
-  sublabel: string;
+  sublabel?: string;
   color: string;
   onClick: () => void;
 }) {
@@ -328,7 +346,7 @@ function ShareButton({
       style={{ backgroundColor: color }}
     >
       <span className="text-sm font-bold">{label}</span>
-      <span className="text-xs opacity-80">{sublabel}</span>
+      {sublabel && <span className="text-xs opacity-80">{sublabel}</span>}
     </button>
   );
 }
@@ -339,9 +357,8 @@ function PreviewCard({
   dataUrl,
   accentColor,
   primaryColor,
+  highlights,
   onDownload,
-  onPostFacebook,
-  onPostInstagram,
   onShareMore,
 }: {
   title: string;
@@ -349,9 +366,8 @@ function PreviewCard({
   dataUrl: string | null;
   accentColor: string;
   primaryColor: string;
+  highlights?: string | null;
   onDownload: () => void;
-  onPostFacebook?: () => void;
-  onPostInstagram?: () => void;
   onShareMore: () => void;
 }) {
   return (
@@ -381,6 +397,15 @@ function PreviewCard({
           </div>
         )}
       </div>
+      {highlights && (
+        <div className="border-t bg-white px-6 py-4">
+          <EventHighlightsList
+            highlights={highlights}
+            primaryColor={primaryColor}
+            accentColor={accentColor}
+          />
+        </div>
+      )}
       <div className="space-y-2 border-t p-4">
         <button
           type="button"
@@ -390,37 +415,6 @@ function PreviewCard({
         >
           Download PNG
         </button>
-        {(onPostFacebook || onPostInstagram) && (
-          <div
-            className={`grid gap-2 ${
-              onPostFacebook && onPostInstagram ? "grid-cols-2" : "grid-cols-1"
-            }`}
-          >
-            {onPostFacebook && (
-              <button
-                type="button"
-                onClick={onPostFacebook}
-                className="rounded-xl py-3 text-sm font-semibold text-white transition hover:opacity-90"
-                style={{ backgroundColor: "#1877F2" }}
-              >
-                Facebook
-              </button>
-            )}
-            {onPostInstagram && (
-              <button
-                type="button"
-                onClick={onPostInstagram}
-                className="rounded-xl py-3 text-sm font-semibold text-white transition hover:opacity-90"
-                style={{
-                  background:
-                    "linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)",
-                }}
-              >
-                Instagram
-              </button>
-            )}
-          </div>
-        )}
         <button
           type="button"
           onClick={onShareMore}
@@ -430,7 +424,7 @@ function PreviewCard({
           Share image
         </button>
         <p className="text-center text-xs text-gray-500">
-          Facebook &amp; Instagram: download poster, then upload from the app.
+          Use the share buttons above, or download to save a copy.
         </p>
       </div>
     </div>

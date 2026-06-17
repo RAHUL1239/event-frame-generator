@@ -2,7 +2,14 @@
 
 import { useRef, useState } from "react";
 import { PhotoCropEditor, usePhotoCrop } from "@/components/PhotoCropEditor";
+import { AttendeeSocialProof } from "@/components/AttendeeSocialProof";
+import { EventCountdownBanner } from "@/components/EventCountdownBanner";
+import { FrameThemePicker } from "@/components/FrameThemePicker";
 import type { EventWithOptions } from "@/lib/types";
+import {
+  parseEnabledFrameThemes,
+  type FrameThemeKey,
+} from "@/lib/frame-themes";
 import { generatePersonalAssets } from "@/lib/image-generator";
 import { savePreviewAssets } from "@/lib/preview-storage";
 import { useRouter } from "next/navigation";
@@ -10,9 +17,10 @@ import { useRouter } from "next/navigation";
 type Props = {
   event: EventWithOptions;
   slug: string;
+  attendeeCount: number;
 };
 
-export function PersonalDpForm({ event, slug }: Props) {
+export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [firstName, setFirstName] = useState("");
@@ -25,6 +33,10 @@ export function PersonalDpForm({ event, slug }: Props) {
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const { crop: photoCrop, setCrop: setPhotoCrop } = usePhotoCrop(photoPreview);
+  const enabledThemes = parseEnabledFrameThemes(event.enabledFrameThemes);
+  const [frameThemeKey, setFrameThemeKey] = useState<FrameThemeKey | "">(
+    enabledThemes[0] ?? ""
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -44,6 +56,9 @@ export function PersonalDpForm({ event, slug }: Props) {
     if (!firstName.trim()) return setError("First name is required");
     if (!lastName.trim()) return setError("Last name is required");
     if (!genderKey) return setError("Please select a tagline option");
+    if (enabledThemes.length > 0 && !frameThemeKey) {
+      return setError("Please select a frame style");
+    }
     if (!photo) return setError("Please upload your photo");
 
     setLoading(true);
@@ -57,6 +72,7 @@ export function PersonalDpForm({ event, slug }: Props) {
         role: role.trim(),
         photo,
         photoCrop,
+        frameThemeKey: frameThemeKey || undefined,
       });
 
       const formData = new FormData();
@@ -64,6 +80,7 @@ export function PersonalDpForm({ event, slug }: Props) {
       formData.append("firstName", firstName.trim());
       formData.append("lastName", lastName.trim());
       formData.append("genderKey", genderKey);
+      if (frameThemeKey) formData.append("frameThemeKey", frameThemeKey);
       formData.append("city", city.trim() || event.location || "");
       formData.append("role", role.trim());
       formData.append(
@@ -167,6 +184,13 @@ export function PersonalDpForm({ event, slug }: Props) {
             </div>
           </div>
 
+          <FrameThemePicker
+            enabledFrameThemes={event.enabledFrameThemes}
+            value={frameThemeKey}
+            onChange={setFrameThemeKey}
+            primaryColor={event.primaryColor}
+          />
+
           <div>
             <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
               Your Photo *
@@ -265,6 +289,12 @@ export function PersonalDpForm({ event, slug }: Props) {
             </p>
           )}
 
+          <EventCountdownBanner
+            event={event}
+            primaryColor={event.primaryColor}
+            accentColor={event.accentColor}
+          />
+
           <button
             type="submit"
             disabled={loading}
@@ -275,6 +305,10 @@ export function PersonalDpForm({ event, slug }: Props) {
           </button>
         </div>
       </div>
+      <AttendeeSocialProof
+        count={attendeeCount}
+        primaryColor={event.primaryColor}
+      />
     </form>
   );
 }

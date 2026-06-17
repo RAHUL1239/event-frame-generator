@@ -33,6 +33,18 @@ export function getShareablePageUrl(): string | undefined {
   return url;
 }
 
+/** Public event page where friends create their own frame. */
+export function getEventInvitationUrl(slug: string): string {
+  if (typeof window === "undefined") return "";
+  return `${window.location.origin}/events/${slug}/personal`;
+}
+
+export function getShareableInvitationUrl(slug: string): string | undefined {
+  const url = getEventInvitationUrl(slug);
+  if (!url || isLocalhostUrl(url)) return undefined;
+  return url;
+}
+
 export function isMobileDevice(): boolean {
   if (typeof navigator === "undefined") return false;
   return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);

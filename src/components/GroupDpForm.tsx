@@ -2,7 +2,14 @@
 
 import { useRef, useState } from "react";
 import { PhotoCropEditor } from "@/components/PhotoCropEditor";
+import { AttendeeSocialProof } from "@/components/AttendeeSocialProof";
+import { EventCountdownBanner } from "@/components/EventCountdownBanner";
+import { FrameThemePicker } from "@/components/FrameThemePicker";
 import type { EventWithOptions } from "@/lib/types";
+import {
+  parseEnabledFrameThemes,
+  type FrameThemeKey,
+} from "@/lib/frame-themes";
 import { generateGroupAssets } from "@/lib/image-generator";
 import {
   DEFAULT_PHOTO_CROP,
@@ -16,9 +23,10 @@ import { useRouter } from "next/navigation";
 type Props = {
   event: EventWithOptions;
   slug: string;
+  attendeeCount: number;
 };
 
-export function GroupDpForm({ event, slug }: Props) {
+export function GroupDpForm({ event, slug, attendeeCount }: Props) {
   const router = useRouter();
   const [memberCount, setMemberCount] = useState<2 | 3 | 4>(2);
   const [groupName, setGroupName] = useState("");
@@ -42,6 +50,10 @@ export function GroupDpForm({ event, slug }: Props) {
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
   ];
+  const enabledThemes = parseEnabledFrameThemes(event.enabledFrameThemes);
+  const [frameThemeKey, setFrameThemeKey] = useState<FrameThemeKey | "">(
+    enabledThemes[0] ?? ""
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -85,6 +97,9 @@ export function GroupDpForm({ event, slug }: Props) {
     if (activePhotos.some((p) => !p)) {
       return setError("Please upload a photo for each member");
     }
+    if (enabledThemes.length > 0 && !frameThemeKey) {
+      return setError("Please select a frame style");
+    }
 
     setLoading(true);
     try {
@@ -98,6 +113,7 @@ export function GroupDpForm({ event, slug }: Props) {
           name: `Member ${i + 1}`,
         })),
         photoCrops: photoCrops.slice(0, memberCount),
+        frameThemeKey: frameThemeKey || undefined,
       });
 
       const formData = new FormData();
@@ -105,6 +121,7 @@ export function GroupDpForm({ event, slug }: Props) {
       formData.append("groupName", groupName.trim());
       formData.append("city", city.trim() || event.location || "");
       formData.append("memberCount", String(memberCount));
+      if (frameThemeKey) formData.append("frameThemeKey", frameThemeKey);
       formData.append("members", JSON.stringify([]));
       formData.append(
         "fileMeta",
@@ -245,6 +262,13 @@ export function GroupDpForm({ event, slug }: Props) {
             )}
           </div>
 
+          <FrameThemePicker
+            enabledFrameThemes={event.enabledFrameThemes}
+            value={frameThemeKey}
+            onChange={setFrameThemeKey}
+            primaryColor={event.primaryColor}
+          />
+
           <div>
             <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
               Group Name
@@ -292,6 +316,12 @@ export function GroupDpForm({ event, slug }: Props) {
             </p>
           )}
 
+          <EventCountdownBanner
+            event={event}
+            primaryColor={event.primaryColor}
+            accentColor={event.accentColor}
+          />
+
           <button
             type="submit"
             disabled={loading}
@@ -302,6 +332,10 @@ export function GroupDpForm({ event, slug }: Props) {
           </button>
         </div>
       </div>
+      <AttendeeSocialProof
+        count={attendeeCount}
+        primaryColor={event.primaryColor}
+      />
     </form>
   );
 }

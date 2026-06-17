@@ -1,8 +1,28 @@
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import { prisma } from "@/lib/prisma";
+import {
+  isFrameThemeKey,
+  parseEnabledFrameThemes,
+} from "@/lib/frame-themes";
 import { calculateParticipantNumber } from "@/lib/participant-number";
 import { getClientIp } from "@/lib/server-utils";
+
+function resolveSubmissionFrameTheme(
+  enabledFrameThemes: string | null | undefined,
+  requestedKey: string | null
+): string | null {
+  const enabled = parseEnabledFrameThemes(enabledFrameThemes);
+  if (enabled.length === 0) return null;
+  if (
+    requestedKey &&
+    isFrameThemeKey(requestedKey) &&
+    enabled.includes(requestedKey)
+  ) {
+    return requestedKey;
+  }
+  return enabled[0];
+}
 
 async function participantNumberForSubmission(
   eventId: string,
@@ -62,6 +82,10 @@ export async function POST(
 
     const posterDataUrl = String(formData.get("posterDataUrl") || "") || null;
     const dpDataUrl = String(formData.get("dpDataUrl") || "") || null;
+    const frameThemeKey = resolveSubmissionFrameTheme(
+      event.enabledFrameThemes,
+      String(formData.get("frameThemeKey") || "") || null
+    );
 
     if (type === "personal") {
       const fileMeta = parseFileMeta(formData);
@@ -78,6 +102,7 @@ export async function POST(
           city: String(formData.get("city") || ""),
           role: String(formData.get("role") || ""),
           genderKey: String(formData.get("genderKey") || ""),
+          frameThemeKey,
           posterDataUrl,
           dpDataUrl,
           clientIp,
@@ -138,6 +163,7 @@ export async function POST(
         city: String(formData.get("city") || ""),
         memberCount,
         memberDetails: JSON.stringify(members),
+        frameThemeKey,
         posterDataUrl,
         dpDataUrl,
         clientIp,

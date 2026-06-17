@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 import { slugify } from "@/lib/slug";
+import { FrameThemeAdminSelect } from "@/components/admin/FrameThemeAdminSelect";
+import { parseEnabledFrameThemes } from "@/lib/frame-themes";
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -16,6 +18,7 @@ export default function CreateEventPage() {
     subtitle: "PROFILE FRAME & POSTER GENERATOR",
     tagline: "",
     dateLabel: "",
+    eventDate: "",
     location: "",
     facebookGroupName: "",
     facebookGroupUrl: "",
@@ -25,6 +28,7 @@ export default function CreateEventPage() {
     backgroundColor: "#f5f0e8",
     isActive: true,
   });
+  const [enabledFrameThemes, setEnabledFrameThemes] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
 
   function updateField<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
@@ -46,7 +50,13 @@ export default function CreateEventPage() {
       const res = await fetch("/api/admin/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          eventDate: form.eventDate
+            ? new Date(`${form.eventDate}T12:00:00`).toISOString()
+            : null,
+          enabledFrameThemes: parseEnabledFrameThemes(enabledFrameThemes),
+        }),
       });
 
       const data = await res.json();
@@ -121,7 +131,23 @@ export default function CreateEventPage() {
                 value={form.dateLabel}
                 onChange={(v) => updateField("dateLabel", v)}
                 placeholder="July 17th & 18th, 2026"
+                hint="Displayed on the poster header"
               />
+              <div>
+                <label className="text-sm font-medium text-gray-600">
+                  Countdown date
+                </label>
+                <input
+                  type="date"
+                  value={form.eventDate}
+                  onChange={(e) => updateField("eventDate", e.target.value)}
+                  className="mt-1 w-full rounded-lg border px-3 py-2"
+                />
+                <p className="mt-1 text-xs text-gray-400">
+                  Powers the &quot;Only X days until…&quot; countdown on the form
+                  and poster.
+                </p>
+              </div>
               <Field
                 label="Footer tagline"
                 required
@@ -210,6 +236,16 @@ export default function CreateEventPage() {
                 onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
               />
             </div>
+          </section>
+
+          <section className="rounded-xl border bg-white p-6">
+            <h2 className="mb-4 font-semibold">Frame themes</h2>
+            <FrameThemeAdminSelect
+              value={enabledFrameThemes}
+              onChange={(serialized) =>
+                setEnabledFrameThemes(serialized === "[]" ? null : serialized)
+              }
+            />
           </section>
 
           <section className="rounded-xl border bg-white p-6">

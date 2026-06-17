@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { buildDefaultGenderOptions } from "@/lib/default-gender-options";
+import { normalizeEnabledFrameThemes, serializeEnabledFrameThemesOrNull } from "@/lib/frame-themes";
+import { serializeEventHighlights } from "@/lib/event-highlights";
 import { getClientIp } from "@/lib/server-utils";
 import { slugify } from "@/lib/slug";
 
@@ -65,6 +67,7 @@ export async function POST(request: Request) {
       subtitle: body.subtitle ?? "PROFILE FRAME & POSTER GENERATOR",
       tagline,
       dateLabel,
+      eventDate: body.eventDate ? new Date(body.eventDate) : null,
       location: body.location?.trim() || null,
       facebookGroupName: body.facebookGroupName?.trim() || null,
       facebookGroupUrl: body.facebookGroupUrl?.trim() || null,
@@ -73,6 +76,10 @@ export async function POST(request: Request) {
       accentColor: body.accentColor ?? "#c9a227",
       backgroundColor: body.backgroundColor ?? "#f5f0e8",
       participantCountBase: Math.max(0, Number(body.participantCountBase) || 0),
+      enabledFrameThemes: serializeEnabledFrameThemesOrNull(body.enabledFrameThemes),
+      eventHighlights: serializeEventHighlights(
+        Array.isArray(body.eventHighlights) ? body.eventHighlights : []
+      ),
       genderOptions: {
         create: genderOptions,
       },

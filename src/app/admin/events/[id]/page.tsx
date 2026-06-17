@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { formatFileSize } from "@/lib/utils";
 import { EventLogoUpload } from "@/components/admin/EventLogoUpload";
+import { FrameThemeAdminSelect } from "@/components/admin/FrameThemeAdminSelect";
+import { EventHighlightsAdmin } from "@/components/admin/EventHighlightsAdmin";
+import { parseEnabledFrameThemes } from "@/lib/frame-themes";
+import { parseEventHighlights } from "@/lib/event-highlights";
+import { formatEventDateInputValue } from "@/lib/countdown";
 
 type GenderOption = {
   id: string;
@@ -20,6 +25,7 @@ type EventDetail = {
   subtitle: string;
   tagline: string;
   dateLabel: string;
+  eventDate: string | null;
   location: string | null;
   facebookGroupName: string | null;
   facebookGroupUrl: string | null;
@@ -30,6 +36,8 @@ type EventDetail = {
   backgroundColor: string;
   posterTemplate: string | null;
   participantCountBase: number;
+  enabledFrameThemes: string | null;
+  eventHighlights: string | null;
   genderOptions: GenderOption[];
   submissions: {
     id: string;
@@ -77,6 +85,9 @@ export default function AdminEventPage({
             facebookGroupName: data.facebookGroupName ?? null,
             facebookGroupUrl: data.facebookGroupUrl ?? null,
             participantCountBase: data.participantCountBase ?? 0,
+            enabledFrameThemes: data.enabledFrameThemes ?? null,
+            eventHighlights: data.eventHighlights ?? null,
+            eventDate: data.eventDate ?? null,
             genderOptions: data.genderOptions ?? [],
             submissions: (data.submissions ?? []).map(
               (sub: EventDetail["submissions"][number]) => ({
@@ -104,6 +115,7 @@ export default function AdminEventPage({
         subtitle: event.subtitle,
         tagline: event.tagline,
         dateLabel: event.dateLabel,
+        eventDate: event.eventDate,
         location: event.location,
         facebookGroupName: event.facebookGroupName,
         facebookGroupUrl: event.facebookGroupUrl,
@@ -113,6 +125,8 @@ export default function AdminEventPage({
         backgroundColor: event.backgroundColor,
         posterTemplate: event.posterTemplate,
         participantCountBase: event.participantCountBase,
+        enabledFrameThemes: parseEnabledFrameThemes(event.enabledFrameThemes),
+        eventHighlights: parseEventHighlights(event.eventHighlights),
         genderOptions: event.genderOptions,
       }),
     });
@@ -269,7 +283,30 @@ export default function AdminEventPage({
                   #247). Set to 0 to show the actual count only.
                 </p>
               </div>
-              <Field label="Date Label" value={event.dateLabel} onChange={(v) => setEvent({ ...event, dateLabel: v })} />
+              <Field label="Date Label" value={event.dateLabel} onChange={(v) => setEvent({ ...event, dateLabel: v })} hint="Shown on poster header, e.g. July 17th & 18th, 2026" />
+              <div>
+                <label className="text-sm font-medium text-gray-600">
+                  Countdown date
+                </label>
+                <input
+                  type="date"
+                  value={formatEventDateInputValue(event.eventDate)}
+                  onChange={(e) =>
+                    setEvent({
+                      ...event,
+                      eventDate: e.target.value
+                        ? new Date(`${e.target.value}T12:00:00`).toISOString()
+                        : null,
+                    })
+                  }
+                  className="mt-1 w-full rounded-lg border px-3 py-2"
+                />
+                <p className="mt-1 text-xs text-gray-400">
+                  First day of the event — powers the &quot;Only X days until…&quot;
+                  countdown on the form and poster. Falls back to parsing the date
+                  label if empty.
+                </p>
+              </div>
               <Field label="Tagline (footer)" value={event.tagline} onChange={(v) => setEvent({ ...event, tagline: v })} />
               <Field label="Location (default city)" value={event.location ?? ""} onChange={(v) => setEvent({ ...event, location: v })} />
               <Field label="Facebook Group Name" value={event.facebookGroupName ?? ""} onChange={(v) => setEvent({ ...event, facebookGroupName: v })} />
@@ -304,6 +341,29 @@ export default function AdminEventPage({
               />
               <span className="text-sm">Event is active</span>
             </label>
+          </section>
+
+          <section className="rounded-xl border bg-white p-6">
+            <h2 className="mb-4 font-semibold">Frame themes</h2>
+            <FrameThemeAdminSelect
+              value={event.enabledFrameThemes}
+              onChange={(serialized) =>
+                setEvent({
+                  ...event,
+                  enabledFrameThemes: serialized === "[]" ? null : serialized,
+                })
+              }
+            />
+          </section>
+
+          <section className="rounded-xl border bg-white p-6">
+            <h2 className="mb-4 font-semibold">Event highlights</h2>
+            <EventHighlightsAdmin
+              value={event.eventHighlights}
+              onChange={(serialized) =>
+                setEvent({ ...event, eventHighlights: serialized })
+              }
+            />
           </section>
 
           <section className="rounded-xl border bg-white p-6">

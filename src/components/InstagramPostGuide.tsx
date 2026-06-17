@@ -30,7 +30,7 @@ export function InstagramPostGuide({
       <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
         <div className="flex items-start justify-between gap-4">
           <h3 className="text-lg font-bold" style={{ color: primaryColor }}>
-            How to post on Instagram
+            How to post to Instagram Story
           </h3>
           <button
             type="button"
@@ -43,9 +43,8 @@ export function InstagramPostGuide({
         </div>
 
         <p className="mt-2 text-sm text-gray-600">
-          {onDesktop
-            ? "Your poster has been downloaded and the caption copied. Open Instagram on your phone or upload from instagram.com on desktop."
-            : "Instagram does not let websites upload photos directly. We have prepared your poster — follow these steps:"}
+          Instagram Stories cannot be posted directly from a website. Your poster
+          has been saved — follow these steps in the Instagram app.
         </p>
 
         <ul className="mt-4 space-y-2 text-sm">
@@ -72,7 +71,7 @@ export function InstagramPostGuide({
         </ul>
 
         <div className="mt-4 rounded-lg bg-gray-50 p-3 text-sm text-gray-700">
-          <p className="font-medium">Your caption:</p>
+          <p className="font-medium">Optional caption for a text sticker:</p>
           <p className="mt-1 whitespace-pre-line italic">&quot;{caption}&quot;</p>
         </div>
 
@@ -80,42 +79,42 @@ export function InstagramPostGuide({
           {onDesktop ? (
             <>
               <li>
-                Open <strong>instagram.com</strong> and sign in, or use the
-                Instagram app on your phone
+                Open the <strong>Instagram app</strong> on your phone (Stories
+                are mobile-only)
               </li>
               <li>
-                Start a new post and upload <strong>{filename}</strong> from
-                Downloads
+                AirDrop or transfer <strong>{filename}</strong> to your phone if
+                needed
               </li>
               <li>
-                Paste your caption — press{" "}
-                <kbd className="rounded bg-gray-200 px-1">Ctrl+V</kbd> (or{" "}
-                <kbd className="rounded bg-gray-200 px-1">Cmd+V</kbd> on Mac)
+                Tap <strong>Your story</strong> or swipe right from the feed
               </li>
               <li>
-                Tap <strong>Share</strong>
+                Select <strong>{filename}</strong> from your photo gallery
+              </li>
+              <li>
+                Add a text sticker and paste your caption if you like, then tap{" "}
+                <strong>Share to story</strong>
               </li>
             </>
           ) : (
             <>
               <li>
-                Tap <strong>Share poster to Instagram</strong> below and choose{" "}
-                <strong>Instagram</strong> from the share menu
+                Open the <strong>Instagram</strong> app
               </li>
               <li>
-                Choose <strong>Feed</strong> or <strong>Story</strong> in
-                Instagram
+                Tap <strong>Your story</strong> or swipe right from the feed
               </li>
               <li>
-                If the image is not attached, tap <strong>+</strong> and select{" "}
-                <strong>{filename}</strong> from Downloads
+                Choose <strong>{filename}</strong> from your gallery (Downloads
+                or Photos)
               </li>
               <li>
-                Long-press and <strong>paste</strong> your caption (already copied
-                to clipboard)
+                Pinch or drag to fit the poster on screen
               </li>
               <li>
-                Tap <strong>Share</strong>
+                Tap the <strong>Aa</strong> text tool, paste your caption if
+                desired, then tap <strong>Your story</strong>
               </li>
             </>
           )}
@@ -133,7 +132,7 @@ export function InstagramPostGuide({
                 "linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)",
             }}
           >
-            {onDesktop ? "Open Instagram" : "Share poster to Instagram"}
+            {onDesktop ? "Open Instagram" : "Open Instagram app"}
           </button>
           <button
             type="button"

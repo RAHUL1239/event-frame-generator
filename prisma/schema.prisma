@@ -24,6 +24,8 @@ model Event {
   subtitle        String   @default("PROFILE FRAME & POSTER GENERATOR")
   tagline         String
   dateLabel       String
+  /** First day of the event — used for countdown (falls back to parsing dateLabel). */
+  eventDate       DateTime?
   location        String?
   facebookGroupName String?
   facebookGroupUrl  String?
@@ -35,6 +37,10 @@ model Event {
   backgroundColor String   @default("#f5f0e8")
   logoUrl         String?
   posterTemplate  String?
+  /** JSON array of up to 3 frame theme keys users can pick on the form. */
+  enabledFrameThemes String?
+  /** JSON array of highlight bullets shown under the generated poster. */
+  eventHighlights   String?
   dpTemplate      String?
   groupDpTemplate String?
   createdAt       DateTime @default(now())
@@ -69,6 +75,7 @@ model Submission {
   city          String?
   role          String?
   genderKey     String?
+  frameThemeKey String?
   memberCount   Int?
   memberDetails String?
   posterDataUrl String?
