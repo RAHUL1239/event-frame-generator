@@ -156,7 +156,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-6">
+    <form onSubmit={handleSubmit} className="mx-auto max-w-2xl">
       <div className="rounded-2xl bg-white p-6 shadow-lg md:p-10">
         <span
           className="inline-block rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-wide"
@@ -306,9 +306,9 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
             retained on the server.
           </div>
         </div>
-      </div>
 
-      <div className="rounded-2xl bg-white p-6 shadow-lg md:p-10">
+        <div className="my-8 border-t border-gray-200" />
+
         <span
           className="inline-block rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-wide"
           style={{ backgroundColor: `${event.accentColor}22`, color: event.primaryColor }}
@@ -316,23 +316,14 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
           Step 2 of 2
         </span>
 
-        <h2
-          className="mt-4 text-3xl font-bold"
-          style={{ color: event.primaryColor }}
-        >
-          Choose Your Frame
-        </h2>
-        <p className="mt-2 text-gray-600">
-          Pick a style for your group poster and WhatsApp DP.
-        </p>
-
-        <div className="mt-8 space-y-6">
+        <div className="mt-6 space-y-6">
           {hasThemeStep ? (
             <FrameThemePicker
               enabledFrameThemes={event.enabledFrameThemes}
               value={frameThemeKey}
               onChange={setFrameThemeKey}
               primaryColor={event.primaryColor}
+              eventName={event.name}
             />
           ) : (
             <p className="text-sm text-gray-600">
@@ -362,6 +353,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
           </button>
         </div>
       </div>
+
       <AttendeeSocialProof
         count={attendeeCount}
         primaryColor={event.primaryColor}

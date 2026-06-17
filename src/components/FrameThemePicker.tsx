@@ -1,5 +1,6 @@
 "use client";
 
+import { FrameThemePreview } from "@/components/FrameThemePreview";
 import {
   FRAME_THEMES,
   parseEnabledFrameThemes,
@@ -11,6 +12,7 @@ type Props = {
   value: FrameThemeKey | "";
   onChange: (key: FrameThemeKey) => void;
   primaryColor: string;
+  eventName?: string;
 };
 
 export function FrameThemePicker({
@@ -18,9 +20,12 @@ export function FrameThemePicker({
   value,
   onChange,
   primaryColor,
+  eventName,
 }: Props) {
   const enabled = parseEnabledFrameThemes(enabledFrameThemes);
   if (enabled.length === 0) return null;
+
+  const selectedTheme = value ? FRAME_THEMES[value] : null;
 
   return (
     <div>
@@ -61,6 +66,15 @@ export function FrameThemePicker({
           );
         })}
       </ul>
+
+      {selectedTheme && (
+        <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4">
+          <p className="mb-3 text-center text-xs font-medium text-gray-600">
+            Preview — {selectedTheme.name}
+          </p>
+          <FrameThemePreview theme={selectedTheme} eventName={eventName} />
+        </div>
+      )}
     </div>
   );
 }
