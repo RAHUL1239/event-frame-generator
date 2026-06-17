@@ -3,7 +3,6 @@
 import { useRef, useState } from "react";
 import { PhotoCropEditor } from "@/components/PhotoCropEditor";
 import { AttendeeSocialProof } from "@/components/AttendeeSocialProof";
-import { EventCountdownBanner } from "@/components/EventCountdownBanner";
 import {
   FrameThemePicker,
   getGenerateFrameLabel,
@@ -162,7 +161,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
           className="inline-block rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-wide"
           style={{ backgroundColor: `${event.accentColor}22`, color: event.primaryColor }}
         >
-          Step 1 of 2
+          Create your frame
         </span>
 
         <h2
@@ -172,7 +171,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
           Enter Group Details
         </h2>
         <p className="mt-2 text-gray-600">
-          Add your group info and member photos.
+          Add your group info, member photos, and choose a frame style.
         </p>
 
         <div className="mt-8 space-y-6">
@@ -305,18 +304,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
             <strong>Disclaimer:</strong> Photos are processed temporarily and not
             retained on the server.
           </div>
-        </div>
 
-        <div className="my-8 border-t border-gray-200" />
-
-        <span
-          className="inline-block rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-wide"
-          style={{ backgroundColor: `${event.accentColor}22`, color: event.primaryColor }}
-        >
-          Step 2 of 2
-        </span>
-
-        <div className="mt-6 space-y-6">
           {hasThemeStep ? (
             <FrameThemePicker
               enabledFrameThemes={event.enabledFrameThemes}
@@ -324,23 +312,13 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
               onChange={setFrameThemeKey}
               primaryColor={event.primaryColor}
             />
-          ) : (
-            <p className="text-sm text-gray-600">
-              Your frame will use the default event styling.
-            </p>
-          )}
+          ) : null}
 
           {error && (
             <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">
               {error}
             </p>
           )}
-
-          <EventCountdownBanner
-            event={event}
-            primaryColor={event.primaryColor}
-            accentColor={event.accentColor}
-          />
 
           <button
             type="submit"
