@@ -1,6 +1,7 @@
 import type { EventWithOptions } from "./types";
 import type { PhotoCrop } from "./photo-crop";
 import { DEFAULT_PHOTO_CROP } from "./photo-crop";
+import { isPrivateBlobUrl } from "./logo-storage";
 
 export const DEFAULT_EVENT_LOGO = "/mkm-logo.png";
 
@@ -13,7 +14,11 @@ export function getEventTheme(event: EventWithOptions) {
 }
 
 export function getEventLogoUrl(event: { logoUrl?: string | null }): string {
-  return event.logoUrl || DEFAULT_EVENT_LOGO;
+  const logoUrl = event.logoUrl || DEFAULT_EVENT_LOGO;
+  if (isPrivateBlobUrl(logoUrl)) {
+    return `/api/logos?url=${encodeURIComponent(logoUrl)}`;
+  }
+  return logoUrl;
 }
 
 export async function loadEventLogo(

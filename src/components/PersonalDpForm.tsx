@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { PhotoCropEditor, usePhotoCrop } from "@/components/PhotoCropEditor";
+import { usePhotoCrop } from "@/components/PhotoCropEditor";
+import { PhotoFramePreview } from "@/components/PhotoFramePreview";
 import { AttendeeSocialProof } from "@/components/AttendeeSocialProof";
 import { EventCountdownBanner } from "@/components/EventCountdownBanner";
 import {
@@ -217,11 +218,17 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
               </button>
             ) : (
               <div className="rounded-xl border-2 border-dashed border-gray-300 bg-brand-cream p-4">
-                <PhotoCropEditor
+                <PhotoFramePreview
+                  event={event}
+                  frameThemeKey={frameThemeKey || undefined}
+                  firstName={firstName}
+                  lastName={lastName}
+                  genderKey={genderKey}
+                  city={city}
+                  role={role}
                   src={photoPreview}
                   crop={photoCrop}
                   onCropChange={setPhotoCrop}
-                  accentColor={event.accentColor}
                 />
                 <div className="mt-3 flex items-center justify-between gap-3 border-t border-gray-200 pt-3">
                   <span className="truncate text-sm text-gray-600">
@@ -302,7 +309,6 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
               value={frameThemeKey}
               onChange={setFrameThemeKey}
               primaryColor={event.primaryColor}
-              eventName={event.name}
             />
           ) : (
             <p className="text-sm text-gray-600">

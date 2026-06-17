@@ -28,6 +28,19 @@ type GroupInput = GroupFormData & { event: EventWithOptions };
 const POSTER_W = 1080;
 const POSTER_H = 1080;
 
+export type PersonalPosterRenderInput = Omit<PersonalFormData, "photo"> & {
+  event: EventWithOptions;
+};
+
+export const PERSONAL_POSTER_W = POSTER_W;
+export const PERSONAL_POSTER_H = POSTER_H;
+export const PERSONAL_PHOTO_POSITION = {
+  x: 250,
+  y: 390,
+  radius: 128,
+  ringPadding: 6,
+};
+
 function getGenderTagline(event: EventWithOptions, genderKey: string) {
   return event.genderOptions.find((o) => o.key === genderKey)?.tagline ?? "";
 }
@@ -308,7 +321,7 @@ function drawPosterFooterSection(
 
 async function drawBmmPersonalPoster(
   ctx: CanvasRenderingContext2D,
-  input: PersonalInput,
+  input: PersonalPosterRenderInput,
   logo: HTMLImageElement,
   photo: HTMLImageElement,
   theme: ResolvedFrameTheme
@@ -350,6 +363,22 @@ async function drawBmmPersonalPoster(
   drawPosterFooterSection(ctx, event, theme, middleY + 118);
 }
 
+export async function renderPersonalPosterCanvas(
+  canvas: HTMLCanvasElement,
+  input: PersonalPosterRenderInput,
+  photo: HTMLImageElement
+): Promise<void> {
+  const theme = resolveFrameTheme(input.event, input.frameThemeKey);
+  const logo = await loadEventLogo(input.event);
+
+  canvas.width = POSTER_W;
+  canvas.height = POSTER_H;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  await drawBmmPersonalPoster(ctx, input, logo, photo, theme);
+}
+
 export async function generatePersonalAssets(
   input: PersonalInput
 ): Promise<GeneratedAssets> {
@@ -359,10 +388,7 @@ export async function generatePersonalAssets(
   const logo = await loadEventLogo(input.event);
 
   const poster = document.createElement("canvas");
-  poster.width = POSTER_W;
-  poster.height = POSTER_H;
-  const pCtx = poster.getContext("2d")!;
-  await drawBmmPersonalPoster(pCtx, input, logo, photo, theme);
+  await renderPersonalPosterCanvas(poster, input, photo);
 
   const dp = document.createElement("canvas");
   dp.width = 640;

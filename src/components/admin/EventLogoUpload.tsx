@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { DEFAULT_EVENT_LOGO } from "@/lib/utils";
+import { DEFAULT_EVENT_LOGO, getEventLogoUrl } from "@/lib/utils";
 
 type Props = {
   eventId: string;
@@ -16,7 +16,8 @@ export function EventLogoUpload({ eventId, logoUrl, onUploaded }: Props) {
   const [error, setError] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
 
-  const displayUrl = preview || logoUrl || DEFAULT_EVENT_LOGO;
+  const displayUrl =
+    preview || (logoUrl ? getEventLogoUrl({ logoUrl }) : DEFAULT_EVENT_LOGO);
 
   async function handleFileChange(file: File | null) {
     if (!file) return;
