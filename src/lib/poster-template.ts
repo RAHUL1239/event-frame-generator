@@ -77,24 +77,21 @@ export function resolvePosterTextColor(
 export function getPosterHeadline(
   config: PosterTemplateConfig,
   event: EventWithOptions,
-  genderTagline: string
+  _genderTagline?: string
 ): PosterHeadlineLine[] {
-  if (config.headline?.length) return config.headline;
-
-  const lines: PosterHeadlineLine[] = [
-    { text: "JOIN ME AT THE", color: "accent" },
-  ];
-
-  const eventWords = event.name.toUpperCase().split(/\s+/).filter(Boolean);
-  if (eventWords.length >= 3) {
-    lines.push({ text: eventWords[0], color: "gold" });
-    lines.push({ text: eventWords.slice(1).join(" "), color: "gold" });
+  if (config.headline?.length) {
+    return config.headline.filter(
+      (line) => line.text.trim().toUpperCase() !== "JOIN ME AT THE"
+    );
   }
 
-  if (genderTagline.trim()) {
-    lines.push({ text: genderTagline, color: "accent" });
-  } else if (eventWords.length < 3) {
-    lines.push({ text: event.name.toUpperCase(), color: "gold" });
+  const lines: PosterHeadlineLine[] = [];
+  const eventWords = event.name.toUpperCase().split(/\s+/).filter(Boolean);
+  if (eventWords.length >= 3) {
+    lines.push({ text: eventWords[0], color: "primary" });
+    lines.push({ text: eventWords.slice(1).join(" "), color: "primary" });
+  } else {
+    lines.push({ text: event.name.toUpperCase(), color: "primary" });
   }
 
   return lines;
