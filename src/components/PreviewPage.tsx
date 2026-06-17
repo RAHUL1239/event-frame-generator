@@ -345,7 +345,10 @@ function PreviewCard({
           {subtitle}
         </p>
       </div>
-      <div className="flex justify-center p-6" style={{ backgroundColor: primaryColor }}>
+      <div
+        className="flex justify-center p-6"
+        style={{ backgroundColor: previewBackground ?? "#f3f4f6" }}
+      >
         {dataUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
