@@ -267,6 +267,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
             value={frameThemeKey}
             onChange={setFrameThemeKey}
             primaryColor={event.primaryColor}
+            eventName={event.name}
           />
 
           <div>

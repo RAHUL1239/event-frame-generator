@@ -1,5 +1,6 @@
 "use client";
 
+import { FrameThemePreview } from "@/components/FrameThemePreview";
 import {
   FRAME_THEMES,
   parseEnabledFrameThemes,
@@ -11,6 +12,7 @@ type Props = {
   value: FrameThemeKey | "";
   onChange: (key: FrameThemeKey) => void;
   primaryColor: string;
+  eventName?: string;
 };
 
 export function FrameThemePicker({
@@ -18,9 +20,12 @@ export function FrameThemePicker({
   value,
   onChange,
   primaryColor,
+  eventName,
 }: Props) {
   const enabled = parseEnabledFrameThemes(enabledFrameThemes);
   if (enabled.length === 0) return null;
+
+  const selectedTheme = value ? FRAME_THEMES[value] : null;
 
   return (
     <div>
@@ -28,7 +33,7 @@ export function FrameThemePicker({
         Frame style *
       </label>
       <p className="mb-3 text-sm text-gray-600">
-        Choose a look for your poster and WhatsApp DP.
+        Choose a look for your poster and WhatsApp DP. Tap a style to preview it.
       </p>
       <div
         className={`grid gap-3 ${
@@ -43,33 +48,45 @@ export function FrameThemePicker({
               key={key}
               type="button"
               onClick={() => onChange(key)}
-              className={`rounded-xl border-2 p-4 text-left transition ${
+              className={`overflow-hidden rounded-xl border-2 text-left transition ${
                 selected
                   ? "border-brand-teal bg-white shadow-md"
                   : "border-transparent bg-brand-cream hover:bg-brand-cream-dark"
               }`}
               style={selected ? { borderColor: primaryColor } : undefined}
             >
-              <div className="mb-3 flex gap-1">
-                <span
-                  className="h-6 flex-1 rounded"
-                  style={{ backgroundColor: theme.colors.primary }}
-                />
-                <span
-                  className="h-6 flex-1 rounded"
-                  style={{ backgroundColor: theme.colors.accent }}
-                />
-                <span
-                  className="h-6 flex-1 rounded border border-gray-200"
-                  style={{ backgroundColor: theme.colors.background }}
-                />
+              <FrameThemePreview
+                theme={theme}
+                eventName={eventName}
+                compact
+              />
+              <div className="p-3">
+                <p className="text-sm font-semibold text-gray-900">
+                  {theme.name}
+                </p>
+                <p className="mt-0.5 text-xs text-gray-500">
+                  {theme.description}
+                </p>
               </div>
-              <p className="text-sm font-semibold text-gray-900">{theme.name}</p>
-              <p className="mt-1 text-xs text-gray-500">{theme.description}</p>
             </button>
           );
         })}
       </div>
+
+      {selectedTheme && (
+        <div className="mt-5 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+          <p className="mb-3 text-center text-sm font-semibold text-gray-700">
+            Selected: {selectedTheme.name}
+          </p>
+          <FrameThemePreview
+            theme={selectedTheme}
+            eventName={eventName}
+          />
+          <p className="mt-3 text-center text-xs text-gray-500">
+            Your photo and details will appear in this layout when generated.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
