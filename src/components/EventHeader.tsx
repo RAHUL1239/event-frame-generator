@@ -25,14 +25,14 @@ export function EventHeader({ event, activeTab, basePath }: Props) {
             className="h-14 w-14 object-contain"
             unoptimized
           />
-          <div>
+          <div className="min-w-0">
             <h1
-              className="text-2xl font-bold md:text-3xl"
+              className="text-2xl font-bold leading-snug md:text-3xl"
               style={{ color: event.accentColor }}
             >
               {event.name}
             </h1>
-            <p className="text-sm uppercase tracking-wider text-white/90">
+            <p className="mt-1 text-sm uppercase tracking-wider text-white/90 md:mt-4">
               {event.subtitle}
             </p>
           </div>
