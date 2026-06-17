@@ -29,9 +29,9 @@ export const FRAME_FULL_OVERLAYS: Partial<
   Record<FrameThemeKey, FrameFullOverlayConfig>
 > = {
   "traditional-maharashtrian": {
-    src: "/frames/maharashtrian-frame.png",
-    holeInsetRatio: 130 / 1080,
-    contentPadding: 100,
+    src: "/frames/maharashtrian-frame.jpg",
+    holeInsetRatio: 62 / 1080,
+    contentPadding: 50,
   },
 };
 
