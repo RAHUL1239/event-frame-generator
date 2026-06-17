@@ -50,7 +50,7 @@ export function FrameThemePicker({
                   <img
                     src={previewSrc}
                     alt=""
-                    className="h-12 w-12 shrink-0 rounded-lg object-cover object-right"
+                    className="h-12 w-12 shrink-0 rounded-lg object-cover object-[85%_center]"
                   />
                 ) : (
                   <span

@@ -4,7 +4,7 @@ import {
   resolveFrameTheme,
   type ResolvedFrameTheme,
 } from "./frame-themes";
-import { drawFrameOverlay, loadThemeFrameOverlay } from "./frame-overlays";
+import { drawFrameOverlay, loadThemeFrameOverlay, paintFrameBorderOverlay } from "./frame-overlays";
 import { getEventCountdown } from "./countdown";
 import {
   getPosterHashtag,
@@ -103,8 +103,10 @@ async function paintFrameBackground(
   ctx.fillRect(0, 0, width, height);
 
   const overlay = await loadThemeFrameOverlay(theme.overlayKey ?? theme.key);
+  if (overlay?.drawOnTop) return;
+
   if (overlay) {
-    drawFrameOverlay(ctx, overlay.image, overlay.config, width, height);
+    drawFrameOverlay(ctx, overlay.image, width, height);
     return;
   }
 
@@ -423,6 +425,7 @@ async function drawBmmPersonalPoster(
   drawMiddleSection(ctx, middleTagline, qr, middleY, gold);
 
   drawPosterFooterSection(ctx, event, theme, middleY + 118);
+  await paintFrameBorderOverlay(ctx, theme.overlayKey ?? theme.key, POSTER_W, POSTER_H);
 }
 
 export async function renderPersonalPosterCanvas(
@@ -501,6 +504,7 @@ async function drawBmmGroupPoster(
   drawMiddleSection(ctx, middleTagline, qr, middleY, gold);
 
   drawPosterFooterSection(ctx, event, theme, middleY + 118);
+  await paintFrameBorderOverlay(ctx, theme.overlayKey ?? theme.key, POSTER_W, POSTER_H);
 }
 
 export async function renderGroupPosterCanvas(
@@ -606,6 +610,7 @@ export async function renderPersonalDpCanvas(
 
   await paintFrameBackground(ctx, theme, DP_W, DP_H);
   drawPersonalDp(ctx, input, logo, photo, theme, true);
+  await paintFrameBorderOverlay(ctx, theme.overlayKey ?? theme.key, DP_W, DP_H);
 }
 
 export async function renderGroupDpCanvas(
@@ -624,6 +629,7 @@ export async function renderGroupDpCanvas(
 
   await paintFrameBackground(ctx, theme, DP_W, DP_H);
   drawGroupDp(ctx, input, logo, photos, theme, true);
+  await paintFrameBorderOverlay(ctx, theme.overlayKey ?? theme.key, DP_W, DP_H);
 }
 
 export async function generatePersonalAssets(
