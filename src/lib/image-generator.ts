@@ -123,6 +123,32 @@ function drawHeadlineBlock(
       currentY += 42;
     }
   }
+  return currentY;
+}
+
+function drawHeadlineBlockCentered(
+  ctx: CanvasRenderingContext2D,
+  lines: { text: string; color?: string }[],
+  centerX: number,
+  startY: number,
+  maxWidth: number,
+  theme: ResolvedFrameTheme
+) {
+  const { primary, accent, gold, green } = theme.colors;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
+  ctx.direction = "ltr";
+  let currentY = startY;
+  for (const line of lines) {
+    ctx.fillStyle = resolvePosterColor(line.color, primary, accent, gold, green);
+    ctx.font = posterFont(700, 34);
+    const wrapped = splitTextIntoLines(ctx, line.text, maxWidth);
+    for (const segment of wrapped) {
+      ctx.fillText(segment, centerX, currentY);
+      currentY += 40;
+    }
+  }
+  return currentY;
 }
 
 function drawAttendeeBlock(
@@ -178,9 +204,9 @@ function drawMiddleSection(
 
   const textY = y + 58;
   ctx.fillStyle = primary;
-  ctx.font = posterFont(600, 28);
-  const textMaxWidth = qr ? POSTER_W - 180 : 720;
-  wrapCanvasText(ctx, slogan, POSTER_W / 2, textY, textMaxWidth, 36);
+  ctx.font = posterFont(600, 30);
+  const textMaxWidth = qr ? POSTER_W - 220 : 860;
+  wrapCanvasText(ctx, slogan, POSTER_W / 2, textY, textMaxWidth, 38);
 
   if (qr) {
     const size = 96;
@@ -204,13 +230,16 @@ function drawStatsBar(
 
   stats.forEach((stat, i) => {
     const x = i * blockW;
-    ctx.fillStyle = resolvePosterColor(stat.color, primary, accent, gold, green);
-    ctx.fillRect(x, y, blockW, barH);
+    const color = resolvePosterColor(stat.color, primary, accent, gold, green);
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x + 10, y + 8, blockW - 20, barH - 16);
 
     ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
     ctx.direction = "ltr";
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = color;
     ctx.font = posterFont(700, 34);
     ctx.fillText(stat.value, x + blockW / 2, y + 52);
 
@@ -227,10 +256,14 @@ function drawFooter(
   website?: string,
   socialHandle?: string
 ) {
-  ctx.fillStyle = primary;
-  ctx.fillRect(0, y, POSTER_W, height);
+  ctx.strokeStyle = primary;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(36, y);
+  ctx.lineTo(POSTER_W - 36, y);
+  ctx.stroke();
 
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = primary;
   ctx.font = posterFont(500, 22);
   ctx.textBaseline = "middle";
   ctx.direction = "ltr";
@@ -256,10 +289,11 @@ function drawCountdownBanner(
   const barX = 36;
   const barW = POSTER_W - 72;
 
-  ctx.fillStyle = theme.colors.accent;
-  ctx.fillRect(barX, y, barW, COUNTDOWN_BAR_H);
+  ctx.strokeStyle = theme.colors.accent;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(barX, y, barW, COUNTDOWN_BAR_H);
 
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = theme.colors.primary;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.direction = "ltr";
@@ -346,7 +380,8 @@ async function drawBmmPersonalPoster(
   const middleY = 560;
   const qrUrl = getQrUrl(event, config.qrUrl);
   const qr = qrUrl ? await loadQrCode(qrUrl) : null;
-  drawMiddleSection(ctx, event.tagline, qr, middleY, primary);
+  const middleTagline = genderTagline.trim() || event.tagline;
+  drawMiddleSection(ctx, middleTagline, qr, middleY, accent);
 
   drawPosterFooterSection(ctx, event, theme, middleY + 118);
 }
@@ -379,6 +414,8 @@ async function drawBmmGroupPoster(
   const { primary, accent, background } = theme.colors;
   const config = parsePosterTemplate(event);
   const hashtag = getPosterHashtag(config, event);
+  const groupTagline = getGenderTagline(event, "group");
+  const headline = getPosterHeadline(config, event, groupTagline);
 
   ctx.fillStyle = background || "#ffffff";
   ctx.fillRect(0, 0, POSTER_W, POSTER_H);
@@ -386,7 +423,10 @@ async function drawBmmGroupPoster(
 
   drawBmmHeader(ctx, event, logo, theme, hashtag);
 
+  drawHeadlineBlockCentered(ctx, headline, POSTER_W / 2, 150, 920, theme);
+
   const positions = getGroupPhotoPositions(input.memberCount);
+  const maxRadius = Math.max(...positions.map((pos) => pos.r));
   photos.forEach((photo, i) => {
     const pos = positions[i];
     const crop = input.photoCrops[i];
@@ -398,25 +438,30 @@ async function drawBmmGroupPoster(
     ctx.stroke();
   });
 
+  const photoBottom = positions[0].y + maxRadius + theme.photoRingWidth + 16;
+  const nameY = photoBottom + 44;
+
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
   ctx.fillStyle = accent;
   ctx.font = posterFont(700, 34);
-  ctx.fillText(input.groupName.toUpperCase(), POSTER_W / 2, 500);
+  const groupName = input.groupName.trim() || "Our Group";
+  ctx.fillText(groupName.toUpperCase(), POSTER_W / 2, nameY);
 
-  const groupCity = (input.city?.trim() || event.location || "").toUpperCase();
+  const groupCity = (input.city?.trim() || event.location || "").trim();
+  let middleY = nameY + 36;
   if (groupCity) {
     ctx.fillStyle = primary;
     ctx.font = posterFont(600, 22);
-    ctx.fillText(groupCity, POSTER_W / 2, 538);
+    ctx.fillText(groupCity.toUpperCase(), POSTER_W / 2, nameY + 34);
+    middleY = nameY + 68;
   }
 
-  const middleY = 560;
-  const tagline = getGenderTagline(event, "group");
   const qrUrl = getQrUrl(event, config.qrUrl);
   const qr = qrUrl ? await loadQrCode(qrUrl) : null;
-  drawMiddleSection(ctx, tagline || event.tagline, qr, middleY, primary);
+  const middleTagline = groupTagline.trim() || event.tagline;
+  drawMiddleSection(ctx, middleTagline, qr, middleY, accent);
 
   drawPosterFooterSection(ctx, event, theme, middleY + 118);
 }
@@ -532,45 +577,49 @@ export function getGroupPosterPhotoPositions(count: 2 | 3 | 4) {
 }
 
 function getGroupPhotoPositions(count: number) {
+  const centerY = 400;
+
   if (count === 2) {
     return [
-      { x: 360, y: 360, r: 100 },
-      { x: 720, y: 360, r: 100 },
+      { x: 360, y: centerY, r: 100 },
+      { x: 720, y: centerY, r: 100 },
     ];
   }
   if (count === 3) {
     return [
-      { x: 540, y: 300, r: 88 },
-      { x: 360, y: 430, r: 88 },
-      { x: 720, y: 430, r: 88 },
+      { x: 270, y: centerY, r: 88 },
+      { x: 540, y: centerY, r: 88 },
+      { x: 810, y: centerY, r: 88 },
     ];
   }
   return [
-    { x: 360, y: 310, r: 78 },
-    { x: 720, y: 310, r: 78 },
-    { x: 360, y: 440, r: 78 },
-    { x: 720, y: 440, r: 78 },
+    { x: 162, y: centerY, r: 72 },
+    { x: 414, y: centerY, r: 72 },
+    { x: 666, y: centerY, r: 72 },
+    { x: 918, y: centerY, r: 72 },
   ];
 }
 
 function getGroupDpPositions(count: number) {
+  const centerY = 300;
+
   if (count === 2) {
     return [
-      { x: 220, y: 270, r: 95 },
-      { x: 420, y: 270, r: 95 },
+      { x: 220, y: centerY, r: 95 },
+      { x: 420, y: centerY, r: 95 },
     ];
   }
   if (count === 3) {
     return [
-      { x: 320, y: 220, r: 80 },
-      { x: 200, y: 370, r: 80 },
-      { x: 440, y: 370, r: 80 },
+      { x: 160, y: centerY, r: 78 },
+      { x: 320, y: centerY, r: 78 },
+      { x: 480, y: centerY, r: 78 },
     ];
   }
   return [
-    { x: 200, y: 240, r: 70 },
-    { x: 440, y: 240, r: 70 },
-    { x: 200, y: 390, r: 70 },
-    { x: 440, y: 390, r: 70 },
+    { x: 95, y: centerY, r: 55 },
+    { x: 235, y: centerY, r: 55 },
+    { x: 375, y: centerY, r: 55 },
+    { x: 515, y: centerY, r: 55 },
   ];
 }

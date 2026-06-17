@@ -60,19 +60,23 @@ export function getPosterHeadline(
 ): PosterHeadlineLine[] {
   if (config.headline?.length) return config.headline;
 
-  const eventWords = event.name.toUpperCase().split(/\s+/);
+  const lines: PosterHeadlineLine[] = [
+    { text: "JOIN ME AT THE", color: "accent" },
+  ];
+
+  const eventWords = event.name.toUpperCase().split(/\s+/).filter(Boolean);
   if (eventWords.length >= 3) {
-    return [
-      { text: "JOIN ME AT THE", color: "accent" },
-      { text: eventWords[0], color: "primary" },
-      { text: eventWords.slice(1).join(" "), color: "gold" },
-    ];
+    lines.push({ text: eventWords[0], color: "primary" });
+    lines.push({ text: eventWords.slice(1).join(" "), color: "gold" });
   }
 
-  return [
-    { text: "JOIN ME AT THE", color: "accent" },
-    { text: genderTagline, color: "primary" },
-  ];
+  if (genderTagline.trim()) {
+    lines.push({ text: genderTagline, color: "primary" });
+  } else if (eventWords.length < 3) {
+    lines.push({ text: event.name.toUpperCase(), color: "primary" });
+  }
+
+  return lines;
 }
 
 export function getPosterHashtag(

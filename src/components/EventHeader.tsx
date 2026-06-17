@@ -52,7 +52,7 @@ export function EventHeader({ event, activeTab, basePath }: Props) {
                 : undefined
             }
           >
-            Personal DP
+            Personal
           </Link>
           <Link
             href={`${basePath}/group`}
@@ -67,7 +67,7 @@ export function EventHeader({ event, activeTab, basePath }: Props) {
                 : undefined
             }
           >
-            Group DP
+            Group
           </Link>
         </nav>
       </div>
