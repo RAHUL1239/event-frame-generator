@@ -145,7 +145,7 @@ function drawBmmHeader(
     ctx,
     logo,
     layoutX(layout, 36, canvasW),
-    layoutY(layout, 28, canvasH),
+    layoutY(layout, 48, canvasH),
     96,
     96
   );
@@ -661,7 +661,7 @@ function drawPersonalDp(
     ctx.fillRect(0, 0, DP_W, DP_H);
   }
 
-  drawLogo(ctx, logo, layoutX(layout, 320, DP_W), layoutY(layout, 10, DP_H), 72, 72);
+  drawLogo(ctx, logo, layoutX(layout, 320, DP_W), layoutY(layout, 28, DP_H), 72, 72);
   drawCircularImage(ctx, photo, photoX, photoY, photoRadius, input.photoCrop);
 
   ctx.strokeStyle = accent;
@@ -701,7 +701,7 @@ function drawGroupDp(
     ctx.fillRect(0, 0, DP_W, DP_H);
   }
 
-  drawLogo(ctx, logo, layoutX(layout, 320, DP_W), layoutY(layout, 10, DP_H), 68, 68);
+  drawLogo(ctx, logo, layoutX(layout, 320, DP_W), layoutY(layout, 28, DP_H), 68, 68);
 
   const dpPositions = getGroupDpPositions(input.memberCount).map((pos) => ({
     x: layoutX(layout, pos.x, DP_W),
