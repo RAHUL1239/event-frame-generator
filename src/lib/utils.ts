@@ -44,6 +44,22 @@ export function drawLogo(
   return h;
 }
 
+/** Draw logo with top-left anchor (for BMM-style header). */
+export function drawLogoAt(
+  ctx: CanvasRenderingContext2D,
+  logo: HTMLImageElement,
+  leftX: number,
+  topY: number,
+  maxWidth: number,
+  maxHeight: number
+): { width: number; height: number } {
+  const scale = Math.min(maxWidth / logo.width, maxHeight / logo.height);
+  const w = logo.width * scale;
+  const h = logo.height * scale;
+  ctx.drawImage(logo, leftX, topY, w, h);
+  return { width: w, height: h };
+}
+
 export function formatDisplayName(
   firstName?: string | null,
   lastName?: string | null

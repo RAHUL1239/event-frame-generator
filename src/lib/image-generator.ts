@@ -1,7 +1,16 @@
 import type { EventWithOptions, GeneratedAssets, GroupFormData, PersonalFormData } from "./types";
 import {
+  getPosterHashtag,
+  getPosterHeadline,
+  getPosterVenueLine,
+  parsePosterTemplate,
+  resolvePosterColor,
+  type PosterStat,
+} from "./poster-template";
+import {
   drawCircularImage,
   drawLogo,
+  drawLogoAt,
   fileToDataUrl,
   loadEventLogo,
   loadImage,
@@ -10,37 +19,11 @@ import {
 type PersonalInput = PersonalFormData & { event: EventWithOptions };
 type GroupInput = GroupFormData & { event: EventWithOptions };
 
+const POSTER_W = 1080;
+const POSTER_H = 1080;
+
 function getGenderTagline(event: EventWithOptions, genderKey: string) {
   return event.genderOptions.find((o) => o.key === genderKey)?.tagline ?? "";
-}
-
-function drawPosterHeader(
-  ctx: CanvasRenderingContext2D,
-  event: EventWithOptions,
-  logo: HTMLImageElement,
-  centerX: number
-): number {
-  const logoH = drawLogo(ctx, logo, centerX, 12, 110, 110);
-  const y = 12 + logoH + 64;
-
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "34px system-ui, sans-serif";
-  ctx.fillText(event.dateLabel, centerX, y);
-
-  return y + 40;
-}
-
-function drawEventNameBelow(
-  ctx: CanvasRenderingContext2D,
-  event: EventWithOptions,
-  centerX: number,
-  y: number
-): number {
-  ctx.textAlign = "center";
-  ctx.fillStyle = event.accentColor;
-  ctx.font = "bold 28px system-ui, sans-serif";
-  return wrapCanvasText(ctx, event.name.toUpperCase(), centerX, y, 880, 34);
 }
 
 function fillCenteredLine(
@@ -49,7 +32,6 @@ function fillCenteredLine(
   centerX: number,
   y: number
 ) {
-  // Manual centering avoids right-alignment bugs with mixed Devanagari/Latin text.
   ctx.direction = "ltr";
   ctx.textAlign = "left";
   const width = ctx.measureText(line).width;
@@ -82,21 +64,242 @@ function wrapCanvasText(
   return currentY + lineHeight;
 }
 
-function drawCenteredTagline(
+async function loadQrCode(url: string): Promise<HTMLImageElement | null> {
+  try {
+    const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=128x128&margin=0&data=${encodeURIComponent(url)}`;
+    return await loadImage(qrApi);
+  } catch {
+    return null;
+  }
+}
+
+function getQrUrl(event: EventWithOptions, configQr?: string): string | undefined {
+  if (configQr) return configQr;
+  if (typeof window !== "undefined") {
+    return `${window.location.origin}/events/${event.slug}/personal`;
+  }
+  return undefined;
+}
+
+function drawBmmHeader(
   ctx: CanvasRenderingContext2D,
-  text: string,
-  centerX: number,
-  y: number,
-  maxWidth: number,
-  fontSize: number,
-  lineHeight: number,
-  color: string
-): number {
+  event: EventWithOptions,
+  logo: HTMLImageElement,
+  primary: string,
+  accent: string,
+  hashtag?: string
+) {
+  drawLogoAt(ctx, logo, 36, 28, 96, 96);
+
   ctx.textAlign = "center";
+  ctx.fillStyle = primary;
+  ctx.font = "bold 40px system-ui, sans-serif";
+  ctx.fillText(event.name.toUpperCase(), POSTER_W / 2, 72);
+
+  ctx.fillStyle = accent;
+  ctx.font = "600 22px system-ui, sans-serif";
+  ctx.fillText(getPosterVenueLine(event), POSTER_W / 2, 108);
+
+  if (hashtag) {
+    ctx.textAlign = "right";
+    ctx.fillStyle = resolvePosterColor("green", primary, accent);
+    ctx.font = "bold 26px system-ui, sans-serif";
+    ctx.fillText(hashtag, POSTER_W - 36, 58);
+  }
+}
+
+function drawHeadlineBlock(
+  ctx: CanvasRenderingContext2D,
+  lines: { text: string; color?: string }[],
+  x: number,
+  y: number,
+  primary: string,
+  accent: string
+) {
+  ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
-  ctx.fillStyle = color;
-  ctx.font = `${fontSize}px system-ui, sans-serif`;
-  return wrapCanvasText(ctx, text, centerX, y, maxWidth, lineHeight);
+  let currentY = y;
+  for (const line of lines) {
+    ctx.fillStyle = resolvePosterColor(line.color, primary, accent);
+    ctx.font = "bold 34px system-ui, sans-serif";
+    ctx.fillText(line.text, x, currentY);
+    currentY += 42;
+  }
+}
+
+function drawAttendeeBlock(
+  ctx: CanvasRenderingContext2D,
+  name: string,
+  role: string,
+  city: string,
+  x: number,
+  y: number,
+  primary: string,
+  accent: string
+) {
+  ctx.textAlign = "left";
+  ctx.fillStyle = accent;
+  ctx.font = "bold 36px system-ui, sans-serif";
+  const upperName = name.toUpperCase();
+  ctx.fillText(upperName, x, y);
+
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(x, y + 10);
+  ctx.lineTo(x + Math.min(ctx.measureText(upperName).width, 420), y + 10);
+  ctx.stroke();
+
+  ctx.fillStyle = primary;
+  ctx.font = "600 22px system-ui, sans-serif";
+  let lineY = y + 44;
+  if (role) {
+    ctx.fillText(role.toUpperCase(), x, lineY);
+    lineY += 30;
+  }
+  if (city) {
+    ctx.fillText(city.toUpperCase(), x, lineY);
+  }
+}
+
+function drawMiddleSection(
+  ctx: CanvasRenderingContext2D,
+  slogan: string,
+  qr: HTMLImageElement | null,
+  y: number,
+  primary: string
+) {
+  ctx.strokeStyle = "#e5e7eb";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(36, y);
+  ctx.lineTo(POSTER_W - 36, y);
+  ctx.stroke();
+
+  const textY = y + 58;
+  ctx.fillStyle = primary;
+  ctx.font = "600 28px system-ui, sans-serif";
+  wrapCanvasText(ctx, slogan, POSTER_W / 2, textY, 720, 36);
+
+  if (qr) {
+    const size = 96;
+    const qrX = POSTER_W - 36 - size;
+    const qrY = y + 16;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(qrX - 4, qrY - 4, size + 8, size + 8);
+    ctx.drawImage(qr, qrX, qrY, size, size);
+  }
+}
+
+function drawStatsBar(
+  ctx: CanvasRenderingContext2D,
+  stats: PosterStat[],
+  y: number,
+  primary: string,
+  accent: string
+) {
+  const barH = 118;
+  const blockW = POSTER_W / stats.length;
+
+  stats.forEach((stat, i) => {
+    const x = i * blockW;
+    ctx.fillStyle = resolvePosterColor(stat.color, primary, accent);
+    ctx.fillRect(x, y, blockW, barH);
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 34px system-ui, sans-serif";
+    ctx.fillText(stat.value, x + blockW / 2, y + 52);
+
+    ctx.font = "500 18px system-ui, sans-serif";
+    ctx.fillText(stat.label, x + blockW / 2, y + 86);
+  });
+}
+
+function drawFooter(
+  ctx: CanvasRenderingContext2D,
+  y: number,
+  height: number,
+  primary: string,
+  website?: string,
+  socialHandle?: string
+) {
+  ctx.fillStyle = primary;
+  ctx.fillRect(0, y, POSTER_W, height);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "500 22px system-ui, sans-serif";
+  ctx.textBaseline = "middle";
+  if (website) {
+    ctx.textAlign = "left";
+    ctx.fillText(`🌐 ${website}`, 40, y + height / 2);
+  }
+
+  if (socialHandle) {
+    ctx.textAlign = "right";
+    ctx.fillText(`in  ig  fb  yt  ${socialHandle}`, POSTER_W - 40, y + height / 2);
+  }
+}
+
+async function drawBmmPersonalPoster(
+  ctx: CanvasRenderingContext2D,
+  input: PersonalInput,
+  logo: HTMLImageElement,
+  photo: HTMLImageElement
+) {
+  const { event } = input;
+  const primary = event.primaryColor;
+  const accent = event.accentColor;
+  const config = parsePosterTemplate(event);
+  const genderTagline = getGenderTagline(event, input.genderKey);
+  const hashtag = getPosterHashtag(config, event);
+  const headline = getPosterHeadline(config, event, genderTagline);
+
+  ctx.fillStyle = event.backgroundColor || "#ffffff";
+  ctx.fillRect(0, 0, POSTER_W, POSTER_H);
+
+  drawBmmHeader(ctx, event, logo, primary, accent, hashtag);
+
+  const photoX = 250;
+  const photoY = 390;
+  const photoRadius = 128;
+  drawCircularImage(ctx, photo, photoX, photoY, photoRadius, input.photoCrop);
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 8;
+  ctx.beginPath();
+  ctx.arc(photoX, photoY, photoRadius + 6, 0, Math.PI * 2);
+  ctx.stroke();
+
+  drawHeadlineBlock(ctx, headline, 500, 200, primary, accent);
+
+  const displayName = `${input.firstName} ${input.lastName}`.trim();
+  const cityLabel = (input.city?.trim() || event.location || "").trim();
+  drawAttendeeBlock(
+    ctx,
+    displayName,
+    input.role,
+    cityLabel,
+    500,
+    400,
+    primary,
+    accent
+  );
+
+  const middleY = 560;
+  const qrUrl = getQrUrl(event, config.qrUrl);
+  const qr = qrUrl ? await loadQrCode(qrUrl) : null;
+  drawMiddleSection(ctx, event.tagline, qr, middleY, primary);
+
+  const stats = config.stats ?? [];
+  const statsY = 660;
+  const footerY = stats.length > 0 ? statsY + 118 : statsY + 20;
+  const footerH = POSTER_H - footerY;
+
+  if (stats.length > 0) {
+    drawStatsBar(ctx, stats, statsY, primary, accent);
+  }
+
+  drawFooter(ctx, footerY, footerH, primary, config.website, config.socialHandle);
 }
 
 export async function generatePersonalAssets(
@@ -105,58 +308,12 @@ export async function generatePersonalAssets(
   const photoDataUrl = await fileToDataUrl(input.photo);
   const photo = await loadImage(photoDataUrl);
   const logo = await loadEventLogo(input.event);
-  const tagline = getGenderTagline(input.event, input.genderKey);
 
   const poster = document.createElement("canvas");
-  poster.width = 1080;
-  poster.height = 1080;
+  poster.width = POSTER_W;
+  poster.height = POSTER_H;
   const pCtx = poster.getContext("2d")!;
-
-  const gradient = pCtx.createLinearGradient(0, 0, 0, poster.height);
-  gradient.addColorStop(0, input.event.primaryColor);
-  gradient.addColorStop(1, "#0f3331");
-  pCtx.fillStyle = gradient;
-  pCtx.fillRect(0, 0, poster.width, poster.height);
-
-  const headerBottom = drawPosterHeader(pCtx, input.event, logo, 540);
-
-  const photoRadius = 158;
-  const ringRadius = photoRadius + 8;
-  const ringWidth = 6;
-  const photoY = headerBottom + photoRadius + 28;
-  const ringBottom = photoY + ringRadius + ringWidth / 2;
-
-  drawCircularImage(pCtx, photo, 540, photoY, photoRadius, input.photoCrop);
-
-  pCtx.strokeStyle = input.event.accentColor;
-  pCtx.lineWidth = ringWidth;
-  pCtx.beginPath();
-  pCtx.arc(540, photoY, ringRadius, 0, Math.PI * 2);
-  pCtx.stroke();
-
-  let textY = drawEventNameBelow(pCtx, input.event, 540, ringBottom + 48);
-  textY += 20;
-
-  pCtx.fillStyle = "#ffffff";
-  pCtx.font = "bold 38px system-ui, sans-serif";
-  pCtx.textAlign = "center";
-  const displayName = `${input.firstName} ${input.lastName}`.trim();
-  pCtx.fillText(displayName.toUpperCase(), 540, textY);
-  textY += 46;
-
-  pCtx.font = "24px system-ui, sans-serif";
-  pCtx.fillStyle = "#ffffff";
-  if (input.role) {
-    pCtx.fillText(input.role.toUpperCase(), 540, textY);
-    textY += 36;
-  }
-  const cityLabel = (input.city?.trim() || input.event.location || "").toUpperCase();
-  if (cityLabel) {
-    pCtx.fillText(cityLabel, 540, textY);
-    textY += 36;
-  }
-
-  drawCenteredTagline(pCtx, tagline, 540, textY + 16, 900, 32, 40, input.event.accentColor);
+  await drawBmmPersonalPoster(pCtx, input, logo, photo);
 
   const dp = document.createElement("canvas");
   dp.width = 640;
@@ -194,66 +351,68 @@ export async function generateGroupAssets(
   const photoDataUrls = await Promise.all(input.photos.map(fileToDataUrl));
   const photos = await Promise.all(photoDataUrls.map(loadImage));
   const logo = await loadEventLogo(input.event);
+  const { event } = input;
+  const primary = event.primaryColor;
+  const accent = event.accentColor;
+  const config = parsePosterTemplate(event);
+  const hashtag = getPosterHashtag(config, event);
 
   const poster = document.createElement("canvas");
-  poster.width = 1080;
-  poster.height = 1080;
+  poster.width = POSTER_W;
+  poster.height = POSTER_H;
   const pCtx = poster.getContext("2d")!;
 
-  const gradient = pCtx.createLinearGradient(0, 0, 0, poster.height);
-  gradient.addColorStop(0, input.event.primaryColor);
-  gradient.addColorStop(1, "#0f3331");
-  pCtx.fillStyle = gradient;
-  pCtx.fillRect(0, 0, poster.width, poster.height);
+  pCtx.fillStyle = event.backgroundColor || "#ffffff";
+  pCtx.fillRect(0, 0, POSTER_W, POSTER_H);
 
-  const headerBottom = drawPosterHeader(pCtx, input.event, logo, 540);
+  drawBmmHeader(pCtx, event, logo, primary, accent, hashtag);
 
-  const positions = getGroupPhotoPositions(input.memberCount, headerBottom);
+  const positions = getGroupPhotoPositions(input.memberCount);
   photos.forEach((photo, i) => {
     const pos = positions[i];
     const crop = input.photoCrops[i];
     drawCircularImage(pCtx, photo, pos.x, pos.y, pos.r, crop);
-    pCtx.strokeStyle = input.event.accentColor;
-    pCtx.lineWidth = 5;
+    pCtx.strokeStyle = accent;
+    pCtx.lineWidth = 6;
     pCtx.beginPath();
-    pCtx.arc(pos.x, pos.y, pos.r + 4, 0, Math.PI * 2);
+    pCtx.arc(pos.x, pos.y, pos.r + 5, 0, Math.PI * 2);
     pCtx.stroke();
   });
 
-  const photoBottom = Math.max(...positions.map((p) => p.y + p.r + 8));
-  let textY = drawEventNameBelow(pCtx, input.event, 540, photoBottom + 52);
-  textY += 16;
-
-  pCtx.fillStyle = "#ffffff";
-  pCtx.font = "bold 34px system-ui, sans-serif";
   pCtx.textAlign = "center";
-  pCtx.fillText(input.groupName.toUpperCase(), 540, textY);
-  textY += 42;
+  pCtx.fillStyle = accent;
+  pCtx.font = "bold 34px system-ui, sans-serif";
+  pCtx.fillText(input.groupName.toUpperCase(), POSTER_W / 2, 500);
 
-  const groupCity = (input.city?.trim() || input.event.location || "").toUpperCase();
+  const groupCity = (input.city?.trim() || event.location || "").toUpperCase();
   if (groupCity) {
-    pCtx.font = "22px system-ui, sans-serif";
-    pCtx.fillStyle = "#ffffff";
-    pCtx.fillText(groupCity, 540, textY);
-    textY += 36;
+    pCtx.fillStyle = primary;
+    pCtx.font = "600 22px system-ui, sans-serif";
+    pCtx.fillText(groupCity, POSTER_W / 2, 538);
   }
 
-  drawCenteredTagline(
-    pCtx,
-    getGenderTagline(input.event, "group"),
-    540,
-    textY + 12,
-    900,
-    30,
-    38,
-    input.event.accentColor
-  );
+  const middleY = 560;
+  const tagline = getGenderTagline(event, "group");
+  const qrUrl = getQrUrl(event, config.qrUrl);
+  const qr = qrUrl ? await loadQrCode(qrUrl) : null;
+  drawMiddleSection(pCtx, tagline || event.tagline, qr, middleY, primary);
+
+  const stats = config.stats ?? [];
+  const statsY = 660;
+  const footerY = stats.length > 0 ? statsY + 118 : statsY + 20;
+  const footerH = POSTER_H - footerY;
+
+  if (stats.length > 0) {
+    drawStatsBar(pCtx, stats, statsY, primary, accent);
+  }
+
+  drawFooter(pCtx, footerY, footerH, primary, config.website, config.socialHandle);
 
   const dp = document.createElement("canvas");
   dp.width = 640;
   dp.height = 640;
   const dCtx = dp.getContext("2d")!;
-  dCtx.fillStyle = input.event.primaryColor;
+  dCtx.fillStyle = event.primaryColor;
   dCtx.fillRect(0, 0, dp.width, dp.height);
 
   drawLogo(dCtx, logo, 320, 10, 68, 68);
@@ -263,7 +422,7 @@ export async function generateGroupAssets(
     const pos = dpPositions[i];
     const crop = input.photoCrops[i];
     drawCircularImage(dCtx, photo, pos.x, pos.y + 20, pos.r, crop);
-    dCtx.strokeStyle = input.event.accentColor;
+    dCtx.strokeStyle = accent;
     dCtx.lineWidth = 4;
     dCtx.beginPath();
     dCtx.arc(pos.x, pos.y + 20, pos.r + 3, 0, Math.PI * 2);
@@ -281,26 +440,25 @@ export async function generateGroupAssets(
   };
 }
 
-function getGroupPhotoPositions(count: number, headerBottom: number) {
-  const baseY = headerBottom + 150;
+function getGroupPhotoPositions(count: number) {
   if (count === 2) {
     return [
-      { x: 360, y: baseY, r: 120 },
-      { x: 720, y: baseY, r: 120 },
+      { x: 360, y: 360, r: 100 },
+      { x: 720, y: 360, r: 100 },
     ];
   }
   if (count === 3) {
     return [
-      { x: 540, y: baseY - 40, r: 100 },
-      { x: 360, y: baseY + 100, r: 100 },
-      { x: 720, y: baseY + 100, r: 100 },
+      { x: 540, y: 300, r: 88 },
+      { x: 360, y: 430, r: 88 },
+      { x: 720, y: 430, r: 88 },
     ];
   }
   return [
-    { x: 360, y: baseY - 30, r: 90 },
-    { x: 720, y: baseY - 30, r: 90 },
-    { x: 360, y: baseY + 110, r: 90 },
-    { x: 720, y: baseY + 110, r: 90 },
+    { x: 360, y: 310, r: 78 },
+    { x: 720, y: 310, r: 78 },
+    { x: 360, y: 440, r: 78 },
+    { x: 720, y: 440, r: 78 },
   ];
 }
 

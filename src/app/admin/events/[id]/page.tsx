@@ -28,6 +28,7 @@ type EventDetail = {
   primaryColor: string;
   accentColor: string;
   backgroundColor: string;
+  posterTemplate: string | null;
   genderOptions: GenderOption[];
   submissions: {
     id: string;
@@ -108,6 +109,7 @@ export default function AdminEventPage({
         primaryColor: event.primaryColor,
         accentColor: event.accentColor,
         backgroundColor: event.backgroundColor,
+        posterTemplate: event.posterTemplate,
         genderOptions: event.genderOptions,
       }),
     });
@@ -238,12 +240,30 @@ export default function AdminEventPage({
             </p>
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Event Name" value={event.name} onChange={(v) => setEvent({ ...event, name: v })} />
-              <Field label="Subtitle" value={event.subtitle} onChange={(v) => setEvent({ ...event, subtitle: v })} />
+              <Field label="Hashtag" value={event.subtitle} onChange={(v) => setEvent({ ...event, subtitle: v })} hint="e.g. #MKM51 — shown top-right on poster" />
               <Field label="Date Label" value={event.dateLabel} onChange={(v) => setEvent({ ...event, dateLabel: v })} />
               <Field label="Tagline (footer)" value={event.tagline} onChange={(v) => setEvent({ ...event, tagline: v })} />
               <Field label="Location (default city)" value={event.location ?? ""} onChange={(v) => setEvent({ ...event, location: v })} />
               <Field label="Facebook Group Name" value={event.facebookGroupName ?? ""} onChange={(v) => setEvent({ ...event, facebookGroupName: v })} />
               <Field label="Facebook Group URL" value={event.facebookGroupUrl ?? ""} onChange={(v) => setEvent({ ...event, facebookGroupUrl: v })} hint="e.g. https://www.facebook.com/groups/your-group" />
+              <div className="md:col-span-2">
+                <label className="text-sm font-medium text-gray-600">
+                  Poster template (JSON)
+                </label>
+                <textarea
+                  value={event.posterTemplate ?? ""}
+                  onChange={(e) =>
+                    setEvent({ ...event, posterTemplate: e.target.value || null })
+                  }
+                  rows={8}
+                  className="mt-1 w-full rounded-lg border px-3 py-2 font-mono text-xs"
+                  placeholder='{"hashtag":"#BMM2026","headline":[...],"stats":[...],"website":"...","socialHandle":"..."}'
+                />
+                <p className="mt-1 text-xs text-gray-400">
+                  Controls headline colors, stats bar, footer, and QR link. Subtitle
+                  field can also be a hashtag (e.g. #MKM51).
+                </p>
+              </div>
               <ColorField label="Primary Color" value={event.primaryColor} onChange={(v) => setEvent({ ...event, primaryColor: v })} />
               <ColorField label="Accent Color" value={event.accentColor} onChange={(v) => setEvent({ ...event, accentColor: v })} />
               <ColorField label="Background Color" value={event.backgroundColor} onChange={(v) => setEvent({ ...event, backgroundColor: v })} />

@@ -79,6 +79,7 @@ export async function PATCH(
       accentColor: body.accentColor,
       backgroundColor: body.backgroundColor,
       logoUrl: body.logoUrl,
+      posterTemplate: body.posterTemplate || null,
     },
     include: { genderOptions: { orderBy: { sortOrder: "asc" } } },
   });
