@@ -42,7 +42,7 @@ export const FRAME_THEMES: Record<FrameThemeKey, FrameThemeDefinition> = {
     colors: {
       primary: "#7B1E3A",
       accent: "#D4AF37",
-      background: "#FFF8F0",
+      background: "#f5f0e8",
       gold: "#D4AF37",
       green: "#2D6A4F",
     },
@@ -56,7 +56,7 @@ export const FRAME_THEMES: Record<FrameThemeKey, FrameThemeDefinition> = {
     colors: {
       primary: "#1E3A6E",
       accent: "#C9A227",
-      background: "#FFFFFF",
+      background: "#f5f0e8",
       gold: "#C9A227",
       green: "#2D8A4E",
     },
@@ -70,7 +70,7 @@ export const FRAME_THEMES: Record<FrameThemeKey, FrameThemeDefinition> = {
     colors: {
       primary: "#870A82",
       accent: "#E85D24",
-      background: "#FFFFFF",
+      background: "#f5f0e8",
       gold: "#F4B400",
       green: "#00A86B",
     },
@@ -84,7 +84,7 @@ export const FRAME_THEMES: Record<FrameThemeKey, FrameThemeDefinition> = {
     colors: {
       primary: "#2D5A3D",
       accent: "#E07830",
-      background: "#FAF6F0",
+      background: "#f5f0e8",
       gold: "#D4A574",
       green: "#2D5A3D",
     },
@@ -98,7 +98,7 @@ export const FRAME_THEMES: Record<FrameThemeKey, FrameThemeDefinition> = {
     colors: {
       primary: "#1A4D4A",
       accent: "#E85D24",
-      background: "#F0F4F8",
+      background: "#f5f0e8",
       gold: "#C9A227",
       green: "#1A4D4A",
     },
@@ -112,7 +112,7 @@ export const FRAME_THEMES: Record<FrameThemeKey, FrameThemeDefinition> = {
     colors: {
       primary: "#2C3E50",
       accent: "#D4AF37",
-      background: "#FFFFFF",
+      background: "#f5f0e8",
       gold: "#D4AF37",
       green: "#27AE60",
     },

@@ -72,6 +72,13 @@ function getQrUrl(event: EventWithOptions, configQr?: string): string | undefine
   return undefined;
 }
 
+function resolvePosterBackground(
+  event: EventWithOptions,
+  theme: ResolvedFrameTheme
+): string {
+  return event.backgroundColor?.trim() || theme.colors.background || "#f5f0e8";
+}
+
 function drawBmmHeader(
   ctx: CanvasRenderingContext2D,
   event: EventWithOptions,
@@ -230,16 +237,13 @@ function drawStatsBar(
 
   stats.forEach((stat, i) => {
     const x = i * blockW;
-    const color = resolvePosterColor(stat.color, primary, accent, gold, green);
-
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x + 10, y + 8, blockW - 20, barH - 16);
+    ctx.fillStyle = resolvePosterColor(stat.color, primary, accent, gold, green);
+    ctx.fillRect(x, y, blockW, barH);
 
     ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
     ctx.direction = "ltr";
-    ctx.fillStyle = color;
+    ctx.fillStyle = "#ffffff";
     ctx.font = posterFont(700, 34);
     ctx.fillText(stat.value, x + blockW / 2, y + 52);
 
@@ -256,14 +260,10 @@ function drawFooter(
   website?: string,
   socialHandle?: string
 ) {
-  ctx.strokeStyle = primary;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(36, y);
-  ctx.lineTo(POSTER_W - 36, y);
-  ctx.stroke();
-
   ctx.fillStyle = primary;
+  ctx.fillRect(0, y, POSTER_W, height);
+
+  ctx.fillStyle = "#ffffff";
   ctx.font = posterFont(500, 22);
   ctx.textBaseline = "middle";
   ctx.direction = "ltr";
@@ -289,11 +289,10 @@ function drawCountdownBanner(
   const barX = 36;
   const barW = POSTER_W - 72;
 
-  ctx.strokeStyle = theme.colors.accent;
-  ctx.lineWidth = 2;
-  ctx.strokeRect(barX, y, barW, COUNTDOWN_BAR_H);
+  ctx.fillStyle = theme.colors.accent;
+  ctx.fillRect(barX, y, barW, COUNTDOWN_BAR_H);
 
-  ctx.fillStyle = theme.colors.primary;
+  ctx.fillStyle = "#ffffff";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.direction = "ltr";
@@ -349,13 +348,14 @@ async function drawBmmPersonalPoster(
   theme: ResolvedFrameTheme
 ) {
   const { event } = input;
-  const { primary, accent, background } = theme.colors;
+  const { primary, accent } = theme.colors;
+  const posterBackground = resolvePosterBackground(event, theme);
   const config = parsePosterTemplate(event);
   const genderTagline = getGenderTagline(event, input.genderKey);
   const hashtag = getPosterHashtag(config, event);
   const headline = getPosterHeadline(config, event, genderTagline);
 
-  ctx.fillStyle = background || "#ffffff";
+  ctx.fillStyle = posterBackground;
   ctx.fillRect(0, 0, POSTER_W, POSTER_H);
   drawFrameThemeDecoration(ctx, theme, POSTER_W, POSTER_H);
 
@@ -411,13 +411,14 @@ async function drawBmmGroupPoster(
   theme: ResolvedFrameTheme
 ) {
   const { event } = input;
-  const { primary, accent, background } = theme.colors;
+  const { primary, accent } = theme.colors;
+  const posterBackground = resolvePosterBackground(event, theme);
   const config = parsePosterTemplate(event);
   const hashtag = getPosterHashtag(config, event);
   const groupTagline = getGenderTagline(event, "group");
   const headline = getPosterHeadline(config, event, groupTagline);
 
-  ctx.fillStyle = background || "#ffffff";
+  ctx.fillStyle = posterBackground;
   ctx.fillRect(0, 0, POSTER_W, POSTER_H);
   drawFrameThemeDecoration(ctx, theme, POSTER_W, POSTER_H);
 
