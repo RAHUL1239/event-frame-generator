@@ -19,6 +19,7 @@ export default function CreateEventPage() {
     location: "",
     facebookGroupName: "",
     facebookGroupUrl: "",
+    participantCountBase: 0,
     primaryColor: "#1a4d4a",
     accentColor: "#c9a227",
     backgroundColor: "#f5f0e8",
@@ -152,6 +153,28 @@ export default function CreateEventPage() {
                 placeholder="https://www.facebook.com/groups/your-group"
                 hint="Used when attendees share to Facebook"
               />
+              <div>
+                <label className="text-sm font-medium text-gray-600">
+                  Participant count base
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  step={1}
+                  value={form.participantCountBase}
+                  onChange={(e) =>
+                    updateField(
+                      "participantCountBase",
+                      Math.max(0, Number(e.target.value) || 0)
+                    )
+                  }
+                  className="mt-1 w-full rounded-lg border px-3 py-2"
+                />
+                <p className="mt-1 text-xs text-gray-400">
+                  Starting boost for &quot;You are participant #…&quot; (0 =
+                  actual count only).
+                </p>
+              </div>
             </div>
           </section>
 

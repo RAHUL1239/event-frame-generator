@@ -1,7 +1,19 @@
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import { prisma } from "@/lib/prisma";
+import { calculateParticipantNumber } from "@/lib/participant-number";
 import { getClientIp } from "@/lib/server-utils";
+
+async function participantNumberForSubmission(
+  eventId: string,
+  participantCountBase: number,
+  createdAt: Date
+) {
+  const ordinal = await prisma.submission.count({
+    where: { eventId, createdAt: { lte: createdAt } },
+  });
+  return calculateParticipantNumber(participantCountBase, ordinal);
+}
 
 type FileMeta = {
   originalName: string;
@@ -96,7 +108,14 @@ export async function POST(
         },
       });
 
-      return NextResponse.json({ id: submission.id });
+      return NextResponse.json({
+        id: submission.id,
+        participantNumber: await participantNumberForSubmission(
+          event.id,
+          event.participantCountBase,
+          submission.createdAt
+        ),
+      });
     }
 
     const memberCount = Number(formData.get("memberCount") || 2);
@@ -150,7 +169,14 @@ export async function POST(
       },
     });
 
-    return NextResponse.json({ id: submission.id });
+    return NextResponse.json({
+      id: submission.id,
+      participantNumber: await participantNumberForSubmission(
+        event.id,
+        event.participantCountBase,
+        submission.createdAt
+      ),
+    });
   } catch (error) {
     console.error("Submission error:", error);
     return NextResponse.json(

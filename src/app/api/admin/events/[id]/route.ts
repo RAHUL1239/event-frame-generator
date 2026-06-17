@@ -80,6 +80,7 @@ export async function PATCH(
       backgroundColor: body.backgroundColor,
       logoUrl: body.logoUrl,
       posterTemplate: body.posterTemplate || null,
+      participantCountBase: Math.max(0, Number(body.participantCountBase) || 0),
     },
     include: { genderOptions: { orderBy: { sortOrder: "asc" } } },
   });

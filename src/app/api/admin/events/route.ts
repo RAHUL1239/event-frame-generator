@@ -72,6 +72,7 @@ export async function POST(request: Request) {
       primaryColor: body.primaryColor ?? "#1a4d4a",
       accentColor: body.accentColor ?? "#c9a227",
       backgroundColor: body.backgroundColor ?? "#f5f0e8",
+      participantCountBase: Math.max(0, Number(body.participantCountBase) || 0),
       genderOptions: {
         create: genderOptions,
       },

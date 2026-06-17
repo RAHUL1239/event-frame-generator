@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { calculateParticipantNumber } from "@/lib/participant-number";
 import { EventHeader } from "@/components/EventHeader";
 import { EventFooter } from "@/components/EventFooter";
 import { PreviewPage } from "@/components/PreviewPage";
@@ -22,6 +23,17 @@ export default async function PreviewRoute({
 
   if (!submission || submission.event.slug !== slug) notFound();
 
+  const submissionOrdinal = await prisma.submission.count({
+    where: {
+      eventId: submission.eventId,
+      createdAt: { lte: submission.createdAt },
+    },
+  });
+  const participantNumber = calculateParticipantNumber(
+    submission.event.participantCountBase,
+    submissionOrdinal
+  );
+
   const backPath =
     submission.type === "group"
       ? `/events/${slug}/group`
@@ -42,6 +54,7 @@ export default async function PreviewRoute({
           submission={submission}
           slug={slug}
           backPath={backPath}
+          participantNumber={participantNumber}
         />
       </main>
       <EventFooter event={submission.event} />

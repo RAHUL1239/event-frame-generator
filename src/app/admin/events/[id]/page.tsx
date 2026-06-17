@@ -29,6 +29,7 @@ type EventDetail = {
   accentColor: string;
   backgroundColor: string;
   posterTemplate: string | null;
+  participantCountBase: number;
   genderOptions: GenderOption[];
   submissions: {
     id: string;
@@ -75,6 +76,7 @@ export default function AdminEventPage({
             ...data,
             facebookGroupName: data.facebookGroupName ?? null,
             facebookGroupUrl: data.facebookGroupUrl ?? null,
+            participantCountBase: data.participantCountBase ?? 0,
             genderOptions: data.genderOptions ?? [],
             submissions: (data.submissions ?? []).map(
               (sub: EventDetail["submissions"][number]) => ({
@@ -110,6 +112,7 @@ export default function AdminEventPage({
         accentColor: event.accentColor,
         backgroundColor: event.backgroundColor,
         posterTemplate: event.posterTemplate,
+        participantCountBase: event.participantCountBase,
         genderOptions: event.genderOptions,
       }),
     });
@@ -241,6 +244,31 @@ export default function AdminEventPage({
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Event Name" value={event.name} onChange={(v) => setEvent({ ...event, name: v })} />
               <Field label="Hashtag" value={event.subtitle} onChange={(v) => setEvent({ ...event, subtitle: v })} hint="e.g. #MKM51 — shown top-right on poster" />
+              <div>
+                <label className="text-sm font-medium text-gray-600">
+                  Participant count base
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  step={1}
+                  value={event.participantCountBase}
+                  onChange={(e) =>
+                    setEvent({
+                      ...event,
+                      participantCountBase: Math.max(
+                        0,
+                        Number(e.target.value) || 0
+                      ),
+                    })
+                  }
+                  className="mt-1 w-full rounded-lg border px-3 py-2"
+                />
+                <p className="mt-1 text-xs text-gray-400">
+                  Boost displayed participant # (e.g. base 242 + 5 real = shows
+                  #247). Set to 0 to show the actual count only.
+                </p>
+              </div>
               <Field label="Date Label" value={event.dateLabel} onChange={(v) => setEvent({ ...event, dateLabel: v })} />
               <Field label="Tagline (footer)" value={event.tagline} onChange={(v) => setEvent({ ...event, tagline: v })} />
               <Field label="Location (default city)" value={event.location ?? ""} onChange={(v) => setEvent({ ...event, location: v })} />

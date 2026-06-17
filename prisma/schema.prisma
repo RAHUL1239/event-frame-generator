@@ -27,6 +27,8 @@ model Event {
   location        String?
   facebookGroupName String?
   facebookGroupUrl  String?
+  /** Added to each participant's displayed number (e.g. base 200 + 47th submitter = #247). */
+  participantCountBase Int @default(0)
   isActive        Boolean  @default(true)
   primaryColor    String   @default("#1a4d4a")
   accentColor     String   @default("#c9a227")

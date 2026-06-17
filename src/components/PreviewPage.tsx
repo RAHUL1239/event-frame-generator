@@ -39,10 +39,12 @@ export function PreviewPage({
   submission,
   slug,
   backPath,
+  participantNumber,
 }: {
   submission: Submission;
   slug: string;
   backPath: string;
+  participantNumber: number;
 }) {
   const event = submission.event;
   const displayName =
@@ -206,6 +208,25 @@ export function PreviewPage({
         >
           ← Edit
         </Link>
+      </div>
+
+      <div
+        className="mb-6 rounded-2xl px-6 py-5 text-center shadow-lg"
+        style={{
+          backgroundColor: `${event.accentColor}18`,
+          borderColor: event.accentColor,
+          borderWidth: 2,
+        }}
+      >
+        <p
+          className="text-2xl font-bold md:text-3xl"
+          style={{ color: event.primaryColor }}
+        >
+          🎉 You are participant #{participantNumber.toLocaleString()}
+        </p>
+        <p className="mt-2 text-sm text-gray-600">
+          Share your poster and invite friends to join the celebration!
+        </p>
       </div>
 
       <section className="mb-8 rounded-2xl bg-white p-6 shadow-lg">
