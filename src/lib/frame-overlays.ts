@@ -13,6 +13,15 @@ export type FrameBorderStripConfig = {
   borderWidthRatio: number;
 };
 
+export type PosterLayoutContext = {
+  inset: number;
+  innerW: number;
+  innerH: number;
+};
+
+/** Inset used for vector-drawn frames (elegant gold, youth, etc.). */
+export const VECTOR_FRAME_INSET = 36;
+
 export const FRAME_BORDER_STRIPS: Partial<
   Record<FrameThemeKey, FrameBorderStripConfig>
 > = {
@@ -43,16 +52,60 @@ export function getFrameBorderWidth(
   return Math.max(56, Math.round(canvasWidth * config.borderWidthRatio));
 }
 
+export function getPosterLayout(
+  themeKey: FrameThemeKey | null | undefined,
+  canvasW: number,
+  canvasH: number
+): PosterLayoutContext {
+  const inset = hasBorderStripTheme(themeKey)
+    ? getFrameBorderWidth(themeKey, canvasW)
+    : VECTOR_FRAME_INSET;
+  return {
+    inset,
+    innerW: canvasW - inset * 2,
+    innerH: canvasH - inset * 2,
+  };
+}
+
+/** Map a design-space X coordinate into the padded content area. */
+export function layoutX(
+  layout: PosterLayoutContext,
+  x: number,
+  canvasW: number
+): number {
+  return layout.inset + (x / canvasW) * layout.innerW;
+}
+
+/** Map a design-space Y coordinate into the padded content area. */
+export function layoutY(
+  layout: PosterLayoutContext,
+  y: number,
+  canvasH: number
+): number {
+  return layout.inset + (y / canvasH) * layout.innerH;
+}
+
+/** Scale a design-space radius/length for the padded content area. */
+export function layoutScale(
+  layout: PosterLayoutContext,
+  value: number,
+  canvasW: number
+): number {
+  return value * (layout.innerW / canvasW);
+}
+
 export function getFrameContentInsets(
   themeKey: FrameThemeKey | null | undefined,
   canvasWidth: number,
   canvasHeight: number
 ): FrameContentInsets {
-  const border = getFrameBorderWidth(themeKey, canvasWidth);
-  if (!border) {
-    return { top: 0, right: 0, bottom: 0, left: 0 };
-  }
-  return { top: border, right: border, bottom: border, left: border };
+  const layout = getPosterLayout(themeKey, canvasWidth, canvasHeight);
+  return {
+    top: layout.inset,
+    right: layout.inset,
+    bottom: layout.inset,
+    left: layout.inset,
+  };
 }
 
 export function getFrameContentBox(
@@ -60,13 +113,13 @@ export function getFrameContentBox(
   canvasWidth: number,
   canvasHeight: number
 ) {
-  const inset = getFrameContentInsets(themeKey, canvasWidth, canvasHeight);
+  const layout = getPosterLayout(themeKey, canvasWidth, canvasHeight);
   return {
-    x: inset.left,
-    y: inset.top,
-    w: canvasWidth - inset.left - inset.right,
-    h: canvasHeight - inset.top - inset.bottom,
-    inset,
+    x: layout.inset,
+    y: layout.inset,
+    w: layout.innerW,
+    h: layout.innerH,
+    inset: getFrameContentInsets(themeKey, canvasWidth, canvasHeight),
   };
 }
 
@@ -90,7 +143,7 @@ async function loadBorderStripImage(
   }
 }
 
-function tileVerticalStrip(
+function drawStretchVerticalStrip(
   ctx: CanvasRenderingContext2D,
   image: HTMLImageElement,
   x: number,
@@ -99,44 +152,35 @@ function tileVerticalStrip(
   height: number,
   flipX: boolean
 ) {
-  const tileHeight = image.naturalHeight * (width / image.naturalWidth);
-  let cursorY = y;
-
-  while (cursorY < y + height) {
-    const drawHeight = Math.min(tileHeight, y + height - cursorY);
-    const sourceHeight = image.naturalHeight * (drawHeight / tileHeight);
-
-    ctx.save();
-    if (flipX) {
-      ctx.translate(x + width, cursorY);
-      ctx.scale(-1, 1);
-      ctx.drawImage(
-        image,
-        0,
-        0,
-        image.naturalWidth,
-        sourceHeight,
-        0,
-        0,
-        width,
-        drawHeight
-      );
-    } else {
-      ctx.drawImage(
-        image,
-        0,
-        0,
-        image.naturalWidth,
-        sourceHeight,
-        x,
-        cursorY,
-        width,
-        drawHeight
-      );
-    }
-    ctx.restore();
-    cursorY += drawHeight;
+  ctx.save();
+  if (flipX) {
+    ctx.translate(x + width, y);
+    ctx.scale(-1, 1);
+    ctx.drawImage(
+      image,
+      0,
+      0,
+      image.naturalWidth,
+      image.naturalHeight,
+      0,
+      0,
+      width,
+      height
+    );
+  } else {
+    ctx.drawImage(
+      image,
+      0,
+      0,
+      image.naturalWidth,
+      image.naturalHeight,
+      x,
+      y,
+      width,
+      height
+    );
   }
+  ctx.restore();
 }
 
 export async function paintFrameBorderStrips(
@@ -156,44 +200,42 @@ export async function paintFrameBorderStrips(
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
 
-  tileVerticalStrip(ctx, image, 0, 0, border, height, false);
-  tileVerticalStrip(ctx, image, width - border, 0, border, height, true);
+  drawStretchVerticalStrip(ctx, image, 0, 0, border, height, false);
+  drawStretchVerticalStrip(ctx, image, width - border, 0, border, height, true);
 
   ctx.save();
   ctx.translate(0, border);
   ctx.rotate(-Math.PI / 2);
-  tileVerticalStrip(ctx, image, 0, 0, border, width, false);
+  ctx.drawImage(
+    image,
+    0,
+    0,
+    image.naturalWidth,
+    image.naturalHeight,
+    0,
+    0,
+    height,
+    border
+  );
   ctx.restore();
 
   ctx.save();
   ctx.translate(width, height - border);
   ctx.rotate(Math.PI / 2);
-  tileVerticalStrip(ctx, image, 0, 0, border, width, true);
+  ctx.scale(-1, 1);
+  ctx.drawImage(
+    image,
+    0,
+    0,
+    image.naturalWidth,
+    image.naturalHeight,
+    0,
+    0,
+    height,
+    border
+  );
   ctx.restore();
 
   ctx.imageSmoothingEnabled = prevSmoothing;
   ctx.imageSmoothingQuality = prevQuality;
-}
-
-export async function withFrameContentClip(
-  ctx: CanvasRenderingContext2D,
-  themeKey: FrameThemeKey | null | undefined,
-  canvasWidth: number,
-  canvasHeight: number,
-  draw: () => void | Promise<void>
-) {
-  if (!hasBorderStripTheme(themeKey)) {
-    await draw();
-    return;
-  }
-
-  const box = getFrameContentBox(themeKey, canvasWidth, canvasHeight);
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(box.x, box.y, box.w, box.h);
-  ctx.clip();
-  ctx.translate(box.x, box.y);
-  ctx.scale(box.w / canvasWidth, box.h / canvasHeight);
-  await draw();
-  ctx.restore();
 }

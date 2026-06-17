@@ -296,8 +296,13 @@ export function drawFrameThemeDecoration(
     case "minimal":
     default: {
       ctx.strokeStyle = accent;
-      ctx.lineWidth = 2;
+      ctx.lineWidth = options?.onDarkBackground ? 5 : 2;
       ctx.strokeRect(inset, inset, width - inset * 2, height - inset * 2);
+      if (options?.onDarkBackground) {
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(inset + 6, inset + 6, width - (inset + 6) * 2, height - (inset + 6) * 2);
+      }
       break;
     }
   }

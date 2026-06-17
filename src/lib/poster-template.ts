@@ -85,16 +85,7 @@ export function getPosterHeadline(
     );
   }
 
-  const lines: PosterHeadlineLine[] = [];
-  const eventWords = event.name.toUpperCase().split(/\s+/).filter(Boolean);
-  if (eventWords.length >= 3) {
-    lines.push({ text: eventWords[0], color: "primary" });
-    lines.push({ text: eventWords.slice(1).join(" "), color: "primary" });
-  } else {
-    lines.push({ text: event.name.toUpperCase(), color: "primary" });
-  }
-
-  return lines;
+  return [];
 }
 
 export function getPosterHashtag(
