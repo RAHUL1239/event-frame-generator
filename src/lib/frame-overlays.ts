@@ -1,33 +1,28 @@
 import type { FrameThemeKey } from "./frame-themes";
 import { loadImage } from "./utils";
 
-export type FrameOverlayConfig = {
-  src: string;
-  /** Crop from source image. Omit to use the full image. */
-  sourceRect?: { x: number; y: number; width: number; height: number };
-  previewSrc?: string;
-  /** When true, grey/checkerboard pixels become transparent and the frame draws on top of content. */
-  transparentCenter?: boolean;
+export type FrameContentInsets = {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
 };
 
-export const FRAME_OVERLAYS: Partial<Record<FrameThemeKey, FrameOverlayConfig>> = {
+export type FrameBorderStripConfig = {
+  src: string;
+  borderWidthRatio: number;
+};
+
+export const FRAME_BORDER_STRIPS: Partial<
+  Record<FrameThemeKey, FrameBorderStripConfig>
+> = {
   "traditional-maharashtrian": {
-    src: "/frames/maharashtrian-heritage-frame.png",
-    sourceRect: { x: 465, y: 0, width: 559, height: 559 },
-    previewSrc: "/frames/maharashtrian-heritage-frame.png",
-    transparentCenter: true,
+    src: "/frames/maharashtrian-paithani-border.png",
+    borderWidthRatio: 0.095,
   },
 };
 
-const imageCache = new Map<FrameThemeKey, Promise<HTMLImageElement>>();
-const processedCache = new Map<FrameThemeKey, Promise<HTMLCanvasElement>>();
-
-export function getFrameOverlayConfig(
-  key: FrameThemeKey | null | undefined
-): FrameOverlayConfig | null {
-  if (!key) return null;
-  return FRAME_OVERLAYS[key] ?? null;
-}
+const stripCache = new Map<FrameThemeKey, Promise<HTMLImageElement>>();
 
 function overlayImageUrl(src: string): string {
   return src.startsWith("http")
@@ -35,132 +30,163 @@ function overlayImageUrl(src: string): string {
     : `${typeof window !== "undefined" ? window.location.origin : ""}${src}`;
 }
 
-export async function loadFrameOverlayImage(
+export function hasBorderStripTheme(themeKey: FrameThemeKey | null | undefined) {
+  return Boolean(themeKey && FRAME_BORDER_STRIPS[themeKey]);
+}
+
+export function getFrameBorderWidth(
+  themeKey: FrameThemeKey | null | undefined,
+  canvasWidth: number
+): number {
+  const config = themeKey ? FRAME_BORDER_STRIPS[themeKey] : undefined;
+  if (!config) return 0;
+  return Math.max(44, Math.round(canvasWidth * config.borderWidthRatio));
+}
+
+export function getFrameContentInsets(
+  themeKey: FrameThemeKey | null | undefined,
+  canvasWidth: number,
+  canvasHeight: number
+): FrameContentInsets {
+  const border = getFrameBorderWidth(themeKey, canvasWidth);
+  if (!border) {
+    return { top: 0, right: 0, bottom: 0, left: 0 };
+  }
+  return { top: border, right: border, bottom: border, left: border };
+}
+
+export function getFrameContentBox(
+  themeKey: FrameThemeKey | null | undefined,
+  canvasWidth: number,
+  canvasHeight: number
+) {
+  const inset = getFrameContentInsets(themeKey, canvasWidth, canvasHeight);
+  return {
+    x: inset.left,
+    y: inset.top,
+    w: canvasWidth - inset.left - inset.right,
+    h: canvasHeight - inset.top - inset.bottom,
+    inset,
+  };
+}
+
+async function loadBorderStripImage(
   key: FrameThemeKey
 ): Promise<HTMLImageElement | null> {
-  const config = FRAME_OVERLAYS[key];
+  const config = FRAME_BORDER_STRIPS[key];
   if (!config) return null;
 
-  let pending = imageCache.get(key);
+  let pending = stripCache.get(key);
   if (!pending) {
     pending = loadImage(overlayImageUrl(config.src));
-    imageCache.set(key, pending);
+    stripCache.set(key, pending);
   }
 
   try {
     return await pending;
   } catch {
-    imageCache.delete(key);
+    stripCache.delete(key);
     return null;
   }
 }
 
-function isTransparentOverlayPixel(r: number, g: number, b: number): boolean {
-  const spread = Math.max(r, g, b) - Math.min(r, g, b);
-  if (spread >= 32) return false;
-
-  const avg = (r + g + b) / 3;
-  return avg > 80 && avg < 238;
-}
-
-function buildProcessedOverlayCanvas(
-  image: HTMLImageElement,
-  config: FrameOverlayConfig
-): HTMLCanvasElement {
-  const source = config.sourceRect ?? {
-    x: 0,
-    y: 0,
-    width: image.naturalWidth,
-    height: image.naturalHeight,
-  };
-
-  const canvas = document.createElement("canvas");
-  canvas.width = source.width;
-  canvas.height = source.height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return canvas;
-
-  ctx.drawImage(
-    image,
-    source.x,
-    source.y,
-    source.width,
-    source.height,
-    0,
-    0,
-    source.width,
-    source.height
-  );
-
-  if (config.transparentCenter) {
-    const imageData = ctx.getImageData(0, 0, source.width, source.height);
-    const { data } = imageData;
-    for (let i = 0; i < data.length; i += 4) {
-      if (isTransparentOverlayPixel(data[i], data[i + 1], data[i + 2])) {
-        data[i + 3] = 0;
-      }
-    }
-    ctx.putImageData(imageData, 0, 0);
-  }
-
-  return canvas;
-}
-
-async function loadProcessedOverlayCanvas(
-  key: FrameThemeKey
-): Promise<HTMLCanvasElement | null> {
-  const config = FRAME_OVERLAYS[key];
-  if (!config) return null;
-
-  let pending = processedCache.get(key);
-  if (!pending) {
-    pending = loadFrameOverlayImage(key).then((image) => {
-      if (!image) throw new Error("overlay image missing");
-      return buildProcessedOverlayCanvas(image, config);
-    });
-    processedCache.set(key, pending);
-  }
-
-  try {
-    return await pending;
-  } catch {
-    processedCache.delete(key);
-    return null;
-  }
-}
-
-export function drawFrameOverlay(
+function tileVerticalStrip(
   ctx: CanvasRenderingContext2D,
-  image: CanvasImageSource,
+  image: HTMLImageElement,
+  x: number,
+  y: number,
   width: number,
-  height: number
+  height: number,
+  flipX: boolean
 ) {
-  ctx.drawImage(image, 0, 0, width, height);
-}
+  const tileHeight = image.naturalHeight * (width / image.naturalWidth);
+  let cursorY = y;
 
-export async function loadThemeFrameOverlay(themeKey: FrameThemeKey | null) {
-  if (!themeKey) return null;
-  const config = getFrameOverlayConfig(themeKey);
-  if (!config) return null;
+  while (cursorY < y + height) {
+    const drawHeight = Math.min(tileHeight, y + height - cursorY);
+    const sourceHeight = image.naturalHeight * (drawHeight / tileHeight);
 
-  if (config.transparentCenter) {
-    const canvas = await loadProcessedOverlayCanvas(themeKey);
-    if (!canvas) return null;
-    return { image: canvas, config, drawOnTop: true as const };
+    ctx.save();
+    if (flipX) {
+      ctx.translate(x + width, cursorY);
+      ctx.scale(-1, 1);
+      ctx.drawImage(
+        image,
+        0,
+        0,
+        image.naturalWidth,
+        sourceHeight,
+        0,
+        0,
+        width,
+        drawHeight
+      );
+    } else {
+      ctx.drawImage(
+        image,
+        0,
+        0,
+        image.naturalWidth,
+        sourceHeight,
+        x,
+        cursorY,
+        width,
+        drawHeight
+      );
+    }
+    ctx.restore();
+    cursorY += drawHeight;
   }
-
-  const image = await loadFrameOverlayImage(themeKey);
-  if (!image) return null;
-  return { image, config, drawOnTop: false as const };
 }
 
-export async function paintFrameBorderOverlay(
+export async function paintFrameBorderStrips(
   ctx: CanvasRenderingContext2D,
   themeKey: FrameThemeKey | null | undefined,
   width: number,
   height: number
 ) {
-  const overlay = await loadThemeFrameOverlay(themeKey ?? null);
-  if (!overlay?.drawOnTop) return;
-  drawFrameOverlay(ctx, overlay.image, width, height);
+  if (!themeKey || !FRAME_BORDER_STRIPS[themeKey]) return;
+
+  const image = await loadBorderStripImage(themeKey);
+  if (!image) return;
+
+  const border = getFrameBorderWidth(themeKey, width);
+
+  tileVerticalStrip(ctx, image, 0, 0, border, height, false);
+  tileVerticalStrip(ctx, image, width - border, 0, border, height, true);
+
+  ctx.save();
+  ctx.translate(0, border);
+  ctx.rotate(-Math.PI / 2);
+  tileVerticalStrip(ctx, image, 0, 0, border, width, false);
+  ctx.restore();
+
+  ctx.save();
+  ctx.translate(width, height - border);
+  ctx.rotate(Math.PI / 2);
+  tileVerticalStrip(ctx, image, 0, 0, border, width, true);
+  ctx.restore();
+}
+
+export async function withFrameContentClip(
+  ctx: CanvasRenderingContext2D,
+  themeKey: FrameThemeKey | null | undefined,
+  canvasWidth: number,
+  canvasHeight: number,
+  draw: () => void | Promise<void>
+) {
+  if (!hasBorderStripTheme(themeKey)) {
+    await draw();
+    return;
+  }
+
+  const box = getFrameContentBox(themeKey, canvasWidth, canvasHeight);
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(box.x, box.y, box.w, box.h);
+  ctx.clip();
+  ctx.translate(box.x, box.y);
+  ctx.scale(box.w / canvasWidth, box.h / canvasHeight);
+  await draw();
+  ctx.restore();
 }

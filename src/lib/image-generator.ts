@@ -4,7 +4,11 @@ import {
   resolveFrameTheme,
   type ResolvedFrameTheme,
 } from "./frame-themes";
-import { drawFrameOverlay, loadThemeFrameOverlay, paintFrameBorderOverlay } from "./frame-overlays";
+import {
+  hasBorderStripTheme,
+  paintFrameBorderStrips,
+  withFrameContentClip,
+} from "./frame-overlays";
 import { getEventCountdown } from "./countdown";
 import {
   getPosterHashtag,
@@ -102,18 +106,21 @@ async function paintFrameBackground(
   ctx.fillStyle = resolveFrameBackground(theme);
   ctx.fillRect(0, 0, width, height);
 
-  const overlay = await loadThemeFrameOverlay(theme.overlayKey ?? theme.key);
-  if (overlay?.drawOnTop) return;
-
-  if (overlay) {
-    drawFrameOverlay(ctx, overlay.image, width, height);
-    return;
-  }
+  if (hasBorderStripTheme(theme.overlayKey ?? theme.key)) return;
 
   drawFrameThemeDecoration(ctx, theme, width, height, {
     onDarkBackground: true,
     skipWhenOverlay: true,
   });
+}
+
+async function paintMaharashtrianBorders(
+  ctx: CanvasRenderingContext2D,
+  theme: ResolvedFrameTheme,
+  width: number,
+  height: number
+) {
+  await paintFrameBorderStrips(ctx, theme.overlayKey ?? theme.key, width, height);
 }
 
 function drawBmmHeader(
@@ -400,32 +407,36 @@ async function drawBmmPersonalPoster(
 
   await paintFrameBackground(ctx, theme, POSTER_W, POSTER_H);
 
-  drawBmmHeader(ctx, event, logo, theme, hashtag);
+  const themeKey = theme.overlayKey ?? theme.key;
+  await withFrameContentClip(ctx, themeKey, POSTER_W, POSTER_H, async () => {
+    drawBmmHeader(ctx, event, logo, theme, hashtag);
 
-  const photoX = 250;
-  const photoY = 390;
-  const photoRadius = 128;
-  drawCircularImage(ctx, photo, photoX, photoY, photoRadius, input.photoCrop);
-  ctx.strokeStyle = accent;
-  ctx.lineWidth = theme.photoRingWidth;
-  ctx.beginPath();
-  ctx.arc(photoX, photoY, photoRadius + 6, 0, Math.PI * 2);
-  ctx.stroke();
+    const photoX = 250;
+    const photoY = 390;
+    const photoRadius = 128;
+    drawCircularImage(ctx, photo, photoX, photoY, photoRadius, input.photoCrop);
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = theme.photoRingWidth;
+    ctx.beginPath();
+    ctx.arc(photoX, photoY, photoRadius + 6, 0, Math.PI * 2);
+    ctx.stroke();
 
-  drawHeadlineBlock(ctx, headline, 500, 200, theme);
+    drawHeadlineBlock(ctx, headline, 500, 200, theme);
 
-  const displayName = `${input.firstName} ${input.lastName}`.trim();
-  const cityLabel = (input.city?.trim() || event.location || "").trim();
-  drawAttendeeBlock(ctx, displayName, input.role, cityLabel, 500, 400, theme);
+    const displayName = `${input.firstName} ${input.lastName}`.trim();
+    const cityLabel = (input.city?.trim() || event.location || "").trim();
+    drawAttendeeBlock(ctx, displayName, input.role, cityLabel, 500, 400, theme);
 
-  const middleY = 560;
-  const qrUrl = getQrUrl(event, config.qrUrl);
-  const qr = qrUrl ? await loadQrCode(qrUrl) : null;
-  const middleTagline = genderTagline.trim() || event.tagline;
-  drawMiddleSection(ctx, middleTagline, qr, middleY, gold);
+    const middleY = 560;
+    const qrUrl = getQrUrl(event, config.qrUrl);
+    const qr = qrUrl ? await loadQrCode(qrUrl) : null;
+    const middleTagline = genderTagline.trim() || event.tagline;
+    drawMiddleSection(ctx, middleTagline, qr, middleY, gold);
 
-  drawPosterFooterSection(ctx, event, theme, middleY + 118);
-  await paintFrameBorderOverlay(ctx, theme.overlayKey ?? theme.key, POSTER_W, POSTER_H);
+    drawPosterFooterSection(ctx, event, theme, middleY + 118);
+  });
+
+  await paintMaharashtrianBorders(ctx, theme, POSTER_W, POSTER_H);
 }
 
 export async function renderPersonalPosterCanvas(
@@ -461,50 +472,54 @@ async function drawBmmGroupPoster(
 
   await paintFrameBackground(ctx, theme, POSTER_W, POSTER_H);
 
-  drawBmmHeader(ctx, event, logo, theme, hashtag);
+  const themeKey = theme.overlayKey ?? theme.key;
+  await withFrameContentClip(ctx, themeKey, POSTER_W, POSTER_H, async () => {
+    drawBmmHeader(ctx, event, logo, theme, hashtag);
 
-  drawHeadlineBlockCentered(ctx, headline, POSTER_W / 2, 150, 920, theme);
+    drawHeadlineBlockCentered(ctx, headline, POSTER_W / 2, 150, 920, theme);
 
-  const positions = getGroupPhotoPositions(input.memberCount);
-  const maxRadius = Math.max(...positions.map((pos) => pos.r));
-  photos.forEach((photo, i) => {
-    const pos = positions[i];
-    const crop = input.photoCrops[i];
-    drawCircularImage(ctx, photo, pos.x, pos.y, pos.r, crop);
-    ctx.strokeStyle = accent;
-    ctx.lineWidth = theme.photoRingWidth;
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, pos.r + 5, 0, Math.PI * 2);
-    ctx.stroke();
+    const positions = getGroupPhotoPositions(input.memberCount);
+    const maxRadius = Math.max(...positions.map((pos) => pos.r));
+    photos.forEach((photo, i) => {
+      const pos = positions[i];
+      const crop = input.photoCrops[i];
+      drawCircularImage(ctx, photo, pos.x, pos.y, pos.r, crop);
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = theme.photoRingWidth;
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, pos.r + 5, 0, Math.PI * 2);
+      ctx.stroke();
+    });
+
+    const photoBottom = positions[0].y + maxRadius + theme.photoRingWidth + 16;
+    const nameY = photoBottom + 44;
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+    ctx.direction = "ltr";
+    ctx.fillStyle = accent;
+    ctx.font = posterFont(700, 34);
+    const groupName = input.groupName.trim() || "Our Group";
+    ctx.fillText(groupName.toUpperCase(), POSTER_W / 2, nameY);
+
+    const groupCity = (input.city?.trim() || event.location || "").trim();
+    let middleY = nameY + 36;
+    if (groupCity) {
+      ctx.fillStyle = "#ffffff";
+      ctx.font = posterFont(600, 22);
+      ctx.fillText(groupCity.toUpperCase(), POSTER_W / 2, nameY + 34);
+      middleY = nameY + 68;
+    }
+
+    const qrUrl = getQrUrl(event, config.qrUrl);
+    const qr = qrUrl ? await loadQrCode(qrUrl) : null;
+    const middleTagline = groupTagline.trim() || event.tagline;
+    drawMiddleSection(ctx, middleTagline, qr, middleY, gold);
+
+    drawPosterFooterSection(ctx, event, theme, middleY + 118);
   });
 
-  const photoBottom = positions[0].y + maxRadius + theme.photoRingWidth + 16;
-  const nameY = photoBottom + 44;
-
-  ctx.textAlign = "center";
-  ctx.textBaseline = "alphabetic";
-  ctx.direction = "ltr";
-  ctx.fillStyle = accent;
-  ctx.font = posterFont(700, 34);
-  const groupName = input.groupName.trim() || "Our Group";
-  ctx.fillText(groupName.toUpperCase(), POSTER_W / 2, nameY);
-
-  const groupCity = (input.city?.trim() || event.location || "").trim();
-  let middleY = nameY + 36;
-  if (groupCity) {
-    ctx.fillStyle = "#ffffff";
-    ctx.font = posterFont(600, 22);
-    ctx.fillText(groupCity.toUpperCase(), POSTER_W / 2, nameY + 34);
-    middleY = nameY + 68;
-  }
-
-  const qrUrl = getQrUrl(event, config.qrUrl);
-  const qr = qrUrl ? await loadQrCode(qrUrl) : null;
-  const middleTagline = groupTagline.trim() || event.tagline;
-  drawMiddleSection(ctx, middleTagline, qr, middleY, gold);
-
-  drawPosterFooterSection(ctx, event, theme, middleY + 118);
-  await paintFrameBorderOverlay(ctx, theme.overlayKey ?? theme.key, POSTER_W, POSTER_H);
+  await paintMaharashtrianBorders(ctx, theme, POSTER_W, POSTER_H);
 }
 
 export async function renderGroupPosterCanvas(
@@ -609,8 +624,11 @@ export async function renderPersonalDpCanvas(
   if (!ctx) return;
 
   await paintFrameBackground(ctx, theme, DP_W, DP_H);
-  drawPersonalDp(ctx, input, logo, photo, theme, true);
-  await paintFrameBorderOverlay(ctx, theme.overlayKey ?? theme.key, DP_W, DP_H);
+  const themeKey = theme.overlayKey ?? theme.key;
+  await withFrameContentClip(ctx, themeKey, DP_W, DP_H, () => {
+    drawPersonalDp(ctx, input, logo, photo, theme, true);
+  });
+  await paintMaharashtrianBorders(ctx, theme, DP_W, DP_H);
 }
 
 export async function renderGroupDpCanvas(
@@ -628,8 +646,11 @@ export async function renderGroupDpCanvas(
   if (!ctx) return;
 
   await paintFrameBackground(ctx, theme, DP_W, DP_H);
-  drawGroupDp(ctx, input, logo, photos, theme, true);
-  await paintFrameBorderOverlay(ctx, theme.overlayKey ?? theme.key, DP_W, DP_H);
+  const themeKey = theme.overlayKey ?? theme.key;
+  await withFrameContentClip(ctx, themeKey, DP_W, DP_H, () => {
+    drawGroupDp(ctx, input, logo, photos, theme, true);
+  });
+  await paintMaharashtrianBorders(ctx, theme, DP_W, DP_H);
 }
 
 export async function generatePersonalAssets(

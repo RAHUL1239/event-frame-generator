@@ -5,7 +5,6 @@ import {
   parseEnabledFrameThemes,
   type FrameThemeKey,
 } from "@/lib/frame-themes";
-import { FRAME_OVERLAYS } from "@/lib/frame-overlays";
 
 type Props = {
   enabledFrameThemes: string | null | undefined;
@@ -32,7 +31,6 @@ export function FrameThemePicker({
         {enabled.map((key) => {
           const theme = FRAME_THEMES[key];
           const selected = value === key;
-          const previewSrc = FRAME_OVERLAYS[key]?.previewSrc;
           return (
             <li key={key}>
               <button
@@ -45,35 +43,19 @@ export function FrameThemePicker({
                 }`}
                 style={selected ? { borderColor: primaryColor } : undefined}
               >
-                {previewSrc ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={previewSrc}
-                    alt=""
-                    className="h-12 w-12 shrink-0 rounded-lg object-cover object-[85%_center]"
-                  />
-                ) : (
-                  <span
-                    className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2"
-                    style={{
-                      borderColor: selected ? primaryColor : "#d1d5db",
-                      backgroundColor: selected ? primaryColor : "transparent",
-                    }}
-                    aria-hidden
-                  >
-                    {selected && (
-                      <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                    )}
-                  </span>
-                )}
-                <span className="flex flex-col">
-                  <span>{theme.name}</span>
-                  {previewSrc && (
-                    <span className="text-xs font-normal text-gray-500">
-                      {theme.description}
-                    </span>
+                <span
+                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2"
+                  style={{
+                    borderColor: selected ? primaryColor : "#d1d5db",
+                    backgroundColor: selected ? primaryColor : "transparent",
+                  }}
+                  aria-hidden
+                >
+                  {selected && (
+                    <span className="h-1.5 w-1.5 rounded-full bg-white" />
                   )}
                 </span>
+                <span>{theme.name}</span>
               </button>
             </li>
           );
