@@ -14,6 +14,8 @@ export type FrameFullOverlayConfig = {
   holeInsetRatio: number;
   /** Extra inner padding (px at 1080) keeping text away from the frame art. */
   contentPadding?: number;
+  /** How closely pixels must match the sampled matte to be removed. */
+  chromaTolerance?: number;
 };
 
 export type PosterLayoutContext = {
@@ -196,9 +198,90 @@ async function prepareOverlayWithHole(
   }
 
   ctx.drawImage(source, 0, 0);
+  removeFrameMatte(ctx, width, height, config.chromaTolerance ?? 58);
   ctx.clearRect(inset, inset, width - inset * 2, height - inset * 2);
 
   return loadImage(canvas.toDataURL("image/png"));
+}
+
+function sampleMatteColor(
+  data: Uint8ClampedArray,
+  width: number,
+  height: number
+) {
+  const points: Array<[number, number]> = [
+    [4, 4],
+    [width - 5, 4],
+    [4, height - 5],
+    [width - 5, height - 5],
+    [Math.floor(width / 2), 4],
+    [Math.floor(width / 2), height - 5],
+    [4, Math.floor(height / 2)],
+    [width - 5, Math.floor(height / 2)],
+  ];
+
+  let r = 0;
+  let g = 0;
+  let b = 0;
+
+  for (const [x, y] of points) {
+    const i = (y * width + x) * 4;
+    r += data[i];
+    g += data[i + 1];
+    b += data[i + 2];
+  }
+
+  const count = points.length;
+  return { r: r / count, g: g / count, b: b / count };
+}
+
+function isOrnamentPixel(r: number, g: number, b: number) {
+  if (r > 118 && g > 88 && r >= b + 22) return true;
+  if (r > 175 && g > 145 && b > 75) return true;
+  if (r > 78 && g > 58 && r > b + 12 && r + g > 155) return true;
+  return false;
+}
+
+function shouldRemoveMattePixel(
+  r: number,
+  g: number,
+  b: number,
+  matte: { r: number; g: number; b: number },
+  tolerance: number
+) {
+  if (isOrnamentPixel(r, g, b)) return false;
+
+  const distance = Math.hypot(r - matte.r, g - matte.g, b - matte.b);
+  if (distance <= tolerance) return true;
+
+  if (r < 55 && g < 55 && b < 55) return true;
+
+  if (r > 55 && r < 135 && g < 55 && b < 55) return true;
+
+  return false;
+}
+
+function removeFrameMatte(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  tolerance: number
+) {
+  const imageData = ctx.getImageData(0, 0, width, height);
+  const { data } = imageData;
+  const matte = sampleMatteColor(data, width, height);
+
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+
+    if (shouldRemoveMattePixel(r, g, b, matte, tolerance)) {
+      data[i + 3] = 0;
+    }
+  }
+
+  ctx.putImageData(imageData, 0, 0);
 }
 
 export async function paintFrameFullOverlay(
