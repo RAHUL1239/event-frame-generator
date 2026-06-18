@@ -362,13 +362,13 @@ function drawCountdownBanner(
   const barW = layout.innerW;
   const paddingX = 56;
   const maxTextWidth = barW - paddingX;
-  const verticalPad = 26;
+  const verticalPad = 22;
 
-  let fontSize = 44;
+  let fontSize = 38;
   ctx.font = posterFont(700, fontSize);
   let lines = splitTextIntoLines(ctx, message, maxTextWidth);
 
-  while (fontSize > 24) {
+  while (fontSize > 22) {
     const tooWide = lines.some((line) => ctx.measureText(line).width > maxTextWidth);
     if (!tooWide) break;
     fontSize -= 1;
@@ -376,8 +376,8 @@ function drawCountdownBanner(
     lines = splitTextIntoLines(ctx, message, maxTextWidth);
   }
 
-  const lineHeight = Math.round(fontSize * 1.2);
-  const barH = Math.max(88, lines.length * lineHeight + verticalPad * 2);
+  const lineHeight = Math.round(fontSize * 1.15);
+  const barH = Math.max(76, lines.length * lineHeight + verticalPad * 2);
 
   ctx.fillStyle = theme.colors.accent;
   ctx.fillRect(barX, y, barW, barH);
@@ -406,14 +406,14 @@ function drawEventHighlights(
   ctx.fillStyle = POSTER_TEXT;
   ctx.font = posterFont(600, 26);
 
-  let cursorY = y + 28;
+  let cursorY = y + 20;
   for (const item of highlights) {
     const wrapped = splitTextIntoLines(ctx, `✓ ${item}`, maxWidth);
     for (const line of wrapped) {
       ctx.fillText(line, canvasW / 2, cursorY);
-      cursorY += 34;
+      cursorY += 30;
     }
-    cursorY += 6;
+    cursorY += 4;
   }
 
   return cursorY;
@@ -433,14 +433,14 @@ function drawPosterFooterSection(
   const countdown = getEventCountdown(event);
   const highlights = parseEventHighlights(event.eventHighlights);
 
-  let cursorY = middleEndY + 12;
+  let cursorY = middleEndY + 8;
   if (countdown) {
     cursorY =
-      drawCountdownBanner(ctx, countdown.message, cursorY, theme, layout, canvasW) + 12;
+      drawCountdownBanner(ctx, countdown.message, cursorY, theme, layout, canvasW) + 8;
   }
 
   if (highlights.length > 0) {
-    cursorY = drawEventHighlights(ctx, highlights, cursorY, layout, canvasW) + 8;
+    cursorY = drawEventHighlights(ctx, highlights, cursorY, layout, canvasW) + 6;
   }
 
   if (stats.length > 0) {
