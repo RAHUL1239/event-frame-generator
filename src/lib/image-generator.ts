@@ -350,7 +350,7 @@ function drawFooter(
   }
 }
 
-const COUNTDOWN_BAR_H = 48;
+const COUNTDOWN_BAR_H = 96;
 
 function drawCountdownBanner(
   ctx: CanvasRenderingContext2D,
@@ -370,9 +370,9 @@ function drawCountdownBanner(
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.direction = "ltr";
-  let fontSize = 26;
+  let fontSize = 52;
   ctx.font = posterFont(700, fontSize);
-  while (ctx.measureText(message).width > barW - 24 && fontSize > 14) {
+  while (ctx.measureText(message).width > barW - 48 && fontSize > 28) {
     fontSize -= 1;
     ctx.font = posterFont(700, fontSize);
   }
