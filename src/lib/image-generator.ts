@@ -362,13 +362,13 @@ function drawCountdownBanner(
   const barW = layout.innerW;
   const paddingX = 56;
   const maxTextWidth = barW - paddingX;
-  const verticalPad = 32;
+  const verticalPad = 26;
 
-  let fontSize = 52;
+  let fontSize = 44;
   ctx.font = posterFont(700, fontSize);
   let lines = splitTextIntoLines(ctx, message, maxTextWidth);
 
-  while (fontSize > 28) {
+  while (fontSize > 24) {
     const tooWide = lines.some((line) => ctx.measureText(line).width > maxTextWidth);
     if (!tooWide) break;
     fontSize -= 1;
@@ -377,7 +377,7 @@ function drawCountdownBanner(
   }
 
   const lineHeight = Math.round(fontSize * 1.2);
-  const barH = Math.max(110, lines.length * lineHeight + verticalPad * 2);
+  const barH = Math.max(88, lines.length * lineHeight + verticalPad * 2);
 
   ctx.fillStyle = theme.colors.accent;
   ctx.fillRect(barX, y, barW, barH);
