@@ -350,8 +350,6 @@ function drawFooter(
   }
 }
 
-const COUNTDOWN_BAR_H = 96;
-
 function drawCountdownBanner(
   ctx: CanvasRenderingContext2D,
   message: string,
@@ -362,23 +360,34 @@ function drawCountdownBanner(
 ): number {
   const barX = layoutX(layout, 36, canvasW);
   const barW = layout.innerW;
+  const paddingX = 56;
+  const maxTextWidth = barW - paddingX;
+  const verticalPad = 32;
 
-  ctx.fillStyle = theme.colors.accent;
-  ctx.fillRect(barX, y, barW, COUNTDOWN_BAR_H);
-
-  ctx.fillStyle = "#ffffff";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.direction = "ltr";
   let fontSize = 52;
   ctx.font = posterFont(700, fontSize);
-  while (ctx.measureText(message).width > barW - 48 && fontSize > 28) {
+  let lines = splitTextIntoLines(ctx, message, maxTextWidth);
+
+  while (fontSize > 28) {
+    const tooWide = lines.some((line) => ctx.measureText(line).width > maxTextWidth);
+    if (!tooWide) break;
     fontSize -= 1;
     ctx.font = posterFont(700, fontSize);
+    lines = splitTextIntoLines(ctx, message, maxTextWidth);
   }
-  ctx.fillText(message, canvasW / 2, y + COUNTDOWN_BAR_H / 2);
 
-  return y + COUNTDOWN_BAR_H;
+  const lineHeight = Math.round(fontSize * 1.2);
+  const barH = Math.max(110, lines.length * lineHeight + verticalPad * 2);
+
+  ctx.fillStyle = theme.colors.accent;
+  ctx.fillRect(barX, y, barW, barH);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = posterFont(700, fontSize);
+  const firstLineY = y + verticalPad + fontSize * 0.78;
+  wrapCanvasText(ctx, message, canvasW / 2, firstLineY, maxTextWidth, lineHeight);
+
+  return y + barH;
 }
 
 function drawEventHighlights(
