@@ -494,17 +494,18 @@ async function drawBmmPersonalPoster(
   ctx.arc(photoX, photoY, photoRadius + ringPadding, 0, Math.PI * 2);
   ctx.stroke();
 
-  const infoX = layoutX(layout, 500, POSTER_W);
-  let infoY = layoutY(layout, 220, POSTER_H);
+  const textGap = layoutScale(layout, 20, POSTER_W);
+  const infoX = photoX + photoRadius + ringPadding + textGap;
+  let infoY = photoY - layoutScale(layout, 22, POSTER_H);
   if (headline.length > 0) {
-    infoY = drawHeadlineBlock(
+    const headlineEndY = drawHeadlineBlock(
       ctx,
       headline,
       infoX,
       layoutY(layout, 200, POSTER_H),
       theme
     );
-    infoY = Math.max(infoY + 12, layoutY(layout, 400, POSTER_H));
+    infoY = Math.max(infoY, headlineEndY + layoutScale(layout, 12, POSTER_H));
   }
 
   const displayName = `${input.firstName} ${input.lastName}`.trim();
@@ -583,7 +584,6 @@ async function drawBmmGroupPoster(
     y: layoutY(layout, pos.y, POSTER_H),
     r: layoutScale(layout, pos.r, POSTER_W),
   }));
-  const maxRadius = Math.max(...positions.map((pos) => pos.r));
   photos.forEach((photo, i) => {
     const pos = positions[i];
     const crop = input.photoCrops[i];
@@ -595,8 +595,12 @@ async function drawBmmGroupPoster(
     ctx.stroke();
   });
 
-  const photoBottom = positions[0].y + maxRadius + theme.photoRingWidth + 16;
-  const nameY = photoBottom + 44;
+  const photoCenterX =
+    positions.reduce((sum, pos) => sum + pos.x, 0) / positions.length;
+  const photoBottom =
+    Math.max(...positions.map((pos) => pos.y + pos.r + 5)) +
+    layoutScale(layout, 16, POSTER_W);
+  const nameY = photoBottom + layoutScale(layout, 28, POSTER_H);
 
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
@@ -604,14 +608,18 @@ async function drawBmmGroupPoster(
   ctx.fillStyle = POSTER_TEXT;
   ctx.font = posterFont(700, 38);
   const groupName = input.groupName.trim() || "Our Group";
-  ctx.fillText(groupName.toUpperCase(), POSTER_W / 2, nameY);
+  ctx.fillText(groupName.toUpperCase(), photoCenterX, nameY);
 
   const groupCity = (input.city?.trim() || event.location || "").trim();
-  let middleY = nameY + 36;
+  let middleY = nameY + layoutScale(layout, 36, POSTER_H);
   if (groupCity) {
     ctx.font = posterFont(600, 26);
-    ctx.fillText(groupCity.toUpperCase(), POSTER_W / 2, nameY + 34);
-    middleY = nameY + 68;
+    ctx.fillText(
+      groupCity.toUpperCase(),
+      photoCenterX,
+      nameY + layoutScale(layout, 34, POSTER_H)
+    );
+    middleY = nameY + layoutScale(layout, 68, POSTER_H);
   }
 
   const qrUrl = getQrUrl(event, config.qrUrl);
