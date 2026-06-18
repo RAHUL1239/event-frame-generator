@@ -145,7 +145,7 @@ function drawBmmHeader(
     ctx,
     logo,
     layoutX(layout, 36, canvasW),
-    layoutY(layout, 48, canvasH),
+    layoutY(layout, 58, canvasH),
     96,
     96
   );
@@ -155,15 +155,15 @@ function drawBmmHeader(
   ctx.direction = "ltr";
   ctx.fillStyle = POSTER_TEXT;
   ctx.font = posterFont(700, 46);
-  ctx.fillText(event.name.toUpperCase(), canvasW / 2, layoutY(layout, 56, canvasH));
+  ctx.fillText(event.name.toUpperCase(), canvasW / 2, layoutY(layout, 40, canvasH));
 
   ctx.font = posterFont(600, 26);
-  ctx.fillText(getPosterVenueLine(event), canvasW / 2, layoutY(layout, 128, canvasH));
+  ctx.fillText(getPosterVenueLine(event), canvasW / 2, layoutY(layout, 112, canvasH));
 
   if (hashtag) {
     ctx.textAlign = "right";
     ctx.font = posterFont(700, 28);
-    ctx.fillText(hashtag, canvasW - layout.inset, layoutY(layout, 58, canvasH));
+    ctx.fillText(hashtag, canvasW - layout.inset, layoutY(layout, 50, canvasH));
   }
 }
 
