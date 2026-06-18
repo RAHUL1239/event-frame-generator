@@ -16,6 +16,8 @@ export type FrameFullOverlayConfig = {
   contentPadding?: number;
   /** How closely pixels must match the sampled matte to be removed. */
   chromaTolerance?: number;
+  /** Scale overlay when painting (e.g. 1.12 makes the frame band thicker). */
+  overlayScale?: number;
 };
 
 export type PosterLayoutContext = {
@@ -37,8 +39,9 @@ export const FRAME_FULL_OVERLAYS: Partial<
   },
   "elegant-gold": {
     src: "/frames/elegant-gold-frame.jpg?v=2",
-    holeInsetRatio: 60 / 1080,
-    contentPadding: 65,
+    holeInsetRatio: 82 / 1080,
+    contentPadding: 70,
+    overlayScale: 1.12,
   },
 };
 
@@ -65,7 +68,8 @@ export function getFrameOverlayInset(
 ): number {
   const config = themeKey ? FRAME_FULL_OVERLAYS[themeKey] : undefined;
   if (!config) return 0;
-  return Math.max(36, Math.round(canvasWidth * config.holeInsetRatio));
+  const base = Math.max(36, Math.round(canvasWidth * config.holeInsetRatio));
+  return Math.round(base * (config.overlayScale ?? 1));
 }
 
 export function getFrameContentInset(
@@ -295,11 +299,28 @@ export async function paintFrameFullOverlay(
   const image = await loadFrameOverlayImage(themeKey);
   if (!image) return;
 
+  const config = FRAME_FULL_OVERLAYS[themeKey]!;
+  const scale = config.overlayScale ?? 1;
+
   const prevSmoothing = ctx.imageSmoothingEnabled;
   const prevQuality = ctx.imageSmoothingQuality;
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(image, 0, 0, width, height);
+
+  if (scale === 1) {
+    ctx.drawImage(image, 0, 0, width, height);
+  } else {
+    const scaledW = width * scale;
+    const scaledH = height * scale;
+    ctx.drawImage(
+      image,
+      (width - scaledW) / 2,
+      (height - scaledH) / 2,
+      scaledW,
+      scaledH
+    );
+  }
+
   ctx.imageSmoothingEnabled = prevSmoothing;
   ctx.imageSmoothingQuality = prevQuality;
 }
