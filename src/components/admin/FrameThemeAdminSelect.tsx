@@ -29,16 +29,16 @@ export function FrameThemeAdminSelect({ value, onChange }: Props) {
         Choose up to 3 frame styles attendees can pick on the form. Leave all
         unchecked to use the event colors only (no theme picker).
       </p>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {FRAME_THEME_LIST.map((theme) => {
           const checked = selected.includes(theme.key);
           const disabled = !checked && selected.length >= 3;
           return (
             <label
               key={theme.key}
-              className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition ${
+              className={`relative flex cursor-pointer flex-col items-center rounded-xl border p-4 transition ${
                 checked
-                  ? "border-brand-teal bg-teal-50/50"
+                  ? "border-brand-teal bg-teal-50/50 ring-2 ring-brand-teal/30"
                   : disabled
                     ? "cursor-not-allowed border-gray-100 bg-gray-50 opacity-60"
                     : "border-gray-200 hover:border-gray-300"
@@ -49,16 +49,15 @@ export function FrameThemeAdminSelect({ value, onChange }: Props) {
                 checked={checked}
                 disabled={disabled}
                 onChange={() => toggleTheme(theme.key)}
-                className="mt-1"
+                className="absolute left-3 top-3"
               />
-              <FrameThemeThumbnail themeKey={theme.key} />
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-medium text-gray-900">
-                  {theme.name}
-                </span>
-                <span className="mt-0.5 block text-xs text-gray-500">
-                  {theme.description}
-                </span>
+              <FrameThemeThumbnail
+                themeKey={theme.key}
+                size={128}
+                className="h-32 w-32 rounded-lg border border-gray-200 shadow-sm"
+              />
+              <span className="mt-3 text-center text-sm font-medium text-gray-900">
+                {theme.name}
               </span>
             </label>
           );
