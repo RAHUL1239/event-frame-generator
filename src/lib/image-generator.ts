@@ -238,10 +238,10 @@ function drawAttendeeBlock(
 function drawMiddleSection(
   ctx: CanvasRenderingContext2D,
   slogan: string,
-  qr: HTMLImageElement | null,
   y: number,
   layout: PosterLayoutContext,
-  canvasW: number
+  canvasW: number,
+  reserveQrSpace = false
 ) {
   const lineStart = layoutX(layout, 36, canvasW);
   const lineEnd = layoutX(layout, canvasW - 36, canvasW);
@@ -256,17 +256,27 @@ function drawMiddleSection(
   const textY = y + 58;
   ctx.fillStyle = POSTER_TEXT;
   ctx.font = posterFont(600, 36);
-  const textMaxWidth = qr ? canvasW - layout.inset * 2 - 220 : layout.innerW - 80;
+  const textMaxWidth = reserveQrSpace
+    ? canvasW - layout.inset * 2 - 220
+    : layout.innerW - 80;
   wrapCanvasText(ctx, slogan, canvasW / 2, textY, textMaxWidth, 44);
+}
 
-  if (qr) {
-    const size = 96;
-    const qrX = lineEnd - size;
-    const qrY = y + 16;
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(qrX - 4, qrY - 4, size + 8, size + 8);
-    ctx.drawImage(qr, qrX, qrY, size, size);
-  }
+function drawPosterQrCode(
+  ctx: CanvasRenderingContext2D,
+  qr: HTMLImageElement,
+  middleY: number,
+  layout: PosterLayoutContext,
+  canvasW: number
+) {
+  const lineEnd = layoutX(layout, canvasW - 36, canvasW);
+  const size = 96;
+  const qrX = lineEnd - size - layoutScale(layout, 12, canvasW);
+  const qrY = middleY + 16;
+
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(qrX - 6, qrY - 6, size + 12, size + 12);
+  ctx.drawImage(qr, qrX, qrY, size, size);
 }
 
 function drawStatsBar(
@@ -500,7 +510,7 @@ async function drawBmmPersonalPoster(
   const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
   const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
   const middleTagline = genderTagline.trim() || event.tagline;
-  drawMiddleSection(ctx, middleTagline, qr, middleY, layout, POSTER_W);
+  drawMiddleSection(ctx, middleTagline, middleY, layout, POSTER_W, Boolean(qr));
 
   drawPosterFooterSection(
     ctx,
@@ -513,6 +523,9 @@ async function drawBmmPersonalPoster(
   );
 
   await paintFrameOverlay(ctx, theme, POSTER_W, POSTER_H);
+  if (qr) {
+    drawPosterQrCode(ctx, qr, middleY, layout, POSTER_W);
+  }
 }
 
 export async function renderPersonalPosterCanvas(
@@ -609,7 +622,7 @@ async function drawBmmGroupPoster(
   const qrUrl = getEventQrUrl(event, "group", config.qrUrl);
   const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
   const middleTagline = groupTagline.trim() || event.tagline;
-  drawMiddleSection(ctx, middleTagline, qr, middleY, layout, POSTER_W);
+  drawMiddleSection(ctx, middleTagline, middleY, layout, POSTER_W, Boolean(qr));
 
   drawPosterFooterSection(
     ctx,
@@ -622,6 +635,9 @@ async function drawBmmGroupPoster(
   );
 
   await paintFrameOverlay(ctx, theme, POSTER_W, POSTER_H);
+  if (qr) {
+    drawPosterQrCode(ctx, qr, middleY, layout, POSTER_W);
+  }
 }
 
 export async function renderGroupPosterCanvas(
