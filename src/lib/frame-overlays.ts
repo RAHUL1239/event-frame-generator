@@ -36,7 +36,7 @@ export const FRAME_FULL_OVERLAYS: Partial<
     contentPadding: 50,
   },
   "elegant-gold": {
-    src: "/frames/elegant-gold-frame.jpg",
+    src: "/frames/elegant-gold-frame.jpg?v=2",
     holeInsetRatio: 60 / 1080,
     contentPadding: 65,
   },
