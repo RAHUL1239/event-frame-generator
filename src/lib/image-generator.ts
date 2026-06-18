@@ -23,6 +23,7 @@ import {
   resolvePosterColor,
   type PosterStat,
 } from "./poster-template";
+import { loadQrCodeImage, getEventQrUrl } from "./qr-code";
 import {
   drawCircularImage,
   drawLogo,
@@ -78,23 +79,6 @@ export type GroupDpRenderInput = GroupPosterRenderInput;
 
 function getGenderTagline(event: EventWithOptions, genderKey: string) {
   return event.genderOptions.find((o) => o.key === genderKey)?.tagline ?? "";
-}
-
-async function loadQrCode(url: string): Promise<HTMLImageElement | null> {
-  try {
-    const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=128x128&margin=0&data=${encodeURIComponent(url)}`;
-    return await loadImage(qrApi);
-  } catch {
-    return null;
-  }
-}
-
-function getQrUrl(event: EventWithOptions, configQr?: string): string | undefined {
-  if (configQr) return configQr;
-  if (typeof window !== "undefined") {
-    return `${window.location.origin}/events/${event.slug}/personal`;
-  }
-  return undefined;
 }
 
 function resolveFrameBackground(theme: ResolvedFrameTheme): string {
@@ -513,8 +497,8 @@ async function drawBmmPersonalPoster(
   drawAttendeeBlock(ctx, displayName, input.role, cityLabel, infoX, infoY, theme);
 
   const middleY = layoutY(layout, 560, POSTER_H);
-  const qrUrl = getQrUrl(event, config.qrUrl);
-  const qr = qrUrl ? await loadQrCode(qrUrl) : null;
+  const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
+  const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
   const middleTagline = genderTagline.trim() || event.tagline;
   drawMiddleSection(ctx, middleTagline, qr, middleY, layout, POSTER_W);
 
@@ -622,8 +606,8 @@ async function drawBmmGroupPoster(
     middleY = nameY + layoutScale(layout, 68, POSTER_H);
   }
 
-  const qrUrl = getQrUrl(event, config.qrUrl);
-  const qr = qrUrl ? await loadQrCode(qrUrl) : null;
+  const qrUrl = getEventQrUrl(event, "group", config.qrUrl);
+  const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
   const middleTagline = groupTagline.trim() || event.tagline;
   drawMiddleSection(ctx, middleTagline, qr, middleY, layout, POSTER_W);
 
