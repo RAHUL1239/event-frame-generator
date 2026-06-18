@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { EventHighlightsList } from "@/components/EventHighlightsList";
 import { formatDisplayName } from "@/lib/utils";
 import { loadPreviewAssets } from "@/lib/preview-storage";
 import type { EventWithOptions } from "@/lib/types";
@@ -263,7 +262,6 @@ export function PreviewPage({
           accentColor={event.accentColor}
           primaryColor={event.primaryColor}
           previewBackground={event.primaryColor}
-          highlights={event.eventHighlights}
           onDownload={() =>
             posterDataUrl &&
             downloadDataUrl(posterDataUrl, `${slug}-poster.png`)
@@ -272,7 +270,7 @@ export function PreviewPage({
         />
         <PreviewCard
           title="WhatsApp DP"
-          subtitle="Circular crop with event ring"
+          subtitle="Square profile image with event details & QR"
           dataUrl={dpDataUrl}
           accentColor={event.accentColor}
           primaryColor={event.primaryColor}
@@ -318,7 +316,6 @@ function PreviewCard({
   dataUrl,
   accentColor,
   primaryColor,
-  highlights,
   previewBackground,
   onDownload,
   onShareMore,
@@ -328,7 +325,6 @@ function PreviewCard({
   dataUrl: string | null;
   accentColor: string;
   primaryColor: string;
-  highlights?: string | null;
   previewBackground?: string;
   onDownload: () => void;
   onShareMore: () => void;
@@ -363,15 +359,6 @@ function PreviewCard({
           </div>
         )}
       </div>
-      {highlights && (
-        <div className="border-t bg-white px-6 py-4">
-          <EventHighlightsList
-            highlights={highlights}
-            primaryColor={primaryColor}
-            accentColor={accentColor}
-          />
-        </div>
-      )}
       <div className="space-y-2 border-t p-4">
         <button
           type="button"
