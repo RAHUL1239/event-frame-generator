@@ -138,7 +138,7 @@ type PhotoSlot = {
 
 const CIRCULAR_PERSONAL_PHOTO: PhotoSlot = {
   x: 540,
-  y: 400,
+  y: 350,
   radius: 118,
   ringPadding: 4,
 };
@@ -154,7 +154,7 @@ function getGroupPhotoPositionsForTheme(
 ) {
   if (!isCircularLayout(theme)) return getGroupPhotoPositions(count);
 
-  const centerY = 400;
+  const centerY = 350;
   if (count === 2) {
     return [
       { x: 460, y: centerY, r: 78 },
@@ -199,11 +199,13 @@ function drawBmmHeader(
   const textColor = getPosterTextColor(theme);
   const headerScale = circular ? 0.82 * fontScale : fontScale;
   const logoSize = Math.round((circular ? 88 : 96) * headerScale);
+  const nameFontSize = Math.round((circular ? 34 : 46) * headerScale);
+  const nameLineHeight = Math.round((circular ? 32 : 42) * headerScale);
 
   let nameY: number;
 
   if (circular) {
-    const logoTopY = layoutY(layout, scaleCoordY(136, canvasH), canvasH);
+    const logoTopY = layoutY(layout, scaleCoordY(100, canvasH), canvasH);
     drawLogoAt(
       ctx,
       logo,
@@ -212,7 +214,12 @@ function drawBmmHeader(
       logoSize,
       logoSize
     );
-    nameY = logoTopY + logoSize + Math.round(16 * headerScale);
+    // nameY is the text baseline — place it below the logo with a clear gap
+    nameY =
+      logoTopY +
+      logoSize +
+      Math.round(14 * headerScale) +
+      Math.round(nameFontSize * 0.85);
   } else {
     drawLogoAt(
       ctx,
@@ -229,8 +236,6 @@ function drawBmmHeader(
   ctx.direction = "ltr";
   ctx.fillStyle = textColor;
 
-  const nameFontSize = Math.round((circular ? 36 : 46) * headerScale);
-  const nameLineHeight = Math.round((circular ? 34 : 42) * headerScale);
   const nameMaxWidth =
     layout.innerW - (!circular && hashtag ? Math.round(72 * headerScale) : 0);
   ctx.font = posterFont(700, nameFontSize);
@@ -696,7 +701,7 @@ async function drawBmmPersonalPoster(
     drawAttendeeBlock(ctx, displayName, input.role, cityLabel, infoX, infoY, theme);
   }
 
-  const middleY = layoutY(layout, circular ? 640 : 560, POSTER_H);
+  const middleY = layoutY(layout, circular ? 620 : 560, POSTER_H);
   const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
   const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
   const middleTagline = genderTagline.trim() || event.tagline;
@@ -941,7 +946,7 @@ async function drawPersonalDp(
 
   const middleY = layoutY(
     layout,
-    scaleCoordY(circular ? 640 : 560, DP_H),
+    scaleCoordY(circular ? 620 : 560, DP_H),
     DP_H
   );
   const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
