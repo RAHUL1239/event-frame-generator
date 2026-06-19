@@ -125,6 +125,64 @@ function getPosterDividerStroke(theme: ResolvedFrameTheme): string {
     : "rgba(255, 255, 255, 0.35)";
 }
 
+function isGauravshaliTheme(theme: ResolvedFrameTheme): boolean {
+  const key = theme.overlayKey ?? theme.key;
+  return key === "gauravshali-sohla";
+}
+
+/** Orange + gold double rings matching the Gauravshali frame artwork. */
+function drawAttendeePhotoRing(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  photoRadius: number,
+  ringPadding: number,
+  theme: ResolvedFrameTheme,
+  fontScale = 1
+): number {
+  if (isGauravshaliTheme(theme)) {
+    const innerOffset = Math.round(4 * fontScale);
+    const outerOffset = Math.round(12 * fontScale);
+    const innerWidth = Math.max(3, Math.round(4 * fontScale));
+    const outerWidth = Math.max(4, Math.round(5 * fontScale));
+
+    ctx.strokeStyle = theme.colors.accent;
+    ctx.lineWidth = innerWidth;
+    ctx.beginPath();
+    ctx.arc(x, y, photoRadius + innerOffset, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.strokeStyle = theme.colors.gold;
+    ctx.lineWidth = outerWidth;
+    ctx.beginPath();
+    ctx.arc(x, y, photoRadius + outerOffset, 0, Math.PI * 2);
+    ctx.stroke();
+
+    return photoRadius + outerOffset + outerWidth / 2;
+  }
+
+  ctx.strokeStyle = theme.colors.accent;
+  ctx.lineWidth = theme.photoRingWidth;
+  ctx.beginPath();
+  ctx.arc(x, y, photoRadius + ringPadding, 0, Math.PI * 2);
+  ctx.stroke();
+
+  return photoRadius + ringPadding + theme.photoRingWidth / 2;
+}
+
+function getPhotoRingOuterInset(
+  theme: ResolvedFrameTheme,
+  ringPadding: number,
+  fontScale = 1
+): number {
+  if (isGauravshaliTheme(theme)) {
+    const outerOffset = Math.round(12 * fontScale);
+    const outerWidth = Math.max(4, Math.round(5 * fontScale));
+    return outerOffset + outerWidth / 2;
+  }
+  return ringPadding + theme.photoRingWidth / 2;
+}
+
 function drawBmmHeader(
   ctx: CanvasRenderingContext2D,
   event: EventWithOptions,
@@ -549,17 +607,20 @@ async function drawBmmPersonalPoster(
   const photoRadius = layoutScale(layout, photoPos.radius, POSTER_W);
   const ringPadding = layoutScale(layout, photoPos.ringPadding, POSTER_W);
   drawCircularImage(ctx, photo, photoX, photoY, photoRadius, input.photoCrop);
-  ctx.strokeStyle = accent;
-  ctx.lineWidth = theme.photoRingWidth;
-  ctx.beginPath();
-  ctx.arc(photoX, photoY, photoRadius + ringPadding, 0, Math.PI * 2);
-  ctx.stroke();
+  const photoOuterEdge = drawAttendeePhotoRing(
+    ctx,
+    photoX,
+    photoY,
+    photoRadius,
+    ringPadding,
+    theme
+  );
 
   const displayName = `${input.firstName} ${input.lastName}`.trim();
   const cityLabel = (input.city?.trim() || event.location || "").trim();
 
   const textGap = layoutScale(layout, 20, POSTER_W);
-  const infoX = photoX + photoRadius + ringPadding + textGap;
+  const infoX = photoX + photoOuterEdge + textGap;
   let infoY = photoY - layoutScale(layout, 22, POSTER_H);
   if (headline.length > 0) {
     const headlineEndY = drawHeadlineBlock(
@@ -670,18 +731,15 @@ async function drawBmmGroupPoster(
     const pos = positions[i];
     const crop = input.photoCrops[i];
     drawCircularImage(ctx, photo, pos.x, pos.y, pos.r, crop);
-    ctx.strokeStyle = accent;
-    ctx.lineWidth = theme.photoRingWidth;
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, pos.r + 5, 0, Math.PI * 2);
-    ctx.stroke();
+    drawAttendeePhotoRing(ctx, pos.x, pos.y, pos.r, 5, theme);
   });
 
   const photoCenterX =
     positions.reduce((sum, pos) => sum + pos.x, 0) / positions.length;
   const photoBottom =
-    Math.max(...positions.map((pos) => pos.y + pos.r + 5)) +
-    layoutScale(layout, 16, POSTER_W);
+    Math.max(
+      ...positions.map((pos) => pos.y + pos.r + getPhotoRingOuterInset(theme, 5))
+    ) + layoutScale(layout, 16, POSTER_W);
   const nameY = photoBottom + layoutScale(layout, 28, POSTER_H);
 
   ctx.textAlign = "center";
@@ -782,17 +840,21 @@ async function drawPersonalDp(
   const ringPadding = layoutScale(layout, photoPos.ringPadding, DP_W);
 
   drawCircularImage(ctx, photo, photoX, photoY, photoRadius, input.photoCrop);
-  ctx.strokeStyle = accent;
-  ctx.lineWidth = theme.photoRingWidth;
-  ctx.beginPath();
-  ctx.arc(photoX, photoY, photoRadius + ringPadding, 0, Math.PI * 2);
-  ctx.stroke();
+  const photoOuterEdge = drawAttendeePhotoRing(
+    ctx,
+    photoX,
+    photoY,
+    photoRadius,
+    ringPadding,
+    theme,
+    fontScale
+  );
 
   const displayName = `${input.firstName} ${input.lastName}`.trim();
   const cityLabel = (input.city?.trim() || event.location || "").trim();
 
   const textGap = layoutScale(layout, scaleCoord(20, DP_W), DP_W);
-  const infoX = photoX + photoRadius + ringPadding + textGap;
+  const infoX = photoX + photoOuterEdge + textGap;
   const infoY = photoY - layoutScale(layout, scaleCoordY(22, DP_H), DP_H);
   drawAttendeeBlock(
     ctx,
@@ -863,11 +925,7 @@ async function drawGroupDp(
     const pos = positions[i];
     const crop = input.photoCrops[i];
     drawCircularImage(ctx, photo, pos.x, pos.y, pos.r, crop);
-    ctx.strokeStyle = accent;
-    ctx.lineWidth = theme.photoRingWidth;
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, pos.r + 5, 0, Math.PI * 2);
-    ctx.stroke();
+    drawAttendeePhotoRing(ctx, pos.x, pos.y, pos.r, 5, theme);
   });
 
   const photoCenterX =
