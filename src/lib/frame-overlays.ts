@@ -143,6 +143,22 @@ export function getFrameBorderWidth(
   return getFrameOverlayInset(themeKey, canvasWidth);
 }
 
+/** Lowest Y (canvas coords) where circular frame content stays inside the ring. */
+export function getCircularSafeBottomY(
+  themeKey: FrameThemeKey,
+  canvasW: number,
+  canvasH: number
+): number {
+  const config = FRAME_FULL_OVERLAYS[themeKey];
+  if (!config?.holeRadiusRatio) return canvasH;
+
+  const offsetY = (config.overlayOffsetY ?? 0) * canvasH;
+  const centerY = canvasH / 2 + offsetY;
+  const contentRadius = getContentRadius(config, canvasW);
+  const decorationPad = Math.round((88 * canvasW) / 1080);
+  return Math.round(centerY + contentRadius - decorationPad);
+}
+
 export function getPosterLayout(
   themeKey: FrameThemeKey | null | undefined,
   canvasW: number,
