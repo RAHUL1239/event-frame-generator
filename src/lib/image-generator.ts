@@ -138,8 +138,8 @@ type PhotoSlot = {
 
 const CIRCULAR_PERSONAL_PHOTO: PhotoSlot = {
   x: 540,
-  y: 350,
-  radius: 118,
+  y: 368,
+  radius: 108,
   ringPadding: 4,
 };
 
@@ -154,7 +154,7 @@ function getGroupPhotoPositionsForTheme(
 ) {
   if (!isCircularLayout(theme)) return getGroupPhotoPositions(count);
 
-  const centerY = 350;
+  const centerY = 368;
   if (count === 2) {
     return [
       { x: 460, y: centerY, r: 78 },
@@ -199,13 +199,13 @@ function drawBmmHeader(
   const textColor = getPosterTextColor(theme);
   const headerScale = circular ? 0.82 * fontScale : fontScale;
   const logoSize = Math.round((circular ? 88 : 96) * headerScale);
-  const nameFontSize = Math.round((circular ? 34 : 46) * headerScale);
-  const nameLineHeight = Math.round((circular ? 32 : 42) * headerScale);
+  const nameFontSize = Math.round((circular ? 32 : 46) * headerScale);
+  const nameLineHeight = Math.round((circular ? 30 : 42) * headerScale);
 
   let nameY: number;
 
   if (circular) {
-    const logoTopY = layoutY(layout, scaleCoordY(100, canvasH), canvasH);
+    const logoTopY = layoutY(layout, scaleCoordY(72, canvasH), canvasH);
     drawLogoAt(
       ctx,
       logo,
@@ -252,7 +252,7 @@ function drawBmmHeader(
     ctx,
     getPosterVenueLine(event),
     canvasW / 2,
-    nameY + Math.round(14 * headerScale)
+    nameY + Math.round((circular ? 10 : 14) * headerScale)
   );
 
   if (hashtag && !circular) {
@@ -701,7 +701,7 @@ async function drawBmmPersonalPoster(
     drawAttendeeBlock(ctx, displayName, input.role, cityLabel, infoX, infoY, theme);
   }
 
-  const middleY = layoutY(layout, circular ? 620 : 560, POSTER_H);
+  const middleY = layoutY(layout, circular ? 600 : 560, POSTER_H);
   const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
   const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
   const middleTagline = genderTagline.trim() || event.tagline;
@@ -946,7 +946,7 @@ async function drawPersonalDp(
 
   const middleY = layoutY(
     layout,
-    scaleCoordY(circular ? 620 : 560, DP_H),
+    scaleCoordY(circular ? 600 : 560, DP_H),
     DP_H
   );
   const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);

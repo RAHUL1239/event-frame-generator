@@ -31,6 +31,8 @@ export type PosterLayoutContext = {
   inset: number;
   innerW: number;
   innerH: number;
+  /** Vertical shift matching overlay offset so content aligns with the hole. */
+  contentOffsetY?: number;
 };
 
 /** Inset used for vector-drawn frames (elegant gold, youth, etc.). */
@@ -54,7 +56,7 @@ export const FRAME_FULL_OVERLAYS: Partial<
     src: "/frames/gauravshali-sohla-frame.png?v=2",
     holeShape: "circle",
     holeRadiusRatio: 326 / 1024,
-    contentPadding: 20,
+    contentPadding: 28,
     overlayScale: 1.21,
     overlayOffsetY: 0.028,
   },
@@ -143,10 +145,16 @@ export function getPosterLayout(
   canvasH: number
 ): PosterLayoutContext {
   const inset = getFrameContentInset(themeKey, canvasW);
+  const config = themeKey ? FRAME_FULL_OVERLAYS[themeKey] : undefined;
+  const contentOffsetY = config?.overlayOffsetY
+    ? Math.round(config.overlayOffsetY * canvasH)
+    : 0;
+
   return {
     inset,
     innerW: canvasW - inset * 2,
     innerH: canvasH - inset * 2,
+    contentOffsetY,
   };
 }
 
@@ -165,7 +173,11 @@ export function layoutY(
   y: number,
   canvasH: number
 ): number {
-  return layout.inset + (y / canvasH) * layout.innerH;
+  return (
+    layout.inset +
+    (layout.contentOffsetY ?? 0) +
+    (y / canvasH) * layout.innerH
+  );
 }
 
 /** Scale a design-space radius/length for the padded content area. */
