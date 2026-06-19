@@ -437,6 +437,26 @@ function drawAttendeeBlockCentered(
   return bottomY;
 }
 
+function getPosterQrBounds(
+  middleY: number,
+  layout: PosterLayoutContext,
+  canvasW: number,
+  fontScale = 1,
+  theme?: ResolvedFrameTheme
+) {
+  const circular = theme ? isCircularLayout(theme) : false;
+  const lineEnd = layoutX(layout, canvasW - scaleCoord(36, canvasW), canvasW);
+  const size = Math.round((circular ? 76 : 96) * fontScale);
+  const pad = 6;
+  const qrX =
+    lineEnd - size - layoutScale(layout, Math.round(12 * fontScale), canvasW);
+  const qrY = middleY + Math.round((circular ? 8 : 16) * fontScale);
+  return {
+    leftEdge: qrX - pad,
+    bottom: qrY + size + pad,
+  };
+}
+
 function drawMiddleSection(
   ctx: CanvasRenderingContext2D,
   slogan: string,
@@ -465,13 +485,16 @@ function drawMiddleSection(
     600,
     Math.round((circular ? 26 : 36) * fontScale)
   );
+  const barX = layoutX(layout, scaleCoord(36, canvasW), canvasW);
   const textMaxWidth = reserveQrSpace
     ? canvasW - layout.inset * 2 - Math.round(220 * fontScale)
     : layout.innerW - Math.round(80 * fontScale);
+  const textCenterX =
+    circular && reserveQrSpace ? barX + textMaxWidth / 2 + 20 : canvasW / 2;
   return wrapCanvasText(
     ctx,
     slogan,
-    canvasW / 2,
+    textCenterX,
     textY,
     textMaxWidth,
     Math.round((circular ? 24 : 44) * fontScale)
@@ -570,13 +593,16 @@ function drawCountdownBanner(
   y: number,
   theme: ResolvedFrameTheme,
   layout: PosterLayoutContext,
-  canvasW: number
+  canvasW: number,
+  qrBounds?: { leftEdge: number; bottom: number }
 ): number {
   const barX = layoutX(layout, 36, canvasW);
-  const barW = layout.innerW;
   const circular = isCircularLayout(theme);
-  const paddingX = circular ? 36 : 56;
-  const maxTextWidth = barW - paddingX;
+  const barW =
+    circular && qrBounds ? qrBounds.leftEdge - barX - 10 : layout.innerW;
+  const paddingX = circular ? 24 : 56;
+  const maxTextWidth = Math.max(120, barW - paddingX);
+  const textCenterX = circular && qrBounds ? barX + barW / 2 : canvasW / 2;
   const verticalPad = circular ? 10 : 22;
 
   let fontSize = circular ? 22 : 38;
@@ -600,7 +626,7 @@ function drawCountdownBanner(
   ctx.fillStyle = "#ffffff";
   ctx.font = posterFont(700, fontSize);
   const firstLineY = y + verticalPad + fontSize * 0.78;
-  wrapCanvasText(ctx, message, canvasW / 2, firstLineY, maxTextWidth, lineHeight);
+  wrapCanvasText(ctx, message, textCenterX, firstLineY, maxTextWidth, lineHeight);
 
   return y + barH;
 }
@@ -612,12 +638,19 @@ function drawEventHighlights(
   layout: PosterLayoutContext,
   canvasW: number,
   theme: ResolvedFrameTheme,
-  maxBottomY?: number
+  maxBottomY?: number,
+  qrBounds?: { leftEdge: number; bottom: number }
 ): number {
   if (highlights.length === 0) return y;
 
-  const maxWidth = layout.innerW - 48;
   const circular = isCircularLayout(theme);
+  const barX = layoutX(layout, scaleCoord(36, canvasW), canvasW);
+  const maxWidth =
+    circular && qrBounds
+      ? qrBounds.leftEdge - barX - 20
+      : layout.innerW - 48;
+  const centerX =
+    circular && qrBounds ? barX + maxWidth / 2 + 10 : canvasW / 2;
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
@@ -625,8 +658,8 @@ function drawEventHighlights(
 
   let fontSize = circular ? 18 : 26;
   let lineHeight = circular ? 18 : 30;
-  const topPad = circular ? 4 : 20;
-  const itemGap = circular ? 1 : 4;
+  const topPad = circular ? 6 : 20;
+  const itemGap = circular ? 2 : 4;
 
   const measureBottom = () => {
     ctx.font = posterFont(600, fontSize);
@@ -651,7 +684,7 @@ function drawEventHighlights(
   for (const item of highlights) {
     const wrapped = splitTextIntoLines(ctx, `✓ ${item}`, maxWidth);
     for (const line of wrapped) {
-      ctx.fillText(line, canvasW / 2, cursorY);
+      ctx.fillText(line, centerX, cursorY);
       cursorY += lineHeight;
     }
     cursorY += itemGap;
@@ -667,7 +700,8 @@ function drawPosterFooterSection(
   middleEndY: number,
   layout: PosterLayoutContext,
   canvasW: number,
-  canvasH: number
+  canvasH: number,
+  qrBounds?: { leftEdge: number; bottom: number }
 ) {
   const config = parsePosterTemplate(event);
   const stats = config.stats ?? [];
@@ -679,11 +713,21 @@ function drawPosterFooterSection(
     ? getCircularSafeBottomY(themeKey, canvasW, canvasH)
     : undefined;
 
-  let cursorY = middleEndY + (circular ? 2 : 8);
+  let cursorY = middleEndY + (circular ? 8 : 8);
+  if (circular && qrBounds) {
+    cursorY = Math.max(cursorY, qrBounds.bottom + 10);
+  }
   if (countdown) {
     cursorY =
-      drawCountdownBanner(ctx, countdown.message, cursorY, theme, layout, canvasW) +
-      (circular ? 2 : 8);
+      drawCountdownBanner(
+        ctx,
+        countdown.message,
+        cursorY,
+        theme,
+        layout,
+        canvasW,
+        qrBounds
+      ) + (circular ? 6 : 8);
   }
 
   if (highlights.length > 0) {
@@ -695,8 +739,9 @@ function drawPosterFooterSection(
         layout,
         canvasW,
         theme,
-        safeBottomY
-      ) + (circular ? 2 : 6);
+        safeBottomY,
+        qrBounds
+      ) + (circular ? 4 : 6);
   }
 
   if (stats.length > 0) {
@@ -800,9 +845,12 @@ async function drawBmmPersonalPoster(
     );
 
     const middleY =
-      attendeeBottomY + layoutScale(layout, 10, POSTER_W);
+      attendeeBottomY + layoutScale(layout, 18, POSTER_W);
     const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
     const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
+    const qrBounds = qr
+      ? getPosterQrBounds(middleY, layout, POSTER_W, 1, theme)
+      : undefined;
     const middleTagline = genderTagline.trim() || event.tagline;
     const middleEndY = drawMiddleSection(
       ctx,
@@ -821,7 +869,8 @@ async function drawBmmPersonalPoster(
       middleEndY,
       layout,
       POSTER_W,
-      POSTER_H
+      POSTER_H,
+      qrBounds
     );
 
     await paintFrameOverlay(ctx, theme, POSTER_W, POSTER_H);
