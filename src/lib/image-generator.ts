@@ -145,7 +145,7 @@ function layoutCircularPhoto(
 ) {
   const photoRadius = layoutScale(layout, CIRCULAR_PHOTO_RADIUS, canvasW);
   const ringPadding = layoutScale(layout, 4, canvasW);
-  const gap = layoutScale(layout, 10, canvasW);
+  const gap = layoutScale(layout, 6, canvasW);
   return {
     photoX: canvasW / 2,
     photoY: headerBottomY + gap + photoRadius,
@@ -164,8 +164,8 @@ function circularAttendeeNameBaseline(
 ) {
   const photoBottom = photoY + photoRadius + ringPadding;
   const nameFontSize = Math.round(32 * fontScale);
-  const gap = layoutScale(layout, 18, canvasW);
-  return photoBottom + gap + Math.round(nameFontSize * 0.95);
+  const gap = layoutScale(layout, 36, canvasW);
+  return photoBottom + gap + Math.round(nameFontSize * 1.08);
 }
 
 function getPersonalPhotoPosition(theme: ResolvedFrameTheme): PhotoSlot {
@@ -231,14 +231,14 @@ function drawBmmHeader(
   const circular = isCircularLayout(theme);
   const textColor = getPosterTextColor(theme);
   const headerScale = circular ? 0.82 * fontScale : fontScale;
-  const logoSize = Math.round((circular ? 76 : 96) * headerScale);
+  const logoSize = Math.round((circular ? 92 : 96) * headerScale);
   const nameFontSize = Math.round((circular ? 30 : 46) * headerScale);
-  const nameLineHeight = Math.round((circular ? 28 : 42) * headerScale);
+  const nameLineHeight = Math.round((circular ? 26 : 42) * headerScale);
 
   let nameY: number;
 
   if (circular) {
-    const logoTopY = layoutY(layout, scaleCoordY(42, canvasH), canvasH);
+    const logoTopY = layoutY(layout, scaleCoordY(28, canvasH), canvasH);
     drawLogoAt(
       ctx,
       logo,
@@ -398,33 +398,40 @@ function drawAttendeeBlockCentered(
   y: number,
   theme: ResolvedFrameTheme,
   fontScale = 1
-) {
+): number {
   const textColor = getPosterTextColor(theme);
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
   ctx.fillStyle = textColor;
-  ctx.font = posterFont(700, Math.round(32 * fontScale));
+  const nameFontSize = Math.round(32 * fontScale);
+  ctx.font = posterFont(700, nameFontSize);
   const upperName = name.toUpperCase();
   ctx.fillText(upperName, centerX, y);
 
   const nameWidth = Math.min(ctx.measureText(upperName).width, 420 * fontScale);
   ctx.strokeStyle = textColor;
   ctx.lineWidth = Math.max(2, 3 * fontScale);
+  const underlineY = y + Math.round(10 * fontScale);
   ctx.beginPath();
-  ctx.moveTo(centerX - nameWidth / 2, y + Math.round(10 * fontScale));
-  ctx.lineTo(centerX + nameWidth / 2, y + Math.round(10 * fontScale));
+  ctx.moveTo(centerX - nameWidth / 2, underlineY);
+  ctx.lineTo(centerX + nameWidth / 2, underlineY);
   ctx.stroke();
 
-  ctx.font = posterFont(600, Math.round(22 * fontScale));
-  let lineY = y + Math.round(38 * fontScale);
+  const roleFontSize = Math.round(20 * fontScale);
+  ctx.font = posterFont(600, roleFontSize);
+  let lineY = y + Math.round(34 * fontScale);
+  let bottomY = underlineY;
   if (role) {
     ctx.fillText(role.toUpperCase(), centerX, lineY);
-    lineY += Math.round(26 * fontScale);
+    bottomY = lineY + Math.round(roleFontSize * 0.35);
+    lineY += Math.round(24 * fontScale);
   }
   if (city) {
     ctx.fillText(city.toUpperCase(), centerX, lineY);
+    bottomY = lineY + Math.round(roleFontSize * 0.35);
   }
+  return bottomY;
 }
 
 function drawMiddleSection(
@@ -734,7 +741,7 @@ async function drawBmmPersonalPoster(
       layout,
       POSTER_W
     );
-    drawAttendeeBlockCentered(
+    const attendeeBottomY = drawAttendeeBlockCentered(
       ctx,
       displayName,
       input.role,
@@ -745,8 +752,7 @@ async function drawBmmPersonalPoster(
     );
 
     const middleY =
-      nameY +
-      layoutScale(layout, 72, POSTER_W);
+      attendeeBottomY + layoutScale(layout, 40, POSTER_W);
     const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
     const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
     const middleTagline = genderTagline.trim() || event.tagline;
@@ -1055,7 +1061,7 @@ async function drawPersonalDp(
       DP_W,
       fontScale
     );
-    drawAttendeeBlockCentered(
+    const attendeeBottomY = drawAttendeeBlockCentered(
       ctx,
       displayName,
       input.role,
@@ -1067,7 +1073,7 @@ async function drawPersonalDp(
     );
 
     const middleY =
-      nameY + layoutScale(layout, scaleCoord(72, DP_W), DP_W);
+      attendeeBottomY + layoutScale(layout, scaleCoord(40, DP_W), DP_W);
     const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
     const qr = qrUrl
       ? await loadQrCodeImage(qrUrl, Math.round(128 * fontScale))
