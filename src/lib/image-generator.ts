@@ -113,7 +113,68 @@ async function paintFrameOverlay(
   });
 }
 
-const POSTER_TEXT = "#ffffff";
+const DEFAULT_POSTER_TEXT = "#ffffff";
+
+function getPosterTextColor(theme: ResolvedFrameTheme): string {
+  return theme.posterTextColor ?? DEFAULT_POSTER_TEXT;
+}
+
+function getPosterDividerStroke(theme: ResolvedFrameTheme): string {
+  return theme.posterTextColor
+    ? "rgba(139, 52, 24, 0.35)"
+    : "rgba(255, 255, 255, 0.35)";
+}
+
+function isCircularLayout(theme: ResolvedFrameTheme): boolean {
+  return theme.layoutProfile === "circular";
+}
+
+type PhotoSlot = {
+  x: number;
+  y: number;
+  radius: number;
+  ringPadding: number;
+};
+
+const CIRCULAR_PERSONAL_PHOTO: PhotoSlot = {
+  x: 540,
+  y: 430,
+  radius: 88,
+  ringPadding: 4,
+};
+
+function getPersonalPhotoPosition(theme: ResolvedFrameTheme): PhotoSlot {
+  if (isCircularLayout(theme)) return CIRCULAR_PERSONAL_PHOTO;
+  return PERSONAL_PHOTO_POSITION;
+}
+
+function getGroupPhotoPositionsForTheme(
+  theme: ResolvedFrameTheme,
+  count: number
+) {
+  if (!isCircularLayout(theme)) return getGroupPhotoPositions(count);
+
+  const centerY = 410;
+  if (count === 2) {
+    return [
+      { x: 470, y: centerY, r: 72 },
+      { x: 610, y: centerY, r: 72 },
+    ];
+  }
+  if (count === 3) {
+    return [
+      { x: 420, y: centerY, r: 64 },
+      { x: 540, y: centerY, r: 64 },
+      { x: 660, y: centerY, r: 64 },
+    ];
+  }
+  return [
+    { x: 390, y: centerY, r: 52 },
+    { x: 490, y: centerY, r: 52 },
+    { x: 590, y: centerY, r: 52 },
+    { x: 690, y: centerY, r: 52 },
+  ];
+}
 
 function scaleCoord(value: number, canvasW: number): number {
   return (value * canvasW) / POSTER_W;
@@ -134,42 +195,62 @@ function drawBmmHeader(
   hashtag?: string,
   fontScale = 1
 ) {
-  const logoSize = Math.round(96 * fontScale);
-  drawLogoAt(
-    ctx,
-    logo,
-    layoutX(layout, scaleCoord(36, canvasW), canvasW),
-    layoutY(layout, scaleCoordY(58, canvasH), canvasH),
-    logoSize,
-    logoSize
-  );
+  const circular = isCircularLayout(theme);
+  const textColor = getPosterTextColor(theme);
+  const headerScale = circular ? 0.82 * fontScale : fontScale;
+  const logoSize = Math.round((circular ? 72 : 96) * headerScale);
+
+  if (circular) {
+    drawLogoAt(
+      ctx,
+      logo,
+      canvasW / 2 - logoSize / 2,
+      layoutY(layout, scaleCoordY(52, canvasH), canvasH),
+      logoSize,
+      logoSize
+    );
+  } else {
+    drawLogoAt(
+      ctx,
+      logo,
+      layoutX(layout, scaleCoord(36, canvasW), canvasW),
+      layoutY(layout, scaleCoordY(58, canvasH), canvasH),
+      logoSize,
+      logoSize
+    );
+  }
 
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
-  ctx.fillStyle = POSTER_TEXT;
+  ctx.fillStyle = textColor;
 
-  const nameFontSize = Math.round(46 * fontScale);
-  const nameLineHeight = Math.round(42 * fontScale);
-  const nameMaxWidth = layout.innerW - (hashtag ? Math.round(72 * fontScale) : 0);
+  const nameFontSize = Math.round((circular ? 38 : 46) * headerScale);
+  const nameLineHeight = Math.round((circular ? 36 : 42) * headerScale);
+  const nameMaxWidth =
+    layout.innerW - (!circular && hashtag ? Math.round(72 * headerScale) : 0);
   ctx.font = posterFont(700, nameFontSize);
   const nameLines = splitTextIntoLines(ctx, event.name.toUpperCase(), nameMaxWidth);
 
-  let nameY = layoutY(layout, scaleCoordY(40, canvasH), canvasH);
+  let nameY = layoutY(
+    layout,
+    scaleCoordY(circular ? 118 : 40, canvasH),
+    canvasH
+  );
   for (const line of nameLines) {
     fillCenteredLine(ctx, line, canvasW / 2, nameY);
     nameY += nameLineHeight;
   }
 
-  const venueFontSize = Math.round(26 * fontScale);
+  const venueFontSize = Math.round((circular ? 22 : 26) * headerScale);
   ctx.font = posterFont(600, venueFontSize);
   fillCenteredLine(
     ctx,
     getPosterVenueLine(event),
     canvasW / 2,
-    nameY + Math.round(16 * fontScale)
+    nameY + Math.round(14 * headerScale)
   );
 
-  if (hashtag) {
+  if (hashtag && !circular) {
     ctx.textAlign = "right";
     ctx.font = posterFont(700, Math.round(28 * fontScale));
     ctx.fillText(
@@ -191,7 +272,7 @@ function drawHeadlineBlock(
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
-  ctx.fillStyle = POSTER_TEXT;
+  ctx.fillStyle = getPosterTextColor(_theme);
   let currentY = y;
   for (const line of lines) {
     ctx.font = posterFont(700, 40);
@@ -215,7 +296,7 @@ function drawHeadlineBlockCentered(
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
-  ctx.fillStyle = POSTER_TEXT;
+  ctx.fillStyle = getPosterTextColor(_theme);
   let currentY = startY;
   for (const line of lines) {
     ctx.font = posterFont(700, 40);
@@ -241,12 +322,12 @@ function drawAttendeeBlock(
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
-  ctx.fillStyle = POSTER_TEXT;
+  ctx.fillStyle = getPosterTextColor(_theme);
   ctx.font = posterFont(700, Math.round(40 * fontScale));
   const upperName = name.toUpperCase();
   ctx.fillText(upperName, x, y);
 
-  ctx.strokeStyle = POSTER_TEXT;
+  ctx.strokeStyle = getPosterTextColor(_theme);
   ctx.lineWidth = Math.max(2, 3 * fontScale);
   ctx.beginPath();
   ctx.moveTo(x, y + Math.round(10 * fontScale));
@@ -267,19 +348,58 @@ function drawAttendeeBlock(
   }
 }
 
+function drawAttendeeBlockCentered(
+  ctx: CanvasRenderingContext2D,
+  name: string,
+  role: string,
+  city: string,
+  centerX: number,
+  y: number,
+  theme: ResolvedFrameTheme,
+  fontScale = 1
+) {
+  const textColor = getPosterTextColor(theme);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
+  ctx.direction = "ltr";
+  ctx.fillStyle = textColor;
+  ctx.font = posterFont(700, Math.round(34 * fontScale));
+  const upperName = name.toUpperCase();
+  ctx.fillText(upperName, centerX, y);
+
+  const nameWidth = Math.min(ctx.measureText(upperName).width, 420 * fontScale);
+  ctx.strokeStyle = textColor;
+  ctx.lineWidth = Math.max(2, 3 * fontScale);
+  ctx.beginPath();
+  ctx.moveTo(centerX - nameWidth / 2, y + Math.round(10 * fontScale));
+  ctx.lineTo(centerX + nameWidth / 2, y + Math.round(10 * fontScale));
+  ctx.stroke();
+
+  ctx.font = posterFont(600, Math.round(22 * fontScale));
+  let lineY = y + Math.round(38 * fontScale);
+  if (role) {
+    ctx.fillText(role.toUpperCase(), centerX, lineY);
+    lineY += Math.round(26 * fontScale);
+  }
+  if (city) {
+    ctx.fillText(city.toUpperCase(), centerX, lineY);
+  }
+}
+
 function drawMiddleSection(
   ctx: CanvasRenderingContext2D,
   slogan: string,
   y: number,
   layout: PosterLayoutContext,
   canvasW: number,
+  theme: ResolvedFrameTheme,
   reserveQrSpace = false,
   fontScale = 1
 ) {
   const lineStart = layoutX(layout, scaleCoord(36, canvasW), canvasW);
   const lineEnd = layoutX(layout, canvasW - scaleCoord(36, canvasW), canvasW);
 
-  ctx.strokeStyle = "rgba(255,255,255,0.35)";
+  ctx.strokeStyle = getPosterDividerStroke(theme);
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(lineStart, y);
@@ -287,8 +407,11 @@ function drawMiddleSection(
   ctx.stroke();
 
   const textY = y + Math.round(58 * fontScale);
-  ctx.fillStyle = POSTER_TEXT;
-  ctx.font = posterFont(600, Math.round(36 * fontScale));
+  ctx.fillStyle = getPosterTextColor(theme);
+  ctx.font = posterFont(
+    600,
+    Math.round((isCircularLayout(theme) ? 30 : 36) * fontScale)
+  );
   const textMaxWidth = reserveQrSpace
     ? canvasW - layout.inset * 2 - Math.round(220 * fontScale)
     : layout.innerW - Math.round(80 * fontScale);
@@ -357,6 +480,7 @@ function drawFooter(
   accent: string,
   layout: PosterLayoutContext,
   canvasW: number,
+  theme: ResolvedFrameTheme,
   website?: string,
   socialHandle?: string
 ) {
@@ -370,7 +494,7 @@ function drawFooter(
   ctx.lineTo(lineEnd, y);
   ctx.stroke();
 
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = getPosterTextColor(theme);
   ctx.font = posterFont(500, 24);
   ctx.textBaseline = "middle";
   ctx.direction = "ltr";
@@ -430,7 +554,8 @@ function drawEventHighlights(
   highlights: string[],
   y: number,
   layout: PosterLayoutContext,
-  canvasW: number
+  canvasW: number,
+  theme: ResolvedFrameTheme
 ): number {
   if (highlights.length === 0) return y;
 
@@ -438,7 +563,7 @@ function drawEventHighlights(
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
-  ctx.fillStyle = POSTER_TEXT;
+  ctx.fillStyle = getPosterTextColor(theme);
   ctx.font = posterFont(600, 26);
 
   let cursorY = y + 20;
@@ -475,7 +600,7 @@ function drawPosterFooterSection(
   }
 
   if (highlights.length > 0) {
-    cursorY = drawEventHighlights(ctx, highlights, cursorY, layout, canvasW) + 6;
+    cursorY = drawEventHighlights(ctx, highlights, cursorY, layout, canvasW, theme) + 6;
   }
 
   if (stats.length > 0) {
@@ -493,6 +618,7 @@ function drawPosterFooterSection(
     theme.colors.accent,
     layout,
     canvasW,
+    theme,
     config.website,
     config.socialHandle
   );
@@ -516,12 +642,15 @@ async function drawBmmPersonalPoster(
 
   paintFrameBackground(ctx, theme, POSTER_W, POSTER_H);
 
+  const circular = isCircularLayout(theme);
+  const photoPos = getPersonalPhotoPosition(theme);
+
   drawBmmHeader(ctx, event, logo, theme, layout, POSTER_W, POSTER_H, hashtag);
 
-  const photoX = layoutX(layout, PERSONAL_PHOTO_POSITION.x, POSTER_W);
-  const photoY = layoutY(layout, PERSONAL_PHOTO_POSITION.y, POSTER_H);
-  const photoRadius = layoutScale(layout, PERSONAL_PHOTO_POSITION.radius, POSTER_W);
-  const ringPadding = layoutScale(layout, PERSONAL_PHOTO_POSITION.ringPadding, POSTER_W);
+  const photoX = layoutX(layout, photoPos.x, POSTER_W);
+  const photoY = layoutY(layout, photoPos.y, POSTER_H);
+  const photoRadius = layoutScale(layout, photoPos.radius, POSTER_W);
+  const ringPadding = layoutScale(layout, photoPos.ringPadding, POSTER_W);
   drawCircularImage(ctx, photo, photoX, photoY, photoRadius, input.photoCrop);
   ctx.strokeStyle = accent;
   ctx.lineWidth = theme.photoRingWidth;
@@ -529,29 +658,55 @@ async function drawBmmPersonalPoster(
   ctx.arc(photoX, photoY, photoRadius + ringPadding, 0, Math.PI * 2);
   ctx.stroke();
 
-  const textGap = layoutScale(layout, 20, POSTER_W);
-  const infoX = photoX + photoRadius + ringPadding + textGap;
-  let infoY = photoY - layoutScale(layout, 22, POSTER_H);
-  if (headline.length > 0) {
-    const headlineEndY = drawHeadlineBlock(
-      ctx,
-      headline,
-      infoX,
-      layoutY(layout, 200, POSTER_H),
-      theme
-    );
-    infoY = Math.max(infoY, headlineEndY + layoutScale(layout, 12, POSTER_H));
-  }
-
   const displayName = `${input.firstName} ${input.lastName}`.trim();
   const cityLabel = (input.city?.trim() || event.location || "").trim();
-  drawAttendeeBlock(ctx, displayName, input.role, cityLabel, infoX, infoY, theme);
 
-  const middleY = layoutY(layout, 560, POSTER_H);
+  if (circular) {
+    const nameY =
+      photoY +
+      photoRadius +
+      ringPadding +
+      layoutScale(layout, 24, POSTER_W);
+    drawAttendeeBlockCentered(
+      ctx,
+      displayName,
+      input.role,
+      cityLabel,
+      POSTER_W / 2,
+      nameY,
+      theme
+    );
+  } else {
+    const textGap = layoutScale(layout, 20, POSTER_W);
+    const infoX = photoX + photoRadius + ringPadding + textGap;
+    let infoY = photoY - layoutScale(layout, 22, POSTER_H);
+    if (headline.length > 0) {
+      const headlineEndY = drawHeadlineBlock(
+        ctx,
+        headline,
+        infoX,
+        layoutY(layout, 200, POSTER_H),
+        theme
+      );
+      infoY = Math.max(infoY, headlineEndY + layoutScale(layout, 12, POSTER_H));
+    }
+
+    drawAttendeeBlock(ctx, displayName, input.role, cityLabel, infoX, infoY, theme);
+  }
+
+  const middleY = layoutY(layout, circular ? 610 : 560, POSTER_H);
   const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
   const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
   const middleTagline = genderTagline.trim() || event.tagline;
-  drawMiddleSection(ctx, middleTagline, middleY, layout, POSTER_W, Boolean(qr));
+  drawMiddleSection(
+    ctx,
+    middleTagline,
+    middleY,
+    layout,
+    POSTER_W,
+    theme,
+    Boolean(qr)
+  );
 
   drawPosterFooterSection(
     ctx,
@@ -604,9 +759,11 @@ async function drawBmmGroupPoster(
 
   paintFrameBackground(ctx, theme, POSTER_W, POSTER_H);
 
+  const circular = isCircularLayout(theme);
+
   drawBmmHeader(ctx, event, logo, theme, layout, POSTER_W, POSTER_H, hashtag);
 
-  if (headline.length > 0) {
+  if (headline.length > 0 && !circular) {
     drawHeadlineBlockCentered(
       ctx,
       headline,
@@ -617,11 +774,13 @@ async function drawBmmGroupPoster(
     );
   }
 
-  const positions = getGroupPhotoPositions(input.memberCount).map((pos) => ({
-    x: layoutX(layout, pos.x, POSTER_W),
-    y: layoutY(layout, pos.y, POSTER_H),
-    r: layoutScale(layout, pos.r, POSTER_W),
-  }));
+  const positions = getGroupPhotoPositionsForTheme(theme, input.memberCount).map(
+    (pos) => ({
+      x: layoutX(layout, pos.x, POSTER_W),
+      y: layoutY(layout, pos.y, POSTER_H),
+      r: layoutScale(layout, pos.r, POSTER_W),
+    })
+  );
   photos.forEach((photo, i) => {
     const pos = positions[i];
     const crop = input.photoCrops[i];
@@ -643,8 +802,8 @@ async function drawBmmGroupPoster(
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
-  ctx.fillStyle = POSTER_TEXT;
-  ctx.font = posterFont(700, 38);
+  ctx.fillStyle = getPosterTextColor(theme);
+  ctx.font = posterFont(700, circular ? 32 : 38);
   const groupName = input.groupName.trim() || "Our Group";
   ctx.fillText(groupName.toUpperCase(), photoCenterX, nameY);
 
@@ -663,7 +822,15 @@ async function drawBmmGroupPoster(
   const qrUrl = getEventQrUrl(event, "group", config.qrUrl);
   const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
   const middleTagline = groupTagline.trim() || event.tagline;
-  drawMiddleSection(ctx, middleTagline, middleY, layout, POSTER_W, Boolean(qr));
+  drawMiddleSection(
+    ctx,
+    middleTagline,
+    middleY,
+    layout,
+    POSTER_W,
+    theme,
+    Boolean(qr)
+  );
 
   drawPosterFooterSection(
     ctx,
@@ -709,20 +876,22 @@ async function drawPersonalDp(
   const { event, accent } = { event: input.event, accent: theme.colors.accent };
   const config = parsePosterTemplate(event);
   const genderTagline = getGenderTagline(event, input.genderKey);
+  const circular = isCircularLayout(theme);
+  const photoPos = getPersonalPhotoPosition(theme);
   const fontScale = DP_W / POSTER_W;
 
   drawBmmHeader(ctx, event, logo, theme, layout, DP_W, DP_H, undefined, fontScale);
 
-  const photoX = layoutX(layout, scaleCoord(PERSONAL_PHOTO_POSITION.x, DP_W), DP_W);
-  const photoY = layoutY(layout, scaleCoordY(PERSONAL_PHOTO_POSITION.y, DP_H), DP_H);
+  const photoX = layoutX(layout, scaleCoord(photoPos.x, DP_W), DP_W);
+  const photoY = layoutY(layout, scaleCoordY(photoPos.y, DP_H), DP_H);
   const photoRadius = layoutScale(
     layout,
-    scaleCoord(PERSONAL_PHOTO_POSITION.radius, DP_W),
+    scaleCoord(photoPos.radius, DP_W),
     DP_W
   );
   const ringPadding = layoutScale(
     layout,
-    scaleCoord(PERSONAL_PHOTO_POSITION.ringPadding, DP_W),
+    scaleCoord(photoPos.ringPadding, DP_W),
     DP_W
   );
 
@@ -733,24 +902,46 @@ async function drawPersonalDp(
   ctx.arc(photoX, photoY, photoRadius + ringPadding, 0, Math.PI * 2);
   ctx.stroke();
 
-  const textGap = layoutScale(layout, scaleCoord(20, DP_W), DP_W);
-  const infoX = photoX + photoRadius + ringPadding + textGap;
-  const infoY = photoY - layoutScale(layout, scaleCoordY(22, DP_H), DP_H);
-
   const displayName = `${input.firstName} ${input.lastName}`.trim();
   const cityLabel = (input.city?.trim() || event.location || "").trim();
-  drawAttendeeBlock(
-    ctx,
-    displayName,
-    input.role,
-    cityLabel,
-    infoX,
-    infoY,
-    theme,
-    fontScale
-  );
 
-  const middleY = layoutY(layout, scaleCoordY(560, DP_H), DP_H);
+  if (circular) {
+    const nameY =
+      photoY +
+      photoRadius +
+      ringPadding +
+      layoutScale(layout, scaleCoord(24, DP_W), DP_W);
+    drawAttendeeBlockCentered(
+      ctx,
+      displayName,
+      input.role,
+      cityLabel,
+      DP_W / 2,
+      nameY,
+      theme,
+      fontScale
+    );
+  } else {
+    const textGap = layoutScale(layout, scaleCoord(20, DP_W), DP_W);
+    const infoX = photoX + photoRadius + ringPadding + textGap;
+    const infoY = photoY - layoutScale(layout, scaleCoordY(22, DP_H), DP_H);
+    drawAttendeeBlock(
+      ctx,
+      displayName,
+      input.role,
+      cityLabel,
+      infoX,
+      infoY,
+      theme,
+      fontScale
+    );
+  }
+
+  const middleY = layoutY(
+    layout,
+    scaleCoordY(circular ? 610 : 560, DP_H),
+    DP_H
+  );
   const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
   const qr = qrUrl
     ? await loadQrCodeImage(qrUrl, Math.round(128 * fontScale))
@@ -762,6 +953,7 @@ async function drawPersonalDp(
     middleY,
     layout,
     DP_W,
+    theme,
     Boolean(qr),
     fontScale
   );
@@ -783,15 +975,18 @@ async function drawGroupDp(
   const { event, accent } = { event: input.event, accent: theme.colors.accent };
   const config = parsePosterTemplate(event);
   const groupTagline = getGenderTagline(event, "group");
+  const circular = isCircularLayout(theme);
   const fontScale = DP_W / POSTER_W;
 
   drawBmmHeader(ctx, event, logo, theme, layout, DP_W, DP_H, undefined, fontScale);
 
-  const positions = getGroupPhotoPositions(input.memberCount).map((pos) => ({
-    x: layoutX(layout, scaleCoord(pos.x, DP_W), DP_W),
-    y: layoutY(layout, scaleCoordY(pos.y, DP_H), DP_H),
-    r: layoutScale(layout, scaleCoord(pos.r, DP_W), DP_W),
-  }));
+  const positions = getGroupPhotoPositionsForTheme(theme, input.memberCount).map(
+    (pos) => ({
+      x: layoutX(layout, scaleCoord(pos.x, DP_W), DP_W),
+      y: layoutY(layout, scaleCoordY(pos.y, DP_H), DP_H),
+      r: layoutScale(layout, scaleCoord(pos.r, DP_W), DP_W),
+    })
+  );
 
   photos.forEach((photo, i) => {
     const pos = positions[i];
@@ -814,8 +1009,8 @@ async function drawGroupDp(
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
-  ctx.fillStyle = POSTER_TEXT;
-  ctx.font = posterFont(700, Math.round(38 * fontScale));
+  ctx.fillStyle = getPosterTextColor(theme);
+  ctx.font = posterFont(700, Math.round((circular ? 32 : 38) * fontScale));
   const groupName = input.groupName.trim() || "Our Group";
   ctx.fillText(groupName.toUpperCase(), photoCenterX, nameY);
 
@@ -842,6 +1037,7 @@ async function drawGroupDp(
     middleY,
     layout,
     DP_W,
+    theme,
     Boolean(qr),
     fontScale
   );

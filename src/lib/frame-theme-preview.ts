@@ -17,6 +17,8 @@ function toResolvedTheme(key: FrameThemeKey): ResolvedFrameTheme {
     borderStyle: theme.borderStyle,
     photoRingWidth: theme.photoRingWidth,
     overlayKey: theme.overlayKey,
+    posterTextColor: theme.posterTextColor,
+    layoutProfile: theme.layoutProfile,
   };
 }
 

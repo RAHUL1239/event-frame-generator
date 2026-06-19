@@ -1,6 +1,7 @@
 export const FRAME_THEME_KEYS = [
   "traditional-maharashtrian",
   "elegant-gold",
+  "gauravshali-sohla",
   "youth",
   "family",
   "volunteer",
@@ -33,6 +34,10 @@ export type FrameThemeDefinition = {
   borderStyle: FrameBorderStyle;
   photoRingWidth: number;
   overlayKey?: FrameThemeKey;
+  /** Poster text color when the frame interior is light. */
+  posterTextColor?: string;
+  /** Circular frames keep content inside the round boundary. */
+  layoutProfile?: "default" | "circular";
 };
 
 export const FRAME_THEMES: Record<FrameThemeKey, FrameThemeDefinition> = {
@@ -65,6 +70,23 @@ export const FRAME_THEMES: Record<FrameThemeKey, FrameThemeDefinition> = {
     borderStyle: "minimal",
     photoRingWidth: 6,
     overlayKey: "elegant-gold",
+  },
+  "gauravshali-sohla": {
+    key: "gauravshali-sohla",
+    name: "Gauravshali Sohla",
+    description: "Festive round frame with saffron and gold rings",
+    colors: {
+      primary: "#FFF3E8",
+      accent: "#E85A2A",
+      background: "#FFF3E8",
+      gold: "#E8B830",
+      green: "#2D8A4E",
+    },
+    borderStyle: "classic",
+    photoRingWidth: 5,
+    overlayKey: "gauravshali-sohla",
+    posterTextColor: "#8B3418",
+    layoutProfile: "circular",
   },
   youth: {
     key: "youth",
@@ -133,6 +155,8 @@ export type ResolvedFrameTheme = {
   borderStyle: FrameBorderStyle;
   photoRingWidth: number;
   overlayKey?: FrameThemeKey;
+  posterTextColor?: string;
+  layoutProfile?: "default" | "circular";
 };
 
 export function isFrameThemeKey(value: string): value is FrameThemeKey {
@@ -215,6 +239,8 @@ export function resolveFrameTheme(
     borderStyle: theme.borderStyle,
     photoRingWidth: theme.photoRingWidth,
     overlayKey: theme.overlayKey,
+    posterTextColor: theme.posterTextColor,
+    layoutProfile: theme.layoutProfile,
   };
 }
 

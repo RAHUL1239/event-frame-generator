@@ -8,10 +8,15 @@ export type FrameContentInsets = {
   left: number;
 };
 
+export type FrameHoleShape = "square" | "circle";
+
 export type FrameFullOverlayConfig = {
   src: string;
-  /** Transparent hole inset as a fraction of canvas width (e.g. 130/1080). */
-  holeInsetRatio: number;
+  /** Transparent hole inset as a fraction of canvas width (square holes). */
+  holeInsetRatio?: number;
+  /** Transparent hole radius as a fraction of canvas width (circular holes). */
+  holeRadiusRatio?: number;
+  holeShape?: FrameHoleShape;
   /** Extra inner padding (px at 1080) keeping text away from the frame art. */
   contentPadding?: number;
   /** How closely pixels must match the sampled matte to be removed. */
@@ -43,6 +48,12 @@ export const FRAME_FULL_OVERLAYS: Partial<
     contentPadding: 70,
     overlayScale: 1.12,
   },
+  "gauravshali-sohla": {
+    src: "/frames/gauravshali-sohla-frame.png",
+    holeShape: "circle",
+    holeRadiusRatio: 318 / 1024,
+    contentPadding: 48,
+  },
 };
 
 const overlayCache = new Map<FrameThemeKey, Promise<HTMLImageElement>>();
@@ -68,8 +79,36 @@ export function getFrameOverlayInset(
 ): number {
   const config = themeKey ? FRAME_FULL_OVERLAYS[themeKey] : undefined;
   if (!config) return 0;
-  const base = Math.max(36, Math.round(canvasWidth * config.holeInsetRatio));
+
+  if (config.holeShape === "circle" && config.holeRadiusRatio) {
+    const radius = Math.round(canvasWidth * config.holeRadiusRatio);
+    return Math.round(canvasWidth / 2 - radius);
+  }
+
+  const insetRatio = config.holeInsetRatio ?? 0;
+  const base = Math.max(36, Math.round(canvasWidth * insetRatio));
   return Math.round(base * (config.overlayScale ?? 1));
+}
+
+function getContentRadius(
+  config: FrameFullOverlayConfig,
+  canvasWidth: number
+): number {
+  const extraPadding = Math.round(
+    ((config.contentPadding ?? 0) * canvasWidth) / 1080
+  );
+
+  if (config.holeShape === "circle" && config.holeRadiusRatio) {
+    const holeRadius = Math.round(canvasWidth * config.holeRadiusRatio);
+    return Math.max(120, holeRadius - extraPadding);
+  }
+
+  const holeInset = Math.max(
+    36,
+    Math.round(canvasWidth * (config.holeInsetRatio ?? 0))
+  );
+  const scaledHole = Math.round(holeInset * (config.overlayScale ?? 1));
+  return Math.max(120, canvasWidth / 2 - scaledHole - extraPadding);
 }
 
 export function getFrameContentInset(
@@ -81,11 +120,8 @@ export function getFrameContentInset(
   }
 
   const config = FRAME_FULL_OVERLAYS[themeKey!]!;
-  const holeInset = getFrameOverlayInset(themeKey, canvasWidth);
-  const extraPadding = Math.round(
-    ((config.contentPadding ?? 0) * canvasWidth) / 1080
-  );
-  return holeInset + extraPadding;
+  const contentRadius = getContentRadius(config, canvasWidth);
+  return Math.round(canvasWidth / 2 - contentRadius);
 }
 
 export function getFrameBorderWidth(
@@ -191,7 +227,6 @@ async function prepareOverlayWithHole(
   const source = await loadImage(overlayImageUrl(config.src));
   const width = source.naturalWidth;
   const height = source.naturalHeight;
-  const inset = Math.round(width * config.holeInsetRatio);
 
   const canvas = document.createElement("canvas");
   canvas.width = width;
@@ -202,10 +237,33 @@ async function prepareOverlayWithHole(
   }
 
   ctx.drawImage(source, 0, 0);
-  removeFrameMatte(ctx, width, height, config.chromaTolerance ?? 58);
-  ctx.clearRect(inset, inset, width - inset * 2, height - inset * 2);
+  if (config.chromaTolerance != null) {
+    removeFrameMatte(ctx, width, height, config.chromaTolerance);
+  }
+
+  if (config.holeShape === "circle" && config.holeRadiusRatio) {
+    clearCircularHole(ctx, width, height, config.holeRadiusRatio);
+  } else {
+    const inset = Math.round(width * (config.holeInsetRatio ?? 0));
+    ctx.clearRect(inset, inset, width - inset * 2, height - inset * 2);
+  }
 
   return loadImage(canvas.toDataURL("image/png"));
+}
+
+function clearCircularHole(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  radiusRatio: number
+) {
+  const radius = width * radiusRatio;
+  ctx.save();
+  ctx.globalCompositeOperation = "destination-out";
+  ctx.beginPath();
+  ctx.arc(width / 2, height / 2, radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
 }
 
 function sampleMatteColor(
