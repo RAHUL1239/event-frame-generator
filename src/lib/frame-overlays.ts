@@ -23,6 +23,8 @@ export type FrameFullOverlayConfig = {
   chromaTolerance?: number;
   /** Scale overlay when painting (e.g. 1.12 makes the frame band thicker). */
   overlayScale?: number;
+  /** Vertical shift as a fraction of canvas height (positive moves overlay down). */
+  overlayOffsetY?: number;
 };
 
 export type PosterLayoutContext = {
@@ -53,7 +55,8 @@ export const FRAME_FULL_OVERLAYS: Partial<
     holeShape: "circle",
     holeRadiusRatio: 326 / 1024,
     contentPadding: 20,
-    overlayScale: 1.24,
+    overlayScale: 1.21,
+    overlayOffsetY: 0.028,
   },
 };
 
@@ -362,21 +365,24 @@ export async function paintFrameFullOverlay(
 
   const config = FRAME_FULL_OVERLAYS[themeKey]!;
   const scale = config.overlayScale ?? 1;
+  const offsetY = (config.overlayOffsetY ?? 0) * height;
 
   const prevSmoothing = ctx.imageSmoothingEnabled;
   const prevQuality = ctx.imageSmoothingQuality;
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
 
-  if (scale === 1) {
+  if (scale === 1 && offsetY === 0) {
     ctx.drawImage(image, 0, 0, width, height);
+  } else if (scale === 1) {
+    ctx.drawImage(image, 0, offsetY, width, height);
   } else {
     const scaledW = width * scale;
     const scaledH = height * scale;
     ctx.drawImage(
       image,
       (width - scaledW) / 2,
-      (height - scaledH) / 2,
+      (height - scaledH) / 2 + offsetY,
       scaledW,
       scaledH
     );
