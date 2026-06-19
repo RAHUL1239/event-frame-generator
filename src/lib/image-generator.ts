@@ -443,7 +443,8 @@ function drawMiddleSection(
   theme: ResolvedFrameTheme,
   reserveQrSpace = false,
   fontScale = 1
-) {
+): number {
+  const circular = isCircularLayout(theme);
   const lineStart = layoutX(layout, scaleCoord(36, canvasW), canvasW);
   const lineEnd = layoutX(layout, canvasW - scaleCoord(36, canvasW), canvasW);
 
@@ -454,22 +455,23 @@ function drawMiddleSection(
   ctx.lineTo(lineEnd, y);
   ctx.stroke();
 
-  const textY = y + Math.round(58 * fontScale);
+  const textY =
+    y + Math.round((circular ? 40 : 58) * fontScale);
   ctx.fillStyle = getPosterTextColor(theme);
   ctx.font = posterFont(
     600,
-    Math.round((isCircularLayout(theme) ? 30 : 36) * fontScale)
+    Math.round((circular ? 28 : 36) * fontScale)
   );
   const textMaxWidth = reserveQrSpace
     ? canvasW - layout.inset * 2 - Math.round(220 * fontScale)
     : layout.innerW - Math.round(80 * fontScale);
-  wrapCanvasText(
+  return wrapCanvasText(
     ctx,
     slogan,
     canvasW / 2,
     textY,
     textMaxWidth,
-    Math.round(44 * fontScale)
+    Math.round((circular ? 32 : 44) * fontScale)
   );
 }
 
@@ -604,7 +606,8 @@ function drawEventHighlights(
   y: number,
   layout: PosterLayoutContext,
   canvasW: number,
-  theme: ResolvedFrameTheme
+  theme: ResolvedFrameTheme,
+  maxBottomY?: number
 ): number {
   if (highlights.length === 0) return y;
 
@@ -614,16 +617,39 @@ function drawEventHighlights(
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
   ctx.fillStyle = getPosterTextColor(theme);
-  ctx.font = posterFont(600, circular ? 22 : 26);
 
-  let cursorY = y + (circular ? 14 : 20);
+  let fontSize = circular ? 20 : 26;
+  let lineHeight = circular ? 20 : 30;
+  const topPad = circular ? 6 : 20;
+  const itemGap = circular ? 2 : 4;
+
+  const measureBottom = () => {
+    ctx.font = posterFont(600, fontSize);
+    let cursorY = y + topPad;
+    for (const item of highlights) {
+      const wrapped = splitTextIntoLines(ctx, `✓ ${item}`, maxWidth);
+      cursorY += wrapped.length * lineHeight;
+      cursorY += itemGap;
+    }
+    return cursorY;
+  };
+
+  if (circular && maxBottomY) {
+    while (fontSize > 14 && measureBottom() > maxBottomY) {
+      fontSize -= 1;
+      lineHeight -= 1;
+    }
+  }
+
+  ctx.font = posterFont(600, fontSize);
+  let cursorY = y + topPad;
   for (const item of highlights) {
     const wrapped = splitTextIntoLines(ctx, `✓ ${item}`, maxWidth);
     for (const line of wrapped) {
       ctx.fillText(line, canvasW / 2, cursorY);
-      cursorY += circular ? 26 : 30;
+      cursorY += lineHeight;
     }
-    cursorY += 4;
+    cursorY += itemGap;
   }
 
   return cursorY;
@@ -642,28 +668,45 @@ function drawPosterFooterSection(
   const stats = config.stats ?? [];
   const countdown = getEventCountdown(event);
   const highlights = parseEventHighlights(event.eventHighlights);
+  const circular = isCircularLayout(theme);
+  const footerBarH = circular ? 40 : 52;
+  const footerY = circular
+    ? canvasH - layout.inset - footerBarH
+    : undefined;
 
-  let cursorY = middleEndY + 8;
+  let cursorY = middleEndY + (circular ? 4 : 8);
   if (countdown) {
     cursorY =
-      drawCountdownBanner(ctx, countdown.message, cursorY, theme, layout, canvasW) + 8;
+      drawCountdownBanner(ctx, countdown.message, cursorY, theme, layout, canvasW) +
+      (circular ? 4 : 8);
   }
 
   if (highlights.length > 0) {
-    cursorY = drawEventHighlights(ctx, highlights, cursorY, layout, canvasW, theme) + 6;
+    const maxBottomY = footerY ? footerY - 6 : undefined;
+    cursorY =
+      drawEventHighlights(
+        ctx,
+        highlights,
+        cursorY,
+        layout,
+        canvasW,
+        theme,
+        maxBottomY
+      ) + (circular ? 4 : 6);
   }
 
   if (stats.length > 0) {
     drawStatsBar(ctx, stats, cursorY, theme);
     cursorY += 118 + 8;
-  } else {
+  } else if (!circular) {
     cursorY += 8;
   }
 
-  const footerH = Math.max(52, canvasH - cursorY);
+  const footerStartY = footerY ?? cursorY;
+  const footerH = circular ? footerBarH : Math.max(52, canvasH - footerStartY);
   drawFooter(
     ctx,
-    cursorY,
+    footerStartY,
     footerH,
     theme.colors.accent,
     layout,
@@ -752,11 +795,11 @@ async function drawBmmPersonalPoster(
     );
 
     const middleY =
-      attendeeBottomY + layoutScale(layout, 40, POSTER_W);
+      attendeeBottomY + layoutScale(layout, 26, POSTER_W);
     const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
     const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
     const middleTagline = genderTagline.trim() || event.tagline;
-    drawMiddleSection(
+    const middleEndY = drawMiddleSection(
       ctx,
       middleTagline,
       middleY,
@@ -770,7 +813,7 @@ async function drawBmmPersonalPoster(
       ctx,
       event,
       theme,
-      middleY + 118,
+      middleEndY,
       layout,
       POSTER_W,
       POSTER_H
@@ -803,7 +846,7 @@ async function drawBmmPersonalPoster(
   const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
   const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
   const middleTagline = genderTagline.trim() || event.tagline;
-  drawMiddleSection(
+  const middleEndY = drawMiddleSection(
     ctx,
     middleTagline,
     middleY,
@@ -817,7 +860,7 @@ async function drawBmmPersonalPoster(
     ctx,
     event,
     theme,
-    middleY + 118,
+    middleEndY,
     layout,
     POSTER_W,
     POSTER_H
@@ -946,7 +989,7 @@ async function drawBmmGroupPoster(
   const qrUrl = getEventQrUrl(event, "group", config.qrUrl);
   const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
   const middleTagline = groupTagline.trim() || event.tagline;
-  drawMiddleSection(
+  const middleEndY = drawMiddleSection(
     ctx,
     middleTagline,
     middleY,
@@ -960,7 +1003,7 @@ async function drawBmmGroupPoster(
     ctx,
     event,
     theme,
-    middleY + 118,
+    middleEndY,
     layout,
     POSTER_W,
     POSTER_H
