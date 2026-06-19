@@ -258,7 +258,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
               type="text"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
-              placeholder="e.g. Seattle Swaravahini"
+              placeholder="Fairfax Vaibhav"
               className="w-full rounded-xl border border-gray-200 bg-brand-cream px-4 py-3 outline-none focus:border-brand-teal"
               required
             />
