@@ -268,7 +268,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                City <span className="font-normal normal-case text-gray-400">(suggested)</span>
+                City
               </label>
               <input
                 type="text"
@@ -279,7 +279,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
                 data-1p-ignore
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                placeholder={event.location ?? "e.g. Washington DC"}
+                placeholder="Fairfax"
                 className="input-suggested w-full rounded-xl border border-gray-200 bg-brand-cream px-4 py-3 outline-none focus:border-brand-teal"
               />
             </div>
