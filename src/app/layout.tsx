@@ -10,7 +10,10 @@ export const metadata: Metadata = {
   description:
     "Create and share event profile frames, posters, and WhatsApp DPs for your community.",
   icons: {
-    icon: "/favicon.png",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.png", type: "image/png" },
+    ],
     apple: "/favicon.png",
   },
 };
