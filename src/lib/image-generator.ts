@@ -136,43 +136,62 @@ type PhotoSlot = {
   ringPadding: number;
 };
 
-const CIRCULAR_PERSONAL_PHOTO: PhotoSlot = {
-  x: 540,
-  y: 368,
-  radius: 108,
-  ringPadding: 4,
-};
+const CIRCULAR_PHOTO_RADIUS = 100;
+
+function layoutCircularPhoto(
+  headerBottomY: number,
+  layout: PosterLayoutContext,
+  canvasW: number
+) {
+  const photoRadius = layoutScale(layout, CIRCULAR_PHOTO_RADIUS, canvasW);
+  const ringPadding = layoutScale(layout, 4, canvasW);
+  const gap = layoutScale(layout, 32, canvasW);
+  return {
+    photoX: canvasW / 2,
+    photoY: headerBottomY + gap + photoRadius,
+    photoRadius,
+    ringPadding,
+  };
+}
 
 function getPersonalPhotoPosition(theme: ResolvedFrameTheme): PhotoSlot {
-  if (isCircularLayout(theme)) return CIRCULAR_PERSONAL_PHOTO;
+  if (isCircularLayout(theme)) {
+    return {
+      x: 540,
+      y: 368,
+      radius: CIRCULAR_PHOTO_RADIUS,
+      ringPadding: 4,
+    };
+  }
   return PERSONAL_PHOTO_POSITION;
 }
 
 function getGroupPhotoPositionsForTheme(
   theme: ResolvedFrameTheme,
-  count: number
+  count: number,
+  centerY?: number
 ) {
   if (!isCircularLayout(theme)) return getGroupPhotoPositions(count);
 
-  const centerY = 368;
+  const y = centerY ?? 368;
   if (count === 2) {
     return [
-      { x: 460, y: centerY, r: 78 },
-      { x: 620, y: centerY, r: 78 },
+      { x: 460, y, r: 78 },
+      { x: 620, y, r: 78 },
     ];
   }
   if (count === 3) {
     return [
-      { x: 410, y: centerY, r: 70 },
-      { x: 540, y: centerY, r: 70 },
-      { x: 670, y: centerY, r: 70 },
+      { x: 410, y, r: 70 },
+      { x: 540, y, r: 70 },
+      { x: 670, y, r: 70 },
     ];
   }
   return [
-    { x: 380, y: centerY, r: 58 },
-    { x: 490, y: centerY, r: 58 },
-    { x: 600, y: centerY, r: 58 },
-    { x: 710, y: centerY, r: 58 },
+    { x: 380, y, r: 58 },
+    { x: 490, y, r: 58 },
+    { x: 600, y, r: 58 },
+    { x: 710, y, r: 58 },
   ];
 }
 
@@ -194,18 +213,18 @@ function drawBmmHeader(
   canvasH: number,
   hashtag?: string,
   fontScale = 1
-) {
+): number {
   const circular = isCircularLayout(theme);
   const textColor = getPosterTextColor(theme);
   const headerScale = circular ? 0.82 * fontScale : fontScale;
-  const logoSize = Math.round((circular ? 88 : 96) * headerScale);
-  const nameFontSize = Math.round((circular ? 32 : 46) * headerScale);
-  const nameLineHeight = Math.round((circular ? 30 : 42) * headerScale);
+  const logoSize = Math.round((circular ? 76 : 96) * headerScale);
+  const nameFontSize = Math.round((circular ? 30 : 46) * headerScale);
+  const nameLineHeight = Math.round((circular ? 28 : 42) * headerScale);
 
   let nameY: number;
 
   if (circular) {
-    const logoTopY = layoutY(layout, scaleCoordY(72, canvasH), canvasH);
+    const logoTopY = layoutY(layout, scaleCoordY(58, canvasH), canvasH);
     drawLogoAt(
       ctx,
       logo,
@@ -246,13 +265,14 @@ function drawBmmHeader(
     nameY += nameLineHeight;
   }
 
-  const venueFontSize = Math.round((circular ? 22 : 26) * headerScale);
+  const venueFontSize = Math.round((circular ? 20 : 26) * headerScale);
   ctx.font = posterFont(600, venueFontSize);
+  const venueBaseline = nameY + Math.round((circular ? 10 : 14) * headerScale);
   fillCenteredLine(
     ctx,
     getPosterVenueLine(event),
     canvasW / 2,
-    nameY + Math.round((circular ? 10 : 14) * headerScale)
+    venueBaseline
   );
 
   if (hashtag && !circular) {
@@ -264,6 +284,8 @@ function drawBmmHeader(
       layoutY(layout, scaleCoordY(50, canvasH), canvasH)
     );
   }
+
+  return venueBaseline + Math.round(venueFontSize * 0.4);
 }
 
 function drawHeadlineBlock(
@@ -650,14 +672,36 @@ async function drawBmmPersonalPoster(
   paintFrameBackground(ctx, theme, POSTER_W, POSTER_H);
 
   const circular = isCircularLayout(theme);
-  const photoPos = getPersonalPhotoPosition(theme);
 
-  drawBmmHeader(ctx, event, logo, theme, layout, POSTER_W, POSTER_H, hashtag);
+  const headerBottomY = drawBmmHeader(
+    ctx,
+    event,
+    logo,
+    theme,
+    layout,
+    POSTER_W,
+    POSTER_H,
+    hashtag
+  );
 
-  const photoX = layoutX(layout, photoPos.x, POSTER_W);
-  const photoY = layoutY(layout, photoPos.y, POSTER_H);
-  const photoRadius = layoutScale(layout, photoPos.radius, POSTER_W);
-  const ringPadding = layoutScale(layout, photoPos.ringPadding, POSTER_W);
+  let photoX: number;
+  let photoY: number;
+  let photoRadius: number;
+  let ringPadding: number;
+
+  if (circular) {
+    ({ photoX, photoY, photoRadius, ringPadding } = layoutCircularPhoto(
+      headerBottomY,
+      layout,
+      POSTER_W
+    ));
+  } else {
+    const photoPos = getPersonalPhotoPosition(theme);
+    photoX = layoutX(layout, photoPos.x, POSTER_W);
+    photoY = layoutY(layout, photoPos.y, POSTER_H);
+    photoRadius = layoutScale(layout, photoPos.radius, POSTER_W);
+    ringPadding = layoutScale(layout, photoPos.ringPadding, POSTER_W);
+  }
   drawCircularImage(ctx, photo, photoX, photoY, photoRadius, input.photoCrop);
   ctx.strokeStyle = accent;
   ctx.lineWidth = theme.photoRingWidth;
@@ -673,7 +717,7 @@ async function drawBmmPersonalPoster(
       photoY +
       photoRadius +
       ringPadding +
-      layoutScale(layout, 24, POSTER_W);
+      layoutScale(layout, 36, POSTER_W);
     drawAttendeeBlockCentered(
       ctx,
       displayName,
@@ -768,7 +812,16 @@ async function drawBmmGroupPoster(
 
   const circular = isCircularLayout(theme);
 
-  drawBmmHeader(ctx, event, logo, theme, layout, POSTER_W, POSTER_H, hashtag);
+  const headerBottomY = drawBmmHeader(
+    ctx,
+    event,
+    logo,
+    theme,
+    layout,
+    POSTER_W,
+    POSTER_H,
+    hashtag
+  );
 
   if (headline.length > 0 && !circular) {
     drawHeadlineBlockCentered(
@@ -781,10 +834,20 @@ async function drawBmmGroupPoster(
     );
   }
 
+  const groupPhotoRowY = circular
+    ? headerBottomY +
+      layoutScale(layout, 28, POSTER_W) +
+      layoutScale(
+        layout,
+        input.memberCount === 2 ? 78 : input.memberCount === 3 ? 70 : 58,
+        POSTER_W
+      )
+    : undefined;
+
   const positions = getGroupPhotoPositionsForTheme(theme, input.memberCount).map(
     (pos) => ({
       x: layoutX(layout, pos.x, POSTER_W),
-      y: layoutY(layout, pos.y, POSTER_H),
+      y: groupPhotoRowY ?? layoutY(layout, pos.y, POSTER_H),
       r: layoutScale(layout, pos.r, POSTER_W),
     })
   );
@@ -884,23 +947,46 @@ async function drawPersonalDp(
   const config = parsePosterTemplate(event);
   const genderTagline = getGenderTagline(event, input.genderKey);
   const circular = isCircularLayout(theme);
-  const photoPos = getPersonalPhotoPosition(theme);
   const fontScale = DP_W / POSTER_W;
 
-  drawBmmHeader(ctx, event, logo, theme, layout, DP_W, DP_H, undefined, fontScale);
+  const headerBottomY = drawBmmHeader(
+    ctx,
+    event,
+    logo,
+    theme,
+    layout,
+    DP_W,
+    DP_H,
+    undefined,
+    fontScale
+  );
 
-  const photoX = layoutX(layout, scaleCoord(photoPos.x, DP_W), DP_W);
-  const photoY = layoutY(layout, scaleCoordY(photoPos.y, DP_H), DP_H);
-  const photoRadius = layoutScale(
-    layout,
-    scaleCoord(photoPos.radius, DP_W),
-    DP_W
-  );
-  const ringPadding = layoutScale(
-    layout,
-    scaleCoord(photoPos.ringPadding, DP_W),
-    DP_W
-  );
+  let photoX: number;
+  let photoY: number;
+  let photoRadius: number;
+  let ringPadding: number;
+
+  if (circular) {
+    ({ photoX, photoY, photoRadius, ringPadding } = layoutCircularPhoto(
+      headerBottomY,
+      layout,
+      DP_W
+    ));
+  } else {
+    const photoPos = getPersonalPhotoPosition(theme);
+    photoX = layoutX(layout, scaleCoord(photoPos.x, DP_W), DP_W);
+    photoY = layoutY(layout, scaleCoordY(photoPos.y, DP_H), DP_H);
+    photoRadius = layoutScale(
+      layout,
+      scaleCoord(photoPos.radius, DP_W),
+      DP_W
+    );
+    ringPadding = layoutScale(
+      layout,
+      scaleCoord(photoPos.ringPadding, DP_W),
+      DP_W
+    );
+  }
 
   drawCircularImage(ctx, photo, photoX, photoY, photoRadius, input.photoCrop);
   ctx.strokeStyle = accent;
@@ -917,7 +1003,7 @@ async function drawPersonalDp(
       photoY +
       photoRadius +
       ringPadding +
-      layoutScale(layout, scaleCoord(24, DP_W), DP_W);
+      layoutScale(layout, scaleCoord(36, DP_W), DP_W);
     drawAttendeeBlockCentered(
       ctx,
       displayName,
@@ -985,12 +1071,37 @@ async function drawGroupDp(
   const circular = isCircularLayout(theme);
   const fontScale = DP_W / POSTER_W;
 
-  drawBmmHeader(ctx, event, logo, theme, layout, DP_W, DP_H, undefined, fontScale);
+  const headerBottomY = drawBmmHeader(
+    ctx,
+    event,
+    logo,
+    theme,
+    layout,
+    DP_W,
+    DP_H,
+    undefined,
+    fontScale
+  );
+
+  const groupPhotoRowY = circular
+    ? headerBottomY +
+      layoutScale(layout, scaleCoord(28, DP_W), DP_W) +
+      layoutScale(
+        layout,
+        scaleCoord(
+          input.memberCount === 2 ? 78 : input.memberCount === 3 ? 70 : 58,
+          DP_W
+        ),
+        DP_W
+      )
+    : undefined;
 
   const positions = getGroupPhotoPositionsForTheme(theme, input.memberCount).map(
     (pos) => ({
       x: layoutX(layout, scaleCoord(pos.x, DP_W), DP_W),
-      y: layoutY(layout, scaleCoordY(pos.y, DP_H), DP_H),
+      y:
+        groupPhotoRowY ??
+        layoutY(layout, scaleCoordY(pos.y, DP_H), DP_H),
       r: layoutScale(layout, scaleCoord(pos.r, DP_W), DP_W),
     })
   );
