@@ -56,8 +56,8 @@ export type GroupPosterRenderInput = Omit<GroupFormData, "photos" | "members"> &
 export const PERSONAL_POSTER_W = POSTER_W;
 export const PERSONAL_POSTER_H = POSTER_H;
 export const PERSONAL_PHOTO_POSITION = {
-  x: 250,
-  y: 390,
+  x: POSTER_W / 2,
+  y: 310,
   radius: 128,
   ringPadding: 6,
 };
@@ -129,6 +129,7 @@ const CENTERED_PHOTO_DESIGN_Y = 310;
 const DIVIDER_CAP_DESIGN_Y = 520;
 const LOGO_DESIGN_Y = 42;
 const MIDDLE_FOOTER_GAP = 96;
+const ATTENDEE_TO_DIVIDER_GAP = 36;
 
 function isGauravshaliTheme(theme: ResolvedFrameTheme): boolean {
   const key = theme.overlayKey ?? theme.key;
@@ -137,6 +138,24 @@ function isGauravshaliTheme(theme: ResolvedFrameTheme): boolean {
 
 function middleToFooterGap(layout: PosterLayoutContext, canvasW: number): number {
   return layoutScale(layout, MIDDLE_FOOTER_GAP, canvasW);
+}
+
+/** Divider sits at least at the design cap, but never overlaps the attendee block. */
+function resolveMiddleDividerY(
+  layout: PosterLayoutContext,
+  attendeeBottomY: number,
+  canvasW: number,
+  canvasH: number
+): number {
+  const minDividerY = layoutY(
+    layout,
+    scaleCoordY(DIVIDER_CAP_DESIGN_Y, canvasH),
+    canvasH
+  );
+  const afterAttendeeY =
+    attendeeBottomY +
+    layoutScale(layout, ATTENDEE_TO_DIVIDER_GAP, canvasW);
+  return Math.max(minDividerY, afterAttendeeY);
 }
 
 /** Gold inner ring + broken orange outer ring matching Gauravshali branding. */
@@ -492,11 +511,20 @@ function getPosterFooterStartY(
   layout: PosterLayoutContext,
   canvasW: number,
   hasQr: boolean,
-  fontScale = 1
+  fontScale = 1,
+  contentBottomY?: number
 ): number {
-  const base = middleY + middleToFooterGap(layout, canvasW);
-  if (!hasQr) return base;
-  return Math.max(base, getPosterQrBounds(middleY, layout, canvasW, fontScale).bottom + 10);
+  let start = middleY + middleToFooterGap(layout, canvasW);
+  if (hasQr) {
+    start = Math.max(
+      start,
+      getPosterQrBounds(middleY, layout, canvasW, fontScale).bottom + 10
+    );
+  }
+  if (contentBottomY != null) {
+    start = Math.max(start, contentBottomY + 12);
+  }
+  return start;
 }
 
 function drawPosterQrCode(
@@ -794,15 +822,17 @@ async function drawBmmPersonalPoster(
     nameY,
     theme
   );
-  const middleY = Math.min(
-    layoutY(layout, DIVIDER_CAP_DESIGN_Y, POSTER_H),
-    attendeeBottomY + layoutScale(layout, 24, POSTER_W)
+  const middleY = resolveMiddleDividerY(
+    layout,
+    attendeeBottomY,
+    POSTER_W,
+    POSTER_H
   );
 
   const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
   const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
   const middleTagline = genderTagline.trim() || event.tagline;
-  drawMiddleSection(
+  const taglineBottomY = drawMiddleSection(
     ctx,
     middleTagline,
     middleY,
@@ -816,7 +846,14 @@ async function drawBmmPersonalPoster(
     ctx,
     event,
     theme,
-    getPosterFooterStartY(middleY, layout, POSTER_W, Boolean(qr)),
+    getPosterFooterStartY(
+      middleY,
+      layout,
+      POSTER_W,
+      Boolean(qr),
+      1,
+      taglineBottomY
+    ),
     layout,
     POSTER_W,
     POSTER_H
@@ -914,21 +951,24 @@ async function drawBmmGroupPoster(
   ctx.fillText(groupName.toUpperCase(), photoCenterX, nameY);
 
   const groupCity = (input.city?.trim() || event.location || "").trim();
-  let middleY = nameY + layoutScale(layout, 36, POSTER_H);
+  let groupTextBottomY = nameY + Math.round(38 * 0.35);
   if (groupCity) {
     ctx.font = posterFont(600, 26);
-    ctx.fillText(
-      groupCity.toUpperCase(),
-      photoCenterX,
-      nameY + layoutScale(layout, 34, POSTER_H)
-    );
-    middleY = nameY + layoutScale(layout, 68, POSTER_H);
+    const cityY = nameY + layoutScale(layout, 34, POSTER_H);
+    ctx.fillText(groupCity.toUpperCase(), photoCenterX, cityY);
+    groupTextBottomY = cityY + Math.round(26 * 0.35);
   }
+  const middleY = resolveMiddleDividerY(
+    layout,
+    groupTextBottomY,
+    POSTER_W,
+    POSTER_H
+  );
 
   const qrUrl = getEventQrUrl(event, "group", config.qrUrl);
   const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
   const middleTagline = groupTagline.trim() || event.tagline;
-  drawMiddleSection(
+  const taglineBottomY = drawMiddleSection(
     ctx,
     middleTagline,
     middleY,
@@ -942,7 +982,14 @@ async function drawBmmGroupPoster(
     ctx,
     event,
     theme,
-    getPosterFooterStartY(middleY, layout, POSTER_W, Boolean(qr)),
+    getPosterFooterStartY(
+      middleY,
+      layout,
+      POSTER_W,
+      Boolean(qr),
+      1,
+      taglineBottomY
+    ),
     layout,
     POSTER_W,
     POSTER_H
@@ -1027,9 +1074,11 @@ async function drawPersonalDp(
     theme,
     fontScale
   );
-  const middleY = Math.min(
-    layoutY(layout, scaleCoordY(DIVIDER_CAP_DESIGN_Y, DP_H), DP_H),
-    attendeeBottomY + layoutScale(layout, scaleCoord(24, DP_W), DP_W)
+  const middleY = resolveMiddleDividerY(
+    layout,
+    attendeeBottomY,
+    DP_W,
+    DP_H
   );
 
   const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
@@ -1112,16 +1161,19 @@ async function drawGroupDp(
   ctx.fillText(groupName.toUpperCase(), photoCenterX, nameY);
 
   const groupCity = (input.city?.trim() || event.location || "").trim();
-  let middleY = nameY + layoutScale(layout, scaleCoordY(36, DP_H), DP_H);
+  let groupTextBottomY = nameY + Math.round(38 * fontScale * 0.35);
   if (groupCity) {
     ctx.font = posterFont(600, Math.round(26 * fontScale));
-    ctx.fillText(
-      groupCity.toUpperCase(),
-      photoCenterX,
-      nameY + layoutScale(layout, scaleCoordY(34, DP_H), DP_H)
-    );
-    middleY = nameY + layoutScale(layout, scaleCoordY(68, DP_H), DP_H);
+    const cityY = nameY + layoutScale(layout, scaleCoordY(34, DP_H), DP_H);
+    ctx.fillText(groupCity.toUpperCase(), photoCenterX, cityY);
+    groupTextBottomY = cityY + Math.round(26 * fontScale * 0.35);
   }
+  const middleY = resolveMiddleDividerY(
+    layout,
+    groupTextBottomY,
+    DP_W,
+    DP_H
+  );
 
   const qrUrl = getEventQrUrl(event, "group", config.qrUrl);
   const qr = qrUrl

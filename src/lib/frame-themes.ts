@@ -74,7 +74,7 @@ export const FRAME_THEMES: Record<FrameThemeKey, FrameThemeDefinition> = {
   "gauravshali-sohla": {
     key: "gauravshali-sohla",
     name: "Gauravshali Sohla",
-    description: "Festive round frame with saffron and gold rings",
+    description: "Festive saffron and gold frame with double photo rings",
     colors: {
       primary: "#FFF3E8",
       accent: "#E85A2A",
