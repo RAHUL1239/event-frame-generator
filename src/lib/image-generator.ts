@@ -130,6 +130,62 @@ function isGauravshaliTheme(theme: ResolvedFrameTheme): boolean {
   return key === "gauravshali-sohla";
 }
 
+/** Gold inner ring + broken orange outer ring matching Gauravshali branding. */
+function drawGauravshaliPhotoRings(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  photoRadius: number,
+  theme: ResolvedFrameTheme,
+  fontScale = 1
+): number {
+  const innerInset = Math.round(5 * fontScale);
+  const innerWidth = Math.max(5, Math.round(6 * fontScale));
+  const ringGap = Math.round(4 * fontScale);
+  const outerWidth = Math.max(2, Math.round(3 * fontScale));
+  const innerRadius = photoRadius + innerInset;
+  const outerRadius = innerRadius + innerWidth / 2 + ringGap + outerWidth / 2;
+
+  const gapHalf = 0.13;
+  const gapAngles = [Math.PI / 6, (7 * Math.PI) / 6];
+
+  ctx.save();
+  ctx.shadowColor = "rgba(60, 30, 10, 0.18)";
+  ctx.shadowBlur = Math.round(6 * fontScale);
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = Math.round(2 * fontScale);
+  ctx.lineCap = "round";
+
+  ctx.strokeStyle = theme.colors.gold;
+  ctx.lineWidth = innerWidth;
+  ctx.beginPath();
+  ctx.arc(x, y, innerRadius, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.strokeStyle = theme.colors.accent;
+  ctx.lineWidth = outerWidth;
+  for (let i = 0; i < gapAngles.length; i++) {
+    const start = gapAngles[i] + gapHalf;
+    let end = gapAngles[(i + 1) % gapAngles.length] - gapHalf;
+    if (end <= start) end += 2 * Math.PI;
+    ctx.beginPath();
+    ctx.arc(x, y, outerRadius, start, end);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+
+  return outerRadius + outerWidth / 2;
+}
+
+function gauravshaliPhotoRingOuterInset(fontScale = 1): number {
+  const innerInset = Math.round(5 * fontScale);
+  const innerWidth = Math.max(5, Math.round(6 * fontScale));
+  const ringGap = Math.round(4 * fontScale);
+  const outerWidth = Math.max(2, Math.round(3 * fontScale));
+  return innerInset + innerWidth + ringGap + outerWidth;
+}
+
 /** Orange + gold double rings matching the Gauravshali frame artwork. */
 function drawAttendeePhotoRing(
   ctx: CanvasRenderingContext2D,
@@ -141,24 +197,7 @@ function drawAttendeePhotoRing(
   fontScale = 1
 ): number {
   if (isGauravshaliTheme(theme)) {
-    const innerOffset = Math.round(4 * fontScale);
-    const outerOffset = Math.round(12 * fontScale);
-    const innerWidth = Math.max(3, Math.round(4 * fontScale));
-    const outerWidth = Math.max(4, Math.round(5 * fontScale));
-
-    ctx.strokeStyle = theme.colors.accent;
-    ctx.lineWidth = innerWidth;
-    ctx.beginPath();
-    ctx.arc(x, y, photoRadius + innerOffset, 0, Math.PI * 2);
-    ctx.stroke();
-
-    ctx.strokeStyle = theme.colors.gold;
-    ctx.lineWidth = outerWidth;
-    ctx.beginPath();
-    ctx.arc(x, y, photoRadius + outerOffset, 0, Math.PI * 2);
-    ctx.stroke();
-
-    return photoRadius + outerOffset + outerWidth / 2;
+    return drawGauravshaliPhotoRings(ctx, x, y, photoRadius, theme, fontScale);
   }
 
   ctx.strokeStyle = theme.colors.accent;
@@ -176,9 +215,7 @@ function getPhotoRingOuterInset(
   fontScale = 1
 ): number {
   if (isGauravshaliTheme(theme)) {
-    const outerOffset = Math.round(12 * fontScale);
-    const outerWidth = Math.max(4, Math.round(5 * fontScale));
-    return outerOffset + outerWidth / 2;
+    return gauravshaliPhotoRingOuterInset(fontScale);
   }
   return ringPadding + theme.photoRingWidth / 2;
 }
