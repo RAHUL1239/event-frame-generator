@@ -437,7 +437,7 @@ function drawMiddleSection(
   theme: ResolvedFrameTheme,
   reserveQrSpace = false,
   fontScale = 1
-) {
+): number {
   const lineStart = layoutX(layout, scaleCoord(36, canvasW), canvasW);
   const lineEnd = layoutX(layout, canvasW - scaleCoord(36, canvasW), canvasW);
 
@@ -451,17 +451,52 @@ function drawMiddleSection(
   const textY = y + Math.round(58 * fontScale);
   ctx.fillStyle = getPosterTextColor(theme);
   ctx.font = posterFont(600, Math.round(36 * fontScale));
-  const textMaxWidth = reserveQrSpace
-    ? canvasW - layout.inset * 2 - Math.round(220 * fontScale)
-    : layout.innerW - Math.round(80 * fontScale);
-  wrapCanvasText(
+  const barX = layoutX(layout, scaleCoord(36, canvasW), canvasW);
+  let textMaxWidth = layout.innerW - Math.round(80 * fontScale);
+  let textCenterX = canvasW / 2;
+  if (reserveQrSpace) {
+    const qrBounds = getPosterQrBounds(y, layout, canvasW, fontScale);
+    textMaxWidth = Math.max(160, qrBounds.leftEdge - barX - 16);
+    textCenterX = barX + textMaxWidth / 2;
+  }
+  return wrapCanvasText(
     ctx,
     slogan,
-    canvasW / 2,
+    textCenterX,
     textY,
     textMaxWidth,
     Math.round(44 * fontScale)
   );
+}
+
+function getPosterQrBounds(
+  middleY: number,
+  layout: PosterLayoutContext,
+  canvasW: number,
+  fontScale = 1
+) {
+  const lineEnd = layoutX(layout, canvasW - scaleCoord(36, canvasW), canvasW);
+  const size = Math.round(96 * fontScale);
+  const pad = 6;
+  const qrX =
+    lineEnd - size - layoutScale(layout, Math.round(12 * fontScale), canvasW);
+  const qrY = middleY + Math.round(16 * fontScale);
+  return {
+    leftEdge: qrX - pad,
+    bottom: qrY + size + pad,
+  };
+}
+
+function getPosterFooterStartY(
+  middleY: number,
+  layout: PosterLayoutContext,
+  canvasW: number,
+  hasQr: boolean,
+  fontScale = 1
+): number {
+  const base = middleY + middleToFooterGap(layout, canvasW);
+  if (!hasQr) return base;
+  return Math.max(base, getPosterQrBounds(middleY, layout, canvasW, fontScale).bottom + 10);
 }
 
 function drawPosterQrCode(
@@ -781,7 +816,7 @@ async function drawBmmPersonalPoster(
     ctx,
     event,
     theme,
-    middleY + middleToFooterGap(layout, POSTER_W),
+    getPosterFooterStartY(middleY, layout, POSTER_W, Boolean(qr)),
     layout,
     POSTER_W,
     POSTER_H
@@ -907,7 +942,7 @@ async function drawBmmGroupPoster(
     ctx,
     event,
     theme,
-    middleY + middleToFooterGap(layout, POSTER_W),
+    getPosterFooterStartY(middleY, layout, POSTER_W, Boolean(qr)),
     layout,
     POSTER_W,
     POSTER_H
