@@ -58,7 +58,7 @@ export const FRAME_FULL_OVERLAYS: Partial<
     holeRadiusRatio: 326 / 1024,
     contentPadding: 28,
     overlayScale: 1.14,
-    overlayOffsetY: 0.044,
+    overlayOffsetY: 0.032,
   },
 };
 
