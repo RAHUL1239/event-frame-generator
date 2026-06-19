@@ -931,7 +931,11 @@ async function drawGroupDp(
   const photoCenterX =
     positions.reduce((sum, pos) => sum + pos.x, 0) / positions.length;
   const photoBottom =
-    Math.max(...positions.map((pos) => pos.y + pos.r + 5)) +
+    Math.max(
+      ...positions.map((pos) =>
+        pos.y + pos.r + getPhotoRingOuterInset(theme, 5, fontScale)
+      )
+    ) +
     layoutScale(layout, scaleCoord(16, DP_W), DP_W);
   const nameY = photoBottom + layoutScale(layout, scaleCoordY(28, DP_H), DP_H);
 
