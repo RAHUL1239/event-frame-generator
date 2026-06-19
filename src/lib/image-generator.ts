@@ -138,8 +138,8 @@ type PhotoSlot = {
 
 const CIRCULAR_PERSONAL_PHOTO: PhotoSlot = {
   x: 540,
-  y: 450,
-  radius: 102,
+  y: 400,
+  radius: 118,
   ringPadding: 4,
 };
 
@@ -154,7 +154,7 @@ function getGroupPhotoPositionsForTheme(
 ) {
   if (!isCircularLayout(theme)) return getGroupPhotoPositions(count);
 
-  const centerY = 420;
+  const centerY = 400;
   if (count === 2) {
     return [
       { x: 460, y: centerY, r: 78 },
@@ -198,17 +198,21 @@ function drawBmmHeader(
   const circular = isCircularLayout(theme);
   const textColor = getPosterTextColor(theme);
   const headerScale = circular ? 0.82 * fontScale : fontScale;
-  const logoSize = Math.round((circular ? 72 : 96) * headerScale);
+  const logoSize = Math.round((circular ? 88 : 96) * headerScale);
+
+  let nameY: number;
 
   if (circular) {
+    const logoTopY = layoutY(layout, scaleCoordY(136, canvasH), canvasH);
     drawLogoAt(
       ctx,
       logo,
       canvasW / 2 - logoSize / 2,
-      layoutY(layout, scaleCoordY(52, canvasH), canvasH),
+      logoTopY,
       logoSize,
       logoSize
     );
+    nameY = logoTopY + logoSize + Math.round(16 * headerScale);
   } else {
     drawLogoAt(
       ctx,
@@ -218,24 +222,20 @@ function drawBmmHeader(
       logoSize,
       logoSize
     );
+    nameY = layoutY(layout, scaleCoordY(40, canvasH), canvasH);
   }
 
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
   ctx.fillStyle = textColor;
 
-  const nameFontSize = Math.round((circular ? 38 : 46) * headerScale);
-  const nameLineHeight = Math.round((circular ? 36 : 42) * headerScale);
+  const nameFontSize = Math.round((circular ? 36 : 46) * headerScale);
+  const nameLineHeight = Math.round((circular ? 34 : 42) * headerScale);
   const nameMaxWidth =
     layout.innerW - (!circular && hashtag ? Math.round(72 * headerScale) : 0);
   ctx.font = posterFont(700, nameFontSize);
   const nameLines = splitTextIntoLines(ctx, event.name.toUpperCase(), nameMaxWidth);
 
-  let nameY = layoutY(
-    layout,
-    scaleCoordY(circular ? 108 : 40, canvasH),
-    canvasH
-  );
   for (const line of nameLines) {
     fillCenteredLine(ctx, line, canvasW / 2, nameY);
     nameY += nameLineHeight;

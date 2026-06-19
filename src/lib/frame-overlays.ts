@@ -53,7 +53,7 @@ export const FRAME_FULL_OVERLAYS: Partial<
     holeShape: "circle",
     holeRadiusRatio: 326 / 1024,
     contentPadding: 20,
-    overlayScale: 512 / 396,
+    overlayScale: 1.24,
   },
 };
 
