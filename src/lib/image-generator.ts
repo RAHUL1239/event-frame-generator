@@ -127,14 +127,16 @@ function getPosterDividerStroke(theme: ResolvedFrameTheme): string {
 const CENTERED_PHOTO_DESIGN_Y = 340;
 const DIVIDER_CAP_DESIGN_Y = 520;
 const LOGO_DESIGN_Y = 24;
+const LOGO_TO_TITLE_GAP = 22;
 const HEADER_TO_PHOTO_GAP = 28;
-const MIDDLE_FOOTER_GAP = 32;
+const MIDDLE_FOOTER_GAP = 24;
 const ATTENDEE_TO_DIVIDER_GAP = 32;
-const TAGLINE_AFTER_DIVIDER_GAP = 40;
-const QR_AFTER_TAGLINE_GAP = 16;
-const HIGHLIGHTS_FONT_SIZE = 26;
-const HIGHLIGHTS_LINE_HEIGHT = 28;
-const HIGHLIGHTS_MIN_FONT_SIZE = 17;
+const TAGLINE_AFTER_DIVIDER_GAP = 36;
+const QR_AFTER_TAGLINE_GAP = 14;
+const HIGHLIGHTS_FONT_SIZE = 24;
+const HIGHLIGHTS_LINE_HEIGHT = 26;
+const HIGHLIGHTS_MIN_FONT_SIZE = 15;
+const HIGHLIGHTS_MIN_LINE_HEIGHT = 18;
 
 function isGauravshaliTheme(theme: ResolvedFrameTheme): boolean {
   const key = theme.overlayKey ?? theme.key;
@@ -294,38 +296,43 @@ function drawBmmHeader(
   fontScale = 1
 ): number {
   const textColor = getPosterTextColor(theme);
-  const logoSize = Math.round(64 * fontScale);
+  const logoSize = Math.round(52 * fontScale);
   const logoTop = layoutY(layout, scaleCoordY(LOGO_DESIGN_Y, canvasH), canvasH);
   const logoH = drawLogo(ctx, logo, canvasW / 2, logoTop, logoSize, logoSize);
+  const logoBottom = logoTop + logoH;
 
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
   ctx.fillStyle = textColor;
 
-  const nameFontSize = Math.round(42 * fontScale);
-  const nameLineHeight = Math.round(38 * fontScale);
+  const nameFontSize = Math.round(40 * fontScale);
+  const nameLineHeight = Math.round(36 * fontScale);
   const nameMaxWidth = layout.innerW - Math.round(32 * fontScale);
   ctx.font = posterFont(700, nameFontSize);
   const nameLines = splitTextIntoLines(ctx, event.name.toUpperCase(), nameMaxWidth);
 
-  let nameY = logoTop + logoH + Math.round(12 * fontScale);
+  const titleGap = layoutScale(layout, LOGO_TO_TITLE_GAP, canvasW);
+  let nameY =
+    logoBottom +
+    titleGap +
+    Math.round(nameFontSize * 0.92);
   for (const line of nameLines) {
     fillCenteredLine(ctx, line, canvasW / 2, nameY);
     nameY += nameLineHeight;
   }
 
-  const venueFontSize = Math.round(23 * fontScale);
+  const venueFontSize = Math.round(22 * fontScale);
   ctx.font = posterFont(600, venueFontSize);
-  const venueY = nameY + Math.round(10 * fontScale);
+  const venueY = nameY + Math.round(12 * fontScale);
   fillCenteredLine(ctx, getPosterVenueLine(event), canvasW / 2, venueY);
 
   let bottomY = venueY + Math.round(venueFontSize * 0.35);
   if (hashtag) {
     ctx.fillStyle = theme.colors.accent;
-    ctx.font = posterFont(600, Math.round(19 * fontScale));
-    const hashtagY = venueY + Math.round(24 * fontScale);
+    ctx.font = posterFont(600, Math.round(18 * fontScale));
+    const hashtagY = venueY + Math.round(22 * fontScale);
     fillCenteredLine(ctx, hashtag, canvasW / 2, hashtagY);
-    bottomY = hashtagY + Math.round(19 * fontScale * 0.35);
+    bottomY = hashtagY + Math.round(18 * fontScale * 0.35);
   }
 
   return bottomY;
@@ -629,28 +636,31 @@ function drawCountdownBanner(
   y: number,
   theme: ResolvedFrameTheme,
   layout: PosterLayoutContext,
-  canvasW: number
+  canvasW: number,
+  maxBarHeight?: number
 ): number {
   const barX = layoutX(layout, 36, canvasW);
   const barW = layout.innerW;
   const paddingX = 48;
   const maxTextWidth = barW - paddingX;
-  const verticalPad = 16;
+  const verticalPad = 12;
 
-  let fontSize = 28;
+  let fontSize = 26;
   ctx.font = posterFont(700, fontSize);
   let lines = splitTextIntoLines(ctx, message, maxTextWidth);
+  let lineHeight = Math.round(fontSize * 1.1);
+  let barH = Math.max(50, lines.length * lineHeight + verticalPad * 2);
 
-  while (fontSize > 18) {
+  while (fontSize > 16) {
     const tooWide = lines.some((line) => ctx.measureText(line).width > maxTextWidth);
-    if (!tooWide) break;
+    const tooTall = maxBarHeight != null && barH > maxBarHeight;
+    if (!tooWide && !tooTall) break;
     fontSize -= 1;
     ctx.font = posterFont(700, fontSize);
     lines = splitTextIntoLines(ctx, message, maxTextWidth);
+    lineHeight = Math.round(fontSize * 1.1);
+    barH = Math.max(46, lines.length * lineHeight + verticalPad * 2);
   }
-
-  const lineHeight = Math.round(fontSize * 1.12);
-  const barH = Math.max(58, lines.length * lineHeight + verticalPad * 2);
 
   ctx.fillStyle = theme.colors.accent;
   ctx.fillRect(barX, y, barW, barH);
@@ -697,9 +707,16 @@ function drawEventHighlights(
   };
 
   if (maxBottomY) {
-    while (fontSize > HIGHLIGHTS_MIN_FONT_SIZE && measureBottom() > maxBottomY) {
-      fontSize -= 1;
-      lineHeight -= 1;
+    while (
+      measureBottom() > maxBottomY &&
+      (fontSize > HIGHLIGHTS_MIN_FONT_SIZE || lineHeight > HIGHLIGHTS_MIN_LINE_HEIGHT)
+    ) {
+      if (fontSize > HIGHLIGHTS_MIN_FONT_SIZE) {
+        fontSize -= 1;
+      }
+      if (lineHeight > HIGHLIGHTS_MIN_LINE_HEIGHT) {
+        lineHeight -= 1;
+      }
     }
   }
 
@@ -730,12 +747,37 @@ function drawPosterFooterSection(
   const stats = config.stats ?? [];
   const countdown = getEventCountdown(event);
   const highlights = parseEventHighlights(event.eventHighlights);
-  const footerBarH = 52;
-  const maxBottomY = canvasH - layout.inset - footerBarH - 4;
+  const hasFooterContent = Boolean(config.website || config.socialHandle);
+  const footerBarH = hasFooterContent ? 36 : 0;
+  const footerTop = canvasH - layout.inset - footerBarH - 8;
+  const highlightsMaxBottom = footerTop - (hasFooterContent ? 10 : 6);
+  const sectionGap = 8;
 
-  let cursorY = middleEndY + 6;
-  if (countdown) {
-    cursorY = drawCountdownBanner(ctx, countdown.message, cursorY, theme, layout, canvasW) + 6;
+  let cursorY = middleEndY + sectionGap;
+
+  if (countdown && highlights.length > 0) {
+    const totalAvailable = Math.max(80, highlightsMaxBottom - cursorY);
+    const countdownMaxH = Math.min(68, Math.floor(totalAvailable * 0.42));
+    cursorY =
+      drawCountdownBanner(
+        ctx,
+        countdown.message,
+        cursorY,
+        theme,
+        layout,
+        canvasW,
+        countdownMaxH
+      ) + sectionGap;
+  } else if (countdown) {
+    cursorY =
+      drawCountdownBanner(
+        ctx,
+        countdown.message,
+        cursorY,
+        theme,
+        layout,
+        canvasW
+      ) + sectionGap;
   }
 
   if (highlights.length > 0) {
@@ -747,7 +789,7 @@ function drawPosterFooterSection(
         layout,
         canvasW,
         theme,
-        maxBottomY
+        highlightsMaxBottom
       ) + 4;
   }
 
@@ -768,17 +810,19 @@ function drawPosterFooterSection(
     return;
   }
 
-  drawFooter(
-    ctx,
-    maxBottomY,
-    footerBarH,
-    theme.colors.accent,
-    layout,
-    canvasW,
-    theme,
-    config.website,
-    config.socialHandle
-  );
+  if (hasFooterContent) {
+    drawFooter(
+      ctx,
+      footerTop,
+      footerBarH,
+      theme.colors.accent,
+      layout,
+      canvasW,
+      theme,
+      config.website,
+      config.socialHandle
+    );
+  }
 }
 
 async function drawBmmPersonalPoster(
