@@ -336,6 +336,52 @@ function drawAttendeeBlock(
   }
 }
 
+function drawAttendeeBlockCentered(
+  ctx: CanvasRenderingContext2D,
+  name: string,
+  role: string,
+  city: string,
+  centerX: number,
+  y: number,
+  theme: ResolvedFrameTheme,
+  fontScale = 1
+): number {
+  const textColor = getPosterTextColor(theme);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
+  ctx.direction = "ltr";
+  ctx.fillStyle = textColor;
+
+  const nameFontSize = Math.round(32 * fontScale);
+  ctx.font = posterFont(700, nameFontSize);
+  const upperName = name.toUpperCase();
+  ctx.fillText(upperName, centerX, y);
+
+  const nameWidth = Math.min(ctx.measureText(upperName).width, 420 * fontScale);
+  ctx.strokeStyle = textColor;
+  ctx.lineWidth = Math.max(2, 3 * fontScale);
+  const underlineY = y + Math.round(10 * fontScale);
+  ctx.beginPath();
+  ctx.moveTo(centerX - nameWidth / 2, underlineY);
+  ctx.lineTo(centerX + nameWidth / 2, underlineY);
+  ctx.stroke();
+
+  const roleFontSize = Math.round(20 * fontScale);
+  ctx.font = posterFont(600, roleFontSize);
+  let lineY = y + Math.round(34 * fontScale);
+  let bottomY = underlineY;
+  if (role) {
+    ctx.fillText(role.toUpperCase(), centerX, lineY);
+    bottomY = lineY + Math.round(roleFontSize * 0.35);
+    lineY += Math.round(24 * fontScale);
+  }
+  if (city) {
+    ctx.fillText(city.toUpperCase(), centerX, lineY);
+    bottomY = lineY + Math.round(roleFontSize * 0.35);
+  }
+  return bottomY;
+}
+
 function drawMiddleSection(
   ctx: CanvasRenderingContext2D,
   slogan: string,
@@ -601,11 +647,29 @@ async function drawBmmPersonalPoster(
     hashtag
   );
 
-  const photoPos = PERSONAL_PHOTO_POSITION;
-  const photoX = layoutX(layout, photoPos.x, POSTER_W);
-  const photoY = layoutY(layout, photoPos.y, POSTER_H);
-  const photoRadius = layoutScale(layout, photoPos.radius, POSTER_W);
-  const ringPadding = layoutScale(layout, photoPos.ringPadding, POSTER_W);
+  const displayName = `${input.firstName} ${input.lastName}`.trim();
+  const cityLabel = (input.city?.trim() || event.location || "").trim();
+  const centered = isGauravshaliTheme(theme);
+
+  let photoX: number;
+  let photoY: number;
+  let photoRadius: number;
+  let ringPadding: number;
+  let middleY: number;
+
+  if (centered) {
+    photoX = POSTER_W / 2;
+    photoY = layoutY(layout, 340, POSTER_H);
+    photoRadius = layoutScale(layout, 128, POSTER_W);
+    ringPadding = layoutScale(layout, PERSONAL_PHOTO_POSITION.ringPadding, POSTER_W);
+  } else {
+    const photoPos = PERSONAL_PHOTO_POSITION;
+    photoX = layoutX(layout, photoPos.x, POSTER_W);
+    photoY = layoutY(layout, photoPos.y, POSTER_H);
+    photoRadius = layoutScale(layout, photoPos.radius, POSTER_W);
+    ringPadding = layoutScale(layout, photoPos.ringPadding, POSTER_W);
+  }
+
   drawCircularImage(ctx, photo, photoX, photoY, photoRadius, input.photoCrop);
   const photoOuterEdge = drawAttendeePhotoRing(
     ctx,
@@ -616,26 +680,45 @@ async function drawBmmPersonalPoster(
     theme
   );
 
-  const displayName = `${input.firstName} ${input.lastName}`.trim();
-  const cityLabel = (input.city?.trim() || event.location || "").trim();
-
-  const textGap = layoutScale(layout, 20, POSTER_W);
-  const infoX = photoX + photoOuterEdge + textGap;
-  let infoY = photoY - layoutScale(layout, 22, POSTER_H);
-  if (headline.length > 0) {
-    const headlineEndY = drawHeadlineBlock(
+  if (centered) {
+    const nameY =
+      photoY +
+      photoRadius +
+      getPhotoRingOuterInset(theme, ringPadding) +
+      layoutScale(layout, 28, POSTER_W) +
+      Math.round(32 * 0.85);
+    const attendeeBottomY = drawAttendeeBlockCentered(
       ctx,
-      headline,
-      infoX,
-      layoutY(layout, 200, POSTER_H),
+      displayName,
+      input.role,
+      cityLabel,
+      POSTER_W / 2,
+      nameY,
       theme
     );
-    infoY = Math.max(infoY, headlineEndY + layoutScale(layout, 12, POSTER_H));
+    middleY = Math.max(
+      layoutY(layout, 560, POSTER_H),
+      attendeeBottomY + layoutScale(layout, 36, POSTER_W)
+    );
+  } else {
+    const textGap = layoutScale(layout, 20, POSTER_W);
+    const infoX = photoX + photoOuterEdge + textGap;
+    let infoY = photoY - layoutScale(layout, 22, POSTER_H);
+    if (headline.length > 0) {
+      const headlineEndY = drawHeadlineBlock(
+        ctx,
+        headline,
+        infoX,
+        layoutY(layout, 200, POSTER_H),
+        theme
+      );
+      infoY = Math.max(infoY, headlineEndY + layoutScale(layout, 12, POSTER_H));
+    }
+
+    drawAttendeeBlock(ctx, displayName, input.role, cityLabel, infoX, infoY, theme);
+    middleY = layoutY(layout, 560, POSTER_H);
   }
 
-  drawAttendeeBlock(ctx, displayName, input.role, cityLabel, infoX, infoY, theme);
-
-  const middleY = layoutY(layout, 560, POSTER_H);
   const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
   const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
   const middleTagline = genderTagline.trim() || event.tagline;
@@ -833,11 +916,31 @@ async function drawPersonalDp(
     fontScale
   );
 
-  const photoPos = PERSONAL_DP_PHOTO_POSITION;
-  const photoX = layoutX(layout, photoPos.x, DP_W);
-  const photoY = layoutY(layout, photoPos.y, DP_H);
-  const photoRadius = layoutScale(layout, photoPos.radius, DP_W);
-  const ringPadding = layoutScale(layout, photoPos.ringPadding, DP_W);
+  const displayName = `${input.firstName} ${input.lastName}`.trim();
+  const cityLabel = (input.city?.trim() || event.location || "").trim();
+  const centered = isGauravshaliTheme(theme);
+
+  let photoX: number;
+  let photoY: number;
+  let photoRadius: number;
+  let ringPadding: number;
+
+  if (centered) {
+    photoX = DP_W / 2;
+    photoY = layoutY(layout, scaleCoordY(340, DP_H), DP_H);
+    photoRadius = layoutScale(layout, scaleCoord(128, DP_W), DP_W);
+    ringPadding = layoutScale(
+      layout,
+      scaleCoord(PERSONAL_PHOTO_POSITION.ringPadding, DP_W),
+      DP_W
+    );
+  } else {
+    const photoPos = PERSONAL_DP_PHOTO_POSITION;
+    photoX = layoutX(layout, photoPos.x, DP_W);
+    photoY = layoutY(layout, photoPos.y, DP_H);
+    photoRadius = layoutScale(layout, photoPos.radius, DP_W);
+    ringPadding = layoutScale(layout, photoPos.ringPadding, DP_W);
+  }
 
   drawCircularImage(ctx, photo, photoX, photoY, photoRadius, input.photoCrop);
   const photoOuterEdge = drawAttendeePhotoRing(
@@ -850,22 +953,38 @@ async function drawPersonalDp(
     fontScale
   );
 
-  const displayName = `${input.firstName} ${input.lastName}`.trim();
-  const cityLabel = (input.city?.trim() || event.location || "").trim();
-
-  const textGap = layoutScale(layout, scaleCoord(20, DP_W), DP_W);
-  const infoX = photoX + photoOuterEdge + textGap;
-  const infoY = photoY - layoutScale(layout, scaleCoordY(22, DP_H), DP_H);
-  drawAttendeeBlock(
-    ctx,
-    displayName,
-    input.role,
-    cityLabel,
-    infoX,
-    infoY,
-    theme,
-    fontScale
-  );
+  if (centered) {
+    const nameY =
+      photoY +
+      photoRadius +
+      getPhotoRingOuterInset(theme, ringPadding, fontScale) +
+      layoutScale(layout, scaleCoord(28, DP_W), DP_W) +
+      Math.round(32 * fontScale * 0.85);
+    drawAttendeeBlockCentered(
+      ctx,
+      displayName,
+      input.role,
+      cityLabel,
+      DP_W / 2,
+      nameY,
+      theme,
+      fontScale
+    );
+  } else {
+    const textGap = layoutScale(layout, scaleCoord(20, DP_W), DP_W);
+    const infoX = photoX + photoOuterEdge + textGap;
+    const infoY = photoY - layoutScale(layout, scaleCoordY(22, DP_H), DP_H);
+    drawAttendeeBlock(
+      ctx,
+      displayName,
+      input.role,
+      cityLabel,
+      infoX,
+      infoY,
+      theme,
+      fontScale
+    );
+  }
 
   const middleY = layoutY(layout, scaleCoordY(560, DP_H), DP_H);
   const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
