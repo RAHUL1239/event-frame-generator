@@ -138,8 +138,8 @@ type PhotoSlot = {
 
 const CIRCULAR_PERSONAL_PHOTO: PhotoSlot = {
   x: 540,
-  y: 430,
-  radius: 88,
+  y: 450,
+  radius: 102,
   ringPadding: 4,
 };
 
@@ -154,25 +154,25 @@ function getGroupPhotoPositionsForTheme(
 ) {
   if (!isCircularLayout(theme)) return getGroupPhotoPositions(count);
 
-  const centerY = 410;
+  const centerY = 420;
   if (count === 2) {
     return [
-      { x: 470, y: centerY, r: 72 },
-      { x: 610, y: centerY, r: 72 },
+      { x: 460, y: centerY, r: 78 },
+      { x: 620, y: centerY, r: 78 },
     ];
   }
   if (count === 3) {
     return [
-      { x: 420, y: centerY, r: 64 },
-      { x: 540, y: centerY, r: 64 },
-      { x: 660, y: centerY, r: 64 },
+      { x: 410, y: centerY, r: 70 },
+      { x: 540, y: centerY, r: 70 },
+      { x: 670, y: centerY, r: 70 },
     ];
   }
   return [
-    { x: 390, y: centerY, r: 52 },
-    { x: 490, y: centerY, r: 52 },
-    { x: 590, y: centerY, r: 52 },
-    { x: 690, y: centerY, r: 52 },
+    { x: 380, y: centerY, r: 58 },
+    { x: 490, y: centerY, r: 58 },
+    { x: 600, y: centerY, r: 58 },
+    { x: 710, y: centerY, r: 58 },
   ];
 }
 
@@ -233,7 +233,7 @@ function drawBmmHeader(
 
   let nameY = layoutY(
     layout,
-    scaleCoordY(circular ? 118 : 40, canvasH),
+    scaleCoordY(circular ? 108 : 40, canvasH),
     canvasH
   );
   for (const line of nameLines) {
@@ -519,15 +519,16 @@ function drawCountdownBanner(
 ): number {
   const barX = layoutX(layout, 36, canvasW);
   const barW = layout.innerW;
-  const paddingX = 56;
+  const circular = isCircularLayout(theme);
+  const paddingX = circular ? 36 : 56;
   const maxTextWidth = barW - paddingX;
-  const verticalPad = 22;
+  const verticalPad = circular ? 16 : 22;
 
-  let fontSize = 38;
+  let fontSize = circular ? 28 : 38;
   ctx.font = posterFont(700, fontSize);
   let lines = splitTextIntoLines(ctx, message, maxTextWidth);
 
-  while (fontSize > 22) {
+  while (fontSize > (circular ? 18 : 22)) {
     const tooWide = lines.some((line) => ctx.measureText(line).width > maxTextWidth);
     if (!tooWide) break;
     fontSize -= 1;
@@ -560,18 +561,19 @@ function drawEventHighlights(
   if (highlights.length === 0) return y;
 
   const maxWidth = layout.innerW - 48;
+  const circular = isCircularLayout(theme);
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
   ctx.fillStyle = getPosterTextColor(theme);
-  ctx.font = posterFont(600, 26);
+  ctx.font = posterFont(600, circular ? 22 : 26);
 
-  let cursorY = y + 20;
+  let cursorY = y + (circular ? 14 : 20);
   for (const item of highlights) {
     const wrapped = splitTextIntoLines(ctx, `✓ ${item}`, maxWidth);
     for (const line of wrapped) {
       ctx.fillText(line, canvasW / 2, cursorY);
-      cursorY += 30;
+      cursorY += circular ? 26 : 30;
     }
     cursorY += 4;
   }
@@ -694,7 +696,7 @@ async function drawBmmPersonalPoster(
     drawAttendeeBlock(ctx, displayName, input.role, cityLabel, infoX, infoY, theme);
   }
 
-  const middleY = layoutY(layout, circular ? 610 : 560, POSTER_H);
+  const middleY = layoutY(layout, circular ? 640 : 560, POSTER_H);
   const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
   const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
   const middleTagline = genderTagline.trim() || event.tagline;
@@ -939,7 +941,7 @@ async function drawPersonalDp(
 
   const middleY = layoutY(
     layout,
-    scaleCoordY(circular ? 610 : 560, DP_H),
+    scaleCoordY(circular ? 640 : 560, DP_H),
     DP_H
   );
   const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);

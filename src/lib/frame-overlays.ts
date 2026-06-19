@@ -49,10 +49,11 @@ export const FRAME_FULL_OVERLAYS: Partial<
     overlayScale: 1.12,
   },
   "gauravshali-sohla": {
-    src: "/frames/gauravshali-sohla-frame.png",
+    src: "/frames/gauravshali-sohla-frame.png?v=2",
     holeShape: "circle",
-    holeRadiusRatio: 318 / 1024,
-    contentPadding: 48,
+    holeRadiusRatio: 326 / 1024,
+    contentPadding: 20,
+    overlayScale: 512 / 396,
   },
 };
 
@@ -81,7 +82,8 @@ export function getFrameOverlayInset(
   if (!config) return 0;
 
   if (config.holeShape === "circle" && config.holeRadiusRatio) {
-    const radius = Math.round(canvasWidth * config.holeRadiusRatio);
+    const scale = config.overlayScale ?? 1;
+    const radius = Math.round(canvasWidth * config.holeRadiusRatio * scale);
     return Math.round(canvasWidth / 2 - radius);
   }
 
@@ -99,7 +101,8 @@ function getContentRadius(
   );
 
   if (config.holeShape === "circle" && config.holeRadiusRatio) {
-    const holeRadius = Math.round(canvasWidth * config.holeRadiusRatio);
+    const scale = config.overlayScale ?? 1;
+    const holeRadius = Math.round(canvasWidth * config.holeRadiusRatio * scale);
     return Math.max(120, holeRadius - extraPadding);
   }
 
