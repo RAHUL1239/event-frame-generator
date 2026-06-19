@@ -130,6 +130,25 @@ function isGauravshaliTheme(theme: ResolvedFrameTheme): boolean {
   return key === "gauravshali-sohla";
 }
 
+function usesCenteredAttendeeLayout(theme: ResolvedFrameTheme): boolean {
+  const key = theme.overlayKey ?? theme.key;
+  return (
+    key === "gauravshali-sohla" ||
+    key === "traditional-maharashtrian" ||
+    key === "elegant-gold"
+  );
+}
+
+function centeredPhotoDesignY(theme: ResolvedFrameTheme): number {
+  return isGauravshaliTheme(theme) ? 300 : 315;
+}
+
+function middleToFooterGap(theme: ResolvedFrameTheme, canvasW: number, layout: PosterLayoutContext): number {
+  return usesCenteredAttendeeLayout(theme)
+    ? layoutScale(layout, 96, canvasW)
+    : layoutScale(layout, 118, canvasW);
+}
+
 /** Gold inner ring + broken orange outer ring matching Gauravshali branding. */
 function drawGauravshaliPhotoRings(
   ctx: CanvasRenderingContext2D,
@@ -233,11 +252,13 @@ function drawBmmHeader(
 ) {
   const textColor = getPosterTextColor(theme);
   const logoSize = Math.round(96 * fontScale);
+  const themeKey = theme.overlayKey ?? theme.key;
+  const logoDesignY = themeKey === "elegant-gold" ? 36 : 58;
   drawLogoAt(
     ctx,
     logo,
     layoutX(layout, scaleCoord(36, canvasW), canvasW),
-    layoutY(layout, scaleCoordY(58, canvasH), canvasH),
+    layoutY(layout, scaleCoordY(logoDesignY, canvasH), canvasH),
     logoSize,
     logoSize
   );
@@ -549,15 +570,16 @@ function drawCountdownBanner(
 ): number {
   const barX = layoutX(layout, 36, canvasW);
   const barW = layout.innerW;
-  const paddingX = 56;
+  const compact = isGauravshaliTheme(theme);
+  const paddingX = compact ? 40 : 56;
   const maxTextWidth = barW - paddingX;
-  const verticalPad = 22;
+  const verticalPad = compact ? 14 : 22;
 
-  let fontSize = 38;
+  let fontSize = compact ? 24 : 38;
   ctx.font = posterFont(700, fontSize);
   let lines = splitTextIntoLines(ctx, message, maxTextWidth);
 
-  while (fontSize > 22) {
+  while (fontSize > (compact ? 16 : 22)) {
     const tooWide = lines.some((line) => ctx.measureText(line).width > maxTextWidth);
     if (!tooWide) break;
     fontSize -= 1;
@@ -565,8 +587,8 @@ function drawCountdownBanner(
     lines = splitTextIntoLines(ctx, message, maxTextWidth);
   }
 
-  const lineHeight = Math.round(fontSize * 1.15);
-  const barH = Math.max(76, lines.length * lineHeight + verticalPad * 2);
+  const lineHeight = Math.round(fontSize * (compact ? 1.1 : 1.15));
+  const barH = Math.max(compact ? 52 : 76, lines.length * lineHeight + verticalPad * 2);
 
   ctx.fillStyle = theme.colors.accent;
   ctx.fillRect(barX, y, barW, barH);
@@ -585,25 +607,50 @@ function drawEventHighlights(
   y: number,
   layout: PosterLayoutContext,
   canvasW: number,
-  theme: ResolvedFrameTheme
+  theme: ResolvedFrameTheme,
+  maxBottomY?: number
 ): number {
   if (highlights.length === 0) return y;
 
   const maxWidth = layout.innerW - 48;
+  const compact = isGauravshaliTheme(theme);
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
   ctx.fillStyle = getPosterTextColor(theme);
-  ctx.font = posterFont(600, 26);
 
-  let cursorY = y + 20;
+  let fontSize = compact ? 20 : 26;
+  let lineHeight = compact ? 22 : 30;
+  const topPad = compact ? 10 : 20;
+  const itemGap = compact ? 2 : 4;
+
+  const measureBottom = () => {
+    ctx.font = posterFont(600, fontSize);
+    let cursorY = y + topPad;
+    for (const item of highlights) {
+      const wrapped = splitTextIntoLines(ctx, `✓ ${item}`, maxWidth);
+      cursorY += wrapped.length * lineHeight;
+      cursorY += itemGap;
+    }
+    return cursorY;
+  };
+
+  if (maxBottomY) {
+    while (fontSize > 14 && measureBottom() > maxBottomY) {
+      fontSize -= 1;
+      lineHeight -= 1;
+    }
+  }
+
+  ctx.font = posterFont(600, fontSize);
+  let cursorY = y + topPad;
   for (const item of highlights) {
     const wrapped = splitTextIntoLines(ctx, `✓ ${item}`, maxWidth);
     for (const line of wrapped) {
       ctx.fillText(line, canvasW / 2, cursorY);
-      cursorY += 30;
+      cursorY += lineHeight;
     }
-    cursorY += 4;
+    cursorY += itemGap;
   }
 
   return cursorY;
@@ -622,29 +669,43 @@ function drawPosterFooterSection(
   const stats = config.stats ?? [];
   const countdown = getEventCountdown(event);
   const highlights = parseEventHighlights(event.eventHighlights);
+  const footerBarH = 52;
+  const maxBottomY = canvasH - layout.inset - footerBarH - 4;
 
-  let cursorY = middleEndY + 8;
+  let cursorY = middleEndY + (isGauravshaliTheme(theme) ? 4 : 8);
   if (countdown) {
     cursorY =
-      drawCountdownBanner(ctx, countdown.message, cursorY, theme, layout, canvasW) + 8;
+      drawCountdownBanner(ctx, countdown.message, cursorY, theme, layout, canvasW) +
+      (isGauravshaliTheme(theme) ? 4 : 8);
   }
 
   if (highlights.length > 0) {
     cursorY =
-      drawEventHighlights(ctx, highlights, cursorY, layout, canvasW, theme) + 6;
+      drawEventHighlights(
+        ctx,
+        highlights,
+        cursorY,
+        layout,
+        canvasW,
+        theme,
+        isGauravshaliTheme(theme) ? maxBottomY : undefined
+      ) + (isGauravshaliTheme(theme) ? 4 : 6);
   }
 
   if (stats.length > 0) {
     drawStatsBar(ctx, stats, cursorY, theme);
     cursorY += 118 + 8;
-  } else {
+  } else if (!isGauravshaliTheme(theme)) {
     cursorY += 8;
   }
 
-  const footerH = Math.max(52, canvasH - cursorY);
+  const footerStartY = isGauravshaliTheme(theme) ? maxBottomY : cursorY;
+  const footerH = isGauravshaliTheme(theme)
+    ? footerBarH
+    : Math.max(footerBarH, canvasH - footerStartY);
   drawFooter(
     ctx,
-    cursorY,
+    footerStartY,
     footerH,
     theme.colors.accent,
     layout,
@@ -686,7 +747,7 @@ async function drawBmmPersonalPoster(
 
   const displayName = `${input.firstName} ${input.lastName}`.trim();
   const cityLabel = (input.city?.trim() || event.location || "").trim();
-  const centered = isGauravshaliTheme(theme);
+  const centered = usesCenteredAttendeeLayout(theme);
 
   let photoX: number;
   let photoY: number;
@@ -696,7 +757,7 @@ async function drawBmmPersonalPoster(
 
   if (centered) {
     photoX = POSTER_W / 2;
-    photoY = layoutY(layout, 340, POSTER_H);
+    photoY = layoutY(layout, centeredPhotoDesignY(theme), POSTER_H);
     photoRadius = layoutScale(layout, 128, POSTER_W);
     ringPadding = layoutScale(layout, PERSONAL_PHOTO_POSITION.ringPadding, POSTER_W);
   } else {
@@ -722,7 +783,7 @@ async function drawBmmPersonalPoster(
       photoY +
       photoRadius +
       getPhotoRingOuterInset(theme, ringPadding) +
-      layoutScale(layout, 28, POSTER_W) +
+      layoutScale(layout, 22, POSTER_W) +
       Math.round(32 * 0.85);
     const attendeeBottomY = drawAttendeeBlockCentered(
       ctx,
@@ -733,9 +794,10 @@ async function drawBmmPersonalPoster(
       nameY,
       theme
     );
-    middleY = Math.max(
-      layoutY(layout, 560, POSTER_H),
-      attendeeBottomY + layoutScale(layout, 36, POSTER_W)
+    const dividerCap = layoutY(layout, 520, POSTER_H);
+    middleY = Math.min(
+      dividerCap,
+      attendeeBottomY + layoutScale(layout, 24, POSTER_W)
     );
   } else {
     const textGap = layoutScale(layout, 20, POSTER_W);
@@ -773,7 +835,7 @@ async function drawBmmPersonalPoster(
     ctx,
     event,
     theme,
-    middleY + 118,
+    middleY + middleToFooterGap(theme, POSTER_W, layout),
     layout,
     POSTER_W,
     POSTER_H
@@ -899,7 +961,7 @@ async function drawBmmGroupPoster(
     ctx,
     event,
     theme,
-    middleY + 118,
+    middleY + middleToFooterGap(theme, POSTER_W, layout),
     layout,
     POSTER_W,
     POSTER_H
@@ -955,7 +1017,7 @@ async function drawPersonalDp(
 
   const displayName = `${input.firstName} ${input.lastName}`.trim();
   const cityLabel = (input.city?.trim() || event.location || "").trim();
-  const centered = isGauravshaliTheme(theme);
+  const centered = usesCenteredAttendeeLayout(theme);
 
   let photoX: number;
   let photoY: number;
@@ -964,7 +1026,7 @@ async function drawPersonalDp(
 
   if (centered) {
     photoX = DP_W / 2;
-    photoY = layoutY(layout, scaleCoordY(340, DP_H), DP_H);
+    photoY = layoutY(layout, scaleCoordY(centeredPhotoDesignY(theme), DP_H), DP_H);
     photoRadius = layoutScale(layout, scaleCoord(128, DP_W), DP_W);
     ringPadding = layoutScale(
       layout,
