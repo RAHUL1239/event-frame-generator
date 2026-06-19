@@ -53,16 +53,20 @@ export const FRAME_FULL_OVERLAYS: Partial<
     overlayScale: 1.12,
   },
   "gauravshali-sohla": {
-    src: "/frames/gauravshali-sohla-frame.png?v=2",
+    src: "/frames/gauravshali-sohla-frame.png?v=3",
     holeShape: "circle",
     holeRadiusRatio: 326 / 1024,
     contentPadding: 28,
-    overlayScale: 1.18,
-    overlayOffsetY: 0.034,
+    overlayScale: 1.14,
+    overlayOffsetY: 0.044,
   },
 };
 
-const overlayCache = new Map<FrameThemeKey, Promise<HTMLImageElement>>();
+const overlayCache = new Map<string, Promise<HTMLImageElement>>();
+
+function overlayCacheKey(key: FrameThemeKey, config: FrameFullOverlayConfig) {
+  return `${key}:${config.src}:${config.overlayScale ?? 1}:${config.overlayOffsetY ?? 0}`;
+}
 
 function overlayImageUrl(src: string): string {
   return src.startsWith("http")
@@ -224,16 +228,17 @@ async function loadFrameOverlayImage(
   const config = FRAME_FULL_OVERLAYS[key];
   if (!config) return null;
 
-  let pending = overlayCache.get(key);
+  const cacheKey = overlayCacheKey(key, config);
+  let pending = overlayCache.get(cacheKey);
   if (!pending) {
     pending = prepareOverlayWithHole(key, config);
-    overlayCache.set(key, pending);
+    overlayCache.set(cacheKey, pending);
   }
 
   try {
     return await pending;
   } catch {
-    overlayCache.delete(key);
+    overlayCache.delete(cacheKey);
     return null;
   }
 }
