@@ -136,7 +136,7 @@ type PhotoSlot = {
   ringPadding: number;
 };
 
-const CIRCULAR_PHOTO_RADIUS = 96;
+const CIRCULAR_PHOTO_RADIUS = 110;
 
 function layoutCircularPhoto(
   headerBottomY: number,
@@ -145,7 +145,7 @@ function layoutCircularPhoto(
 ) {
   const photoRadius = layoutScale(layout, CIRCULAR_PHOTO_RADIUS, canvasW);
   const ringPadding = layoutScale(layout, 4, canvasW);
-  const gap = layoutScale(layout, 6, canvasW);
+  const gap = layoutScale(layout, 4, canvasW);
   return {
     photoX: canvasW / 2,
     photoY: headerBottomY + gap + photoRadius,
@@ -164,7 +164,7 @@ function circularAttendeeNameBaseline(
 ) {
   const photoBottom = photoY + photoRadius + ringPadding;
   const nameFontSize = Math.round(32 * fontScale);
-  const gap = layoutScale(layout, 36, canvasW);
+  const gap = layoutScale(layout, 32, canvasW);
   return photoBottom + gap + Math.round(nameFontSize * 1.08);
 }
 
@@ -172,7 +172,7 @@ function getPersonalPhotoPosition(theme: ResolvedFrameTheme): PhotoSlot {
   if (isCircularLayout(theme)) {
     return {
       x: 540,
-      y: 368,
+      y: 382,
       radius: CIRCULAR_PHOTO_RADIUS,
       ringPadding: 4,
     };
@@ -187,25 +187,25 @@ function getGroupPhotoPositionsForTheme(
 ) {
   if (!isCircularLayout(theme)) return getGroupPhotoPositions(count);
 
-  const y = centerY ?? 368;
+  const y = centerY ?? 382;
   if (count === 2) {
     return [
-      { x: 460, y, r: 78 },
-      { x: 620, y, r: 78 },
+      { x: 460, y, r: 90 },
+      { x: 620, y, r: 90 },
     ];
   }
   if (count === 3) {
     return [
-      { x: 410, y, r: 70 },
-      { x: 540, y, r: 70 },
-      { x: 670, y, r: 70 },
+      { x: 410, y, r: 80 },
+      { x: 540, y, r: 80 },
+      { x: 670, y, r: 80 },
     ];
   }
   return [
-    { x: 380, y, r: 58 },
-    { x: 490, y, r: 58 },
-    { x: 600, y, r: 58 },
-    { x: 710, y, r: 58 },
+    { x: 380, y, r: 67 },
+    { x: 490, y, r: 67 },
+    { x: 600, y, r: 67 },
+    { x: 710, y, r: 67 },
   ];
 }
 
@@ -231,14 +231,14 @@ function drawBmmHeader(
   const circular = isCircularLayout(theme);
   const textColor = getPosterTextColor(theme);
   const headerScale = circular ? 0.82 * fontScale : fontScale;
-  const logoSize = Math.round((circular ? 92 : 96) * headerScale);
+  const logoSize = Math.round((circular ? 108 : 96) * headerScale);
   const nameFontSize = Math.round((circular ? 30 : 46) * headerScale);
   const nameLineHeight = Math.round((circular ? 26 : 42) * headerScale);
 
   let nameY: number;
 
   if (circular) {
-    const logoTopY = layoutY(layout, scaleCoordY(28, canvasH), canvasH);
+    const logoTopY = layoutY(layout, scaleCoordY(12, canvasH), canvasH);
     drawLogoAt(
       ctx,
       logo,
@@ -251,8 +251,8 @@ function drawBmmHeader(
     nameY =
       logoTopY +
       logoSize +
-      Math.round(14 * headerScale) +
-      Math.round(nameFontSize * 0.85);
+      Math.round(10 * headerScale) +
+      Math.round(nameFontSize * 0.78);
   } else {
     drawLogoAt(
       ctx,
@@ -893,7 +893,7 @@ async function drawBmmGroupPoster(
       layoutScale(layout, 14, POSTER_W) +
       layoutScale(
         layout,
-        input.memberCount === 2 ? 78 : input.memberCount === 3 ? 70 : 58,
+        input.memberCount === 2 ? 90 : input.memberCount === 3 ? 80 : 67,
         POSTER_W
       )
     : undefined;
@@ -1170,7 +1170,7 @@ async function drawGroupDp(
       layoutScale(
         layout,
         scaleCoord(
-          input.memberCount === 2 ? 78 : input.memberCount === 3 ? 70 : 58,
+          input.memberCount === 2 ? 90 : input.memberCount === 3 ? 80 : 67,
           DP_W
         ),
         DP_W
