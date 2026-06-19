@@ -86,7 +86,6 @@ export const FRAME_THEMES: Record<FrameThemeKey, FrameThemeDefinition> = {
     photoRingWidth: 5,
     overlayKey: "gauravshali-sohla",
     posterTextColor: "#8B3418",
-    layoutProfile: "circular",
   },
   youth: {
     key: "youth",

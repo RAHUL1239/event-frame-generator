@@ -53,12 +53,9 @@ export const FRAME_FULL_OVERLAYS: Partial<
     overlayScale: 1.12,
   },
   "gauravshali-sohla": {
-    src: "/frames/gauravshali-sohla-frame.png?v=3",
-    holeShape: "circle",
-    holeRadiusRatio: 326 / 1024,
-    contentPadding: 28,
-    overlayScale: 1.14,
-    overlayOffsetY: 0.032,
+    src: "/frames/gauravshali-sohla-frame.png?v=4",
+    holeInsetRatio: 72 / 1080,
+    contentPadding: 50,
   },
 };
 
@@ -141,22 +138,6 @@ export function getFrameBorderWidth(
   canvasWidth: number
 ): number {
   return getFrameOverlayInset(themeKey, canvasWidth);
-}
-
-/** Lowest Y (canvas coords) where circular frame content stays inside the ring. */
-export function getCircularSafeBottomY(
-  themeKey: FrameThemeKey,
-  canvasW: number,
-  canvasH: number
-): number {
-  const config = FRAME_FULL_OVERLAYS[themeKey];
-  if (!config?.holeRadiusRatio) return canvasH;
-
-  const offsetY = (config.overlayOffsetY ?? 0) * canvasH;
-  const centerY = canvasH / 2 + offsetY;
-  const contentRadius = getContentRadius(config, canvasW);
-  const decorationPad = Math.round((88 * canvasW) / 1080);
-  return Math.round(centerY + contentRadius - decorationPad);
 }
 
 export function getPosterLayout(

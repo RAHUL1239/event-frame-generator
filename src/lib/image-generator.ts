@@ -2,12 +2,10 @@ import type { EventWithOptions, GeneratedAssets, GroupFormData, PersonalFormData
 import {
   drawFrameThemeDecoration,
   resolveFrameTheme,
-  type FrameThemeKey,
   type ResolvedFrameTheme,
 } from "./frame-themes";
 import {
   getPosterLayout,
-  getCircularSafeBottomY,
   hasFrameOverlayTheme,
   layoutScale,
   layoutX,
@@ -127,98 +125,6 @@ function getPosterDividerStroke(theme: ResolvedFrameTheme): string {
     : "rgba(255, 255, 255, 0.35)";
 }
 
-function isCircularLayout(theme: ResolvedFrameTheme): boolean {
-  return theme.layoutProfile === "circular";
-}
-
-type PhotoSlot = {
-  x: number;
-  y: number;
-  radius: number;
-  ringPadding: number;
-};
-
-const CIRCULAR_PHOTO_RADIUS = 124;
-
-function layoutCircularPhoto(
-  headerBottomY: number,
-  layout: PosterLayoutContext,
-  canvasW: number
-) {
-  const photoRadius = layoutScale(layout, CIRCULAR_PHOTO_RADIUS, canvasW);
-  const ringPadding = layoutScale(layout, 4, canvasW);
-  const gap = layoutScale(layout, 2, canvasW);
-  return {
-    photoX: canvasW / 2,
-    photoY: headerBottomY + gap + photoRadius,
-    photoRadius,
-    ringPadding,
-  };
-}
-
-function circularAttendeeNameBaseline(
-  photoY: number,
-  photoRadius: number,
-  ringPadding: number,
-  layout: PosterLayoutContext,
-  canvasW: number,
-  fontScale = 1
-) {
-  const photoBottom = photoY + photoRadius + ringPadding;
-  const nameFontSize = Math.round(32 * fontScale);
-  const gap = layoutScale(layout, 20, canvasW);
-  return photoBottom + gap + Math.round(nameFontSize * 1.08);
-}
-
-function getPersonalPhotoPosition(theme: ResolvedFrameTheme): PhotoSlot {
-  if (isCircularLayout(theme)) {
-    return {
-      x: 540,
-      y: 390,
-      radius: CIRCULAR_PHOTO_RADIUS,
-      ringPadding: 4,
-    };
-  }
-  return PERSONAL_PHOTO_POSITION;
-}
-
-function getGroupPhotoPositionsForTheme(
-  theme: ResolvedFrameTheme,
-  count: number,
-  centerY?: number
-) {
-  if (!isCircularLayout(theme)) return getGroupPhotoPositions(count);
-
-  const y = centerY ?? 390;
-  if (count === 2) {
-    return [
-      { x: 460, y, r: 101 },
-      { x: 620, y, r: 101 },
-    ];
-  }
-  if (count === 3) {
-    return [
-      { x: 410, y, r: 90 },
-      { x: 540, y, r: 90 },
-      { x: 670, y, r: 90 },
-    ];
-  }
-  return [
-    { x: 380, y, r: 75 },
-    { x: 490, y, r: 75 },
-    { x: 600, y, r: 75 },
-    { x: 710, y, r: 75 },
-  ];
-}
-
-function scaleCoord(value: number, canvasW: number): number {
-  return (value * canvasW) / POSTER_W;
-}
-
-function scaleCoordY(value: number, canvasH: number): number {
-  return (value * canvasH) / POSTER_H;
-}
-
 function drawBmmHeader(
   ctx: CanvasRenderingContext2D,
   event: EventWithOptions,
@@ -229,69 +135,44 @@ function drawBmmHeader(
   canvasH: number,
   hashtag?: string,
   fontScale = 1
-): number {
-  const circular = isCircularLayout(theme);
+) {
   const textColor = getPosterTextColor(theme);
-  const headerScale = circular ? 0.82 * fontScale : fontScale;
-  const logoSize = Math.round((circular ? 108 : 96) * headerScale);
-  const nameFontSize = Math.round((circular ? 30 : 46) * headerScale);
-  const nameLineHeight = Math.round((circular ? 24 : 42) * headerScale);
-
-  let nameY: number;
-
-  if (circular) {
-    const logoTopY = layoutY(layout, scaleCoordY(0, canvasH), canvasH);
-    drawLogoAt(
-      ctx,
-      logo,
-      canvasW / 2 - logoSize / 2,
-      logoTopY,
-      logoSize,
-      logoSize
-    );
-    // nameY is the text baseline — place it below the logo with a clear gap
-    nameY =
-      logoTopY +
-      logoSize +
-      Math.round(6 * headerScale) +
-      Math.round(nameFontSize * 0.72);
-  } else {
-    drawLogoAt(
-      ctx,
-      logo,
-      layoutX(layout, scaleCoord(36, canvasW), canvasW),
-      layoutY(layout, scaleCoordY(58, canvasH), canvasH),
-      logoSize,
-      logoSize
-    );
-    nameY = layoutY(layout, scaleCoordY(40, canvasH), canvasH);
-  }
+  const logoSize = Math.round(96 * fontScale);
+  drawLogoAt(
+    ctx,
+    logo,
+    layoutX(layout, scaleCoord(36, canvasW), canvasW),
+    layoutY(layout, scaleCoordY(58, canvasH), canvasH),
+    logoSize,
+    logoSize
+  );
 
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
   ctx.fillStyle = textColor;
 
-  const nameMaxWidth =
-    layout.innerW - (!circular && hashtag ? Math.round(72 * headerScale) : 0);
+  const nameFontSize = Math.round(46 * fontScale);
+  const nameLineHeight = Math.round(42 * fontScale);
+  const nameMaxWidth = layout.innerW - (hashtag ? Math.round(72 * fontScale) : 0);
   ctx.font = posterFont(700, nameFontSize);
   const nameLines = splitTextIntoLines(ctx, event.name.toUpperCase(), nameMaxWidth);
 
+  let nameY = layoutY(layout, scaleCoordY(40, canvasH), canvasH);
   for (const line of nameLines) {
     fillCenteredLine(ctx, line, canvasW / 2, nameY);
     nameY += nameLineHeight;
   }
 
-  const venueFontSize = Math.round((circular ? 20 : 26) * headerScale);
+  const venueFontSize = Math.round(26 * fontScale);
   ctx.font = posterFont(600, venueFontSize);
-  const venueBaseline = nameY + Math.round((circular ? 6 : 14) * headerScale);
   fillCenteredLine(
     ctx,
     getPosterVenueLine(event),
     canvasW / 2,
-    venueBaseline
+    nameY + Math.round(16 * fontScale)
   );
 
-  if (hashtag && !circular) {
+  if (hashtag) {
     ctx.textAlign = "right";
     ctx.font = posterFont(700, Math.round(28 * fontScale));
     ctx.fillText(
@@ -300,8 +181,14 @@ function drawBmmHeader(
       layoutY(layout, scaleCoordY(50, canvasH), canvasH)
     );
   }
+}
 
-  return venueBaseline + Math.round(venueFontSize * 0.4);
+function scaleCoord(value: number, canvasW: number): number {
+  return (value * canvasW) / POSTER_W;
+}
+
+function scaleCoordY(value: number, canvasH: number): number {
+  return (value * canvasH) / POSTER_H;
 }
 
 function drawHeadlineBlock(
@@ -391,72 +278,6 @@ function drawAttendeeBlock(
   }
 }
 
-function drawAttendeeBlockCentered(
-  ctx: CanvasRenderingContext2D,
-  name: string,
-  role: string,
-  city: string,
-  centerX: number,
-  y: number,
-  theme: ResolvedFrameTheme,
-  fontScale = 1
-): number {
-  const textColor = getPosterTextColor(theme);
-  ctx.textAlign = "center";
-  ctx.textBaseline = "alphabetic";
-  ctx.direction = "ltr";
-  ctx.fillStyle = textColor;
-  const circular = isCircularLayout(theme);
-  const nameFontSize = Math.round(32 * fontScale);
-  ctx.font = posterFont(700, nameFontSize);
-  const upperName = name.toUpperCase();
-  ctx.fillText(upperName, centerX, y);
-
-  const nameWidth = Math.min(ctx.measureText(upperName).width, 420 * fontScale);
-  ctx.strokeStyle = textColor;
-  ctx.lineWidth = Math.max(2, 3 * fontScale);
-  const underlineY = y + Math.round((circular ? 8 : 10) * fontScale);
-  ctx.beginPath();
-  ctx.moveTo(centerX - nameWidth / 2, underlineY);
-  ctx.lineTo(centerX + nameWidth / 2, underlineY);
-  ctx.stroke();
-
-  const roleFontSize = Math.round(20 * fontScale);
-  ctx.font = posterFont(600, roleFontSize);
-  let lineY = y + Math.round((circular ? 28 : 34) * fontScale);
-  let bottomY = underlineY;
-  if (role) {
-    ctx.fillText(role.toUpperCase(), centerX, lineY);
-    bottomY = lineY + Math.round(roleFontSize * 0.35);
-    lineY += Math.round((circular ? 18 : 24) * fontScale);
-  }
-  if (city) {
-    ctx.fillText(city.toUpperCase(), centerX, lineY);
-    bottomY = lineY + Math.round(roleFontSize * 0.35);
-  }
-  return bottomY;
-}
-
-function getPosterQrBounds(
-  middleY: number,
-  layout: PosterLayoutContext,
-  canvasW: number,
-  fontScale = 1,
-  theme?: ResolvedFrameTheme
-) {
-  const circular = theme ? isCircularLayout(theme) : false;
-  const lineEnd = layoutX(layout, canvasW - scaleCoord(36, canvasW), canvasW);
-  const size = Math.round((circular ? 76 : 96) * fontScale);
-  const pad = 6;
-  const qrX =
-    lineEnd - size - layoutScale(layout, Math.round(12 * fontScale), canvasW);
-  const qrY = middleY + Math.round((circular ? 8 : 16) * fontScale);
-  return {
-    leftEdge: qrX - pad,
-    bottom: qrY + size + pad,
-  };
-}
-
 function drawMiddleSection(
   ctx: CanvasRenderingContext2D,
   slogan: string,
@@ -466,8 +287,7 @@ function drawMiddleSection(
   theme: ResolvedFrameTheme,
   reserveQrSpace = false,
   fontScale = 1
-): number {
-  const circular = isCircularLayout(theme);
+) {
   const lineStart = layoutX(layout, scaleCoord(36, canvasW), canvasW);
   const lineEnd = layoutX(layout, canvasW - scaleCoord(36, canvasW), canvasW);
 
@@ -478,26 +298,19 @@ function drawMiddleSection(
   ctx.lineTo(lineEnd, y);
   ctx.stroke();
 
-  const textY =
-    y + Math.round((circular ? 28 : 58) * fontScale);
+  const textY = y + Math.round(58 * fontScale);
   ctx.fillStyle = getPosterTextColor(theme);
-  ctx.font = posterFont(
-    600,
-    Math.round((circular ? 26 : 36) * fontScale)
-  );
-  const barX = layoutX(layout, scaleCoord(36, canvasW), canvasW);
+  ctx.font = posterFont(600, Math.round(36 * fontScale));
   const textMaxWidth = reserveQrSpace
     ? canvasW - layout.inset * 2 - Math.round(220 * fontScale)
     : layout.innerW - Math.round(80 * fontScale);
-  const textCenterX =
-    circular && reserveQrSpace ? barX + textMaxWidth / 2 + 20 : canvasW / 2;
-  return wrapCanvasText(
+  wrapCanvasText(
     ctx,
     slogan,
-    textCenterX,
+    canvasW / 2,
     textY,
     textMaxWidth,
-    Math.round((circular ? 24 : 44) * fontScale)
+    Math.round(44 * fontScale)
   );
 }
 
@@ -507,14 +320,12 @@ function drawPosterQrCode(
   middleY: number,
   layout: PosterLayoutContext,
   canvasW: number,
-  fontScale = 1,
-  theme?: ResolvedFrameTheme
+  fontScale = 1
 ) {
-  const circular = theme ? isCircularLayout(theme) : false;
   const lineEnd = layoutX(layout, canvasW - scaleCoord(36, canvasW), canvasW);
-  const size = Math.round((circular ? 76 : 96) * fontScale);
+  const size = Math.round(96 * fontScale);
   const qrX = lineEnd - size - layoutScale(layout, Math.round(12 * fontScale), canvasW);
-  const qrY = middleY + Math.round((circular ? 8 : 16) * fontScale);
+  const qrY = middleY + Math.round(16 * fontScale);
 
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(qrX - 6, qrY - 6, size + 12, size + 12);
@@ -593,23 +404,19 @@ function drawCountdownBanner(
   y: number,
   theme: ResolvedFrameTheme,
   layout: PosterLayoutContext,
-  canvasW: number,
-  qrBounds?: { leftEdge: number; bottom: number }
+  canvasW: number
 ): number {
   const barX = layoutX(layout, 36, canvasW);
-  const circular = isCircularLayout(theme);
-  const barW =
-    circular && qrBounds ? qrBounds.leftEdge - barX - 10 : layout.innerW;
-  const paddingX = circular ? 24 : 56;
-  const maxTextWidth = Math.max(120, barW - paddingX);
-  const textCenterX = circular && qrBounds ? barX + barW / 2 : canvasW / 2;
-  const verticalPad = circular ? 10 : 22;
+  const barW = layout.innerW;
+  const paddingX = 56;
+  const maxTextWidth = barW - paddingX;
+  const verticalPad = 22;
 
-  let fontSize = circular ? 22 : 38;
+  let fontSize = 38;
   ctx.font = posterFont(700, fontSize);
   let lines = splitTextIntoLines(ctx, message, maxTextWidth);
 
-  while (fontSize > (circular ? 16 : 22)) {
+  while (fontSize > 22) {
     const tooWide = lines.some((line) => ctx.measureText(line).width > maxTextWidth);
     if (!tooWide) break;
     fontSize -= 1;
@@ -617,8 +424,8 @@ function drawCountdownBanner(
     lines = splitTextIntoLines(ctx, message, maxTextWidth);
   }
 
-  const lineHeight = Math.round(fontSize * (circular ? 1.1 : 1.15));
-  const barH = Math.max(circular ? 48 : 76, lines.length * lineHeight + verticalPad * 2);
+  const lineHeight = Math.round(fontSize * 1.15);
+  const barH = Math.max(76, lines.length * lineHeight + verticalPad * 2);
 
   ctx.fillStyle = theme.colors.accent;
   ctx.fillRect(barX, y, barW, barH);
@@ -626,7 +433,7 @@ function drawCountdownBanner(
   ctx.fillStyle = "#ffffff";
   ctx.font = posterFont(700, fontSize);
   const firstLineY = y + verticalPad + fontSize * 0.78;
-  wrapCanvasText(ctx, message, textCenterX, firstLineY, maxTextWidth, lineHeight);
+  wrapCanvasText(ctx, message, canvasW / 2, firstLineY, maxTextWidth, lineHeight);
 
   return y + barH;
 }
@@ -637,57 +444,25 @@ function drawEventHighlights(
   y: number,
   layout: PosterLayoutContext,
   canvasW: number,
-  theme: ResolvedFrameTheme,
-  maxBottomY?: number,
-  qrBounds?: { leftEdge: number; bottom: number }
+  theme: ResolvedFrameTheme
 ): number {
   if (highlights.length === 0) return y;
 
-  const circular = isCircularLayout(theme);
-  const barX = layoutX(layout, scaleCoord(36, canvasW), canvasW);
-  const maxWidth =
-    circular && qrBounds
-      ? qrBounds.leftEdge - barX - 20
-      : layout.innerW - 48;
-  const centerX =
-    circular && qrBounds ? barX + maxWidth / 2 + 10 : canvasW / 2;
+  const maxWidth = layout.innerW - 48;
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
   ctx.fillStyle = getPosterTextColor(theme);
+  ctx.font = posterFont(600, 26);
 
-  let fontSize = circular ? 18 : 26;
-  let lineHeight = circular ? 18 : 30;
-  const topPad = circular ? 6 : 20;
-  const itemGap = circular ? 2 : 4;
-
-  const measureBottom = () => {
-    ctx.font = posterFont(600, fontSize);
-    let cursorY = y + topPad;
-    for (const item of highlights) {
-      const wrapped = splitTextIntoLines(ctx, `✓ ${item}`, maxWidth);
-      cursorY += wrapped.length * lineHeight;
-      cursorY += itemGap;
-    }
-    return cursorY + Math.round(lineHeight * 0.25);
-  };
-
-  if (circular && maxBottomY) {
-    while (fontSize > 12 && measureBottom() > maxBottomY) {
-      fontSize -= 1;
-      lineHeight -= 1;
-    }
-  }
-
-  ctx.font = posterFont(600, fontSize);
-  let cursorY = y + topPad;
+  let cursorY = y + 20;
   for (const item of highlights) {
     const wrapped = splitTextIntoLines(ctx, `✓ ${item}`, maxWidth);
     for (const line of wrapped) {
-      ctx.fillText(line, centerX, cursorY);
-      cursorY += lineHeight;
+      ctx.fillText(line, canvasW / 2, cursorY);
+      cursorY += 30;
     }
-    cursorY += itemGap;
+    cursorY += 4;
   }
 
   return cursorY;
@@ -700,58 +475,30 @@ function drawPosterFooterSection(
   middleEndY: number,
   layout: PosterLayoutContext,
   canvasW: number,
-  canvasH: number,
-  qrBounds?: { leftEdge: number; bottom: number }
+  canvasH: number
 ) {
   const config = parsePosterTemplate(event);
   const stats = config.stats ?? [];
   const countdown = getEventCountdown(event);
   const highlights = parseEventHighlights(event.eventHighlights);
-  const circular = isCircularLayout(theme);
-  const themeKey = (theme.overlayKey ?? theme.key) as FrameThemeKey;
-  const safeBottomY = circular
-    ? getCircularSafeBottomY(themeKey, canvasW, canvasH)
-    : undefined;
 
-  let cursorY = middleEndY + (circular ? 8 : 8);
-  if (circular && qrBounds) {
-    cursorY = Math.max(cursorY, qrBounds.bottom + 10);
-  }
+  let cursorY = middleEndY + 8;
   if (countdown) {
     cursorY =
-      drawCountdownBanner(
-        ctx,
-        countdown.message,
-        cursorY,
-        theme,
-        layout,
-        canvasW,
-        qrBounds
-      ) + (circular ? 6 : 8);
+      drawCountdownBanner(ctx, countdown.message, cursorY, theme, layout, canvasW) + 8;
   }
 
   if (highlights.length > 0) {
     cursorY =
-      drawEventHighlights(
-        ctx,
-        highlights,
-        cursorY,
-        layout,
-        canvasW,
-        theme,
-        safeBottomY,
-        qrBounds
-      ) + (circular ? 4 : 6);
+      drawEventHighlights(ctx, highlights, cursorY, layout, canvasW, theme) + 6;
   }
 
   if (stats.length > 0) {
     drawStatsBar(ctx, stats, cursorY, theme);
     cursorY += 118 + 8;
-  } else if (!circular) {
+  } else {
     cursorY += 8;
   }
-
-  if (circular) return;
 
   const footerH = Math.max(52, canvasH - cursorY);
   drawFooter(
@@ -785,9 +532,7 @@ async function drawBmmPersonalPoster(
 
   paintFrameBackground(ctx, theme, POSTER_W, POSTER_H);
 
-  const circular = isCircularLayout(theme);
-
-  const headerBottomY = drawBmmHeader(
+  drawBmmHeader(
     ctx,
     event,
     logo,
@@ -798,24 +543,11 @@ async function drawBmmPersonalPoster(
     hashtag
   );
 
-  let photoX: number;
-  let photoY: number;
-  let photoRadius: number;
-  let ringPadding: number;
-
-  if (circular) {
-    ({ photoX, photoY, photoRadius, ringPadding } = layoutCircularPhoto(
-      headerBottomY,
-      layout,
-      POSTER_W
-    ));
-  } else {
-    const photoPos = getPersonalPhotoPosition(theme);
-    photoX = layoutX(layout, photoPos.x, POSTER_W);
-    photoY = layoutY(layout, photoPos.y, POSTER_H);
-    photoRadius = layoutScale(layout, photoPos.radius, POSTER_W);
-    ringPadding = layoutScale(layout, photoPos.ringPadding, POSTER_W);
-  }
+  const photoPos = PERSONAL_PHOTO_POSITION;
+  const photoX = layoutX(layout, photoPos.x, POSTER_W);
+  const photoY = layoutY(layout, photoPos.y, POSTER_H);
+  const photoRadius = layoutScale(layout, photoPos.radius, POSTER_W);
+  const ringPadding = layoutScale(layout, photoPos.ringPadding, POSTER_W);
   drawCircularImage(ctx, photo, photoX, photoY, photoRadius, input.photoCrop);
   ctx.strokeStyle = accent;
   ctx.lineWidth = theme.photoRingWidth;
@@ -825,60 +557,6 @@ async function drawBmmPersonalPoster(
 
   const displayName = `${input.firstName} ${input.lastName}`.trim();
   const cityLabel = (input.city?.trim() || event.location || "").trim();
-
-  if (circular) {
-    const nameY = circularAttendeeNameBaseline(
-      photoY,
-      photoRadius,
-      ringPadding,
-      layout,
-      POSTER_W
-    );
-    const attendeeBottomY = drawAttendeeBlockCentered(
-      ctx,
-      displayName,
-      input.role,
-      cityLabel,
-      POSTER_W / 2,
-      nameY,
-      theme
-    );
-
-    const middleY =
-      attendeeBottomY + layoutScale(layout, 18, POSTER_W);
-    const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
-    const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
-    const qrBounds = qr
-      ? getPosterQrBounds(middleY, layout, POSTER_W, 1, theme)
-      : undefined;
-    const middleTagline = genderTagline.trim() || event.tagline;
-    const middleEndY = drawMiddleSection(
-      ctx,
-      middleTagline,
-      middleY,
-      layout,
-      POSTER_W,
-      theme,
-      Boolean(qr)
-    );
-
-    drawPosterFooterSection(
-      ctx,
-      event,
-      theme,
-      middleEndY,
-      layout,
-      POSTER_W,
-      POSTER_H,
-      qrBounds
-    );
-
-    await paintFrameOverlay(ctx, theme, POSTER_W, POSTER_H);
-    if (qr) {
-      drawPosterQrCode(ctx, qr, middleY, layout, POSTER_W, 1, theme);
-    }
-    return;
-  }
 
   const textGap = layoutScale(layout, 20, POSTER_W);
   const infoX = photoX + photoRadius + ringPadding + textGap;
@@ -900,7 +578,7 @@ async function drawBmmPersonalPoster(
   const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
   const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
   const middleTagline = genderTagline.trim() || event.tagline;
-  const middleEndY = drawMiddleSection(
+  drawMiddleSection(
     ctx,
     middleTagline,
     middleY,
@@ -914,7 +592,7 @@ async function drawBmmPersonalPoster(
     ctx,
     event,
     theme,
-    middleEndY,
+    middleY + 118,
     layout,
     POSTER_W,
     POSTER_H
@@ -922,7 +600,7 @@ async function drawBmmPersonalPoster(
 
   await paintFrameOverlay(ctx, theme, POSTER_W, POSTER_H);
   if (qr) {
-    drawPosterQrCode(ctx, qr, middleY, layout, POSTER_W, 1, theme);
+    drawPosterQrCode(ctx, qr, middleY, layout, POSTER_W);
   }
 }
 
@@ -961,9 +639,7 @@ async function drawBmmGroupPoster(
 
   paintFrameBackground(ctx, theme, POSTER_W, POSTER_H);
 
-  const circular = isCircularLayout(theme);
-
-  const headerBottomY = drawBmmHeader(
+  drawBmmHeader(
     ctx,
     event,
     logo,
@@ -974,7 +650,7 @@ async function drawBmmGroupPoster(
     hashtag
   );
 
-  if (headline.length > 0 && !circular) {
+  if (headline.length > 0) {
     drawHeadlineBlockCentered(
       ctx,
       headline,
@@ -985,23 +661,11 @@ async function drawBmmGroupPoster(
     );
   }
 
-  const groupPhotoRowY = circular
-    ? headerBottomY +
-      layoutScale(layout, 14, POSTER_W) +
-      layoutScale(
-        layout,
-        input.memberCount === 2 ? 101 : input.memberCount === 3 ? 90 : 75,
-        POSTER_W
-      )
-    : undefined;
-
-  const positions = getGroupPhotoPositionsForTheme(theme, input.memberCount).map(
-    (pos) => ({
-      x: layoutX(layout, pos.x, POSTER_W),
-      y: groupPhotoRowY ?? layoutY(layout, pos.y, POSTER_H),
-      r: layoutScale(layout, pos.r, POSTER_W),
-    })
-  );
+  const positions = getGroupPhotoPositions(input.memberCount).map((pos) => ({
+    x: layoutX(layout, pos.x, POSTER_W),
+    y: layoutY(layout, pos.y, POSTER_H),
+    r: layoutScale(layout, pos.r, POSTER_W),
+  }));
   photos.forEach((photo, i) => {
     const pos = positions[i];
     const crop = input.photoCrops[i];
@@ -1024,7 +688,7 @@ async function drawBmmGroupPoster(
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
   ctx.fillStyle = getPosterTextColor(theme);
-  ctx.font = posterFont(700, circular ? 32 : 38);
+  ctx.font = posterFont(700, 38);
   const groupName = input.groupName.trim() || "Our Group";
   ctx.fillText(groupName.toUpperCase(), photoCenterX, nameY);
 
@@ -1043,7 +707,7 @@ async function drawBmmGroupPoster(
   const qrUrl = getEventQrUrl(event, "group", config.qrUrl);
   const qr = qrUrl ? await loadQrCodeImage(qrUrl) : null;
   const middleTagline = groupTagline.trim() || event.tagline;
-  const middleEndY = drawMiddleSection(
+  drawMiddleSection(
     ctx,
     middleTagline,
     middleY,
@@ -1057,7 +721,7 @@ async function drawBmmGroupPoster(
     ctx,
     event,
     theme,
-    middleEndY,
+    middleY + 118,
     layout,
     POSTER_W,
     POSTER_H
@@ -1065,7 +729,7 @@ async function drawBmmGroupPoster(
 
   await paintFrameOverlay(ctx, theme, POSTER_W, POSTER_H);
   if (qr) {
-    drawPosterQrCode(ctx, qr, middleY, layout, POSTER_W, 1, theme);
+    drawPosterQrCode(ctx, qr, middleY, layout, POSTER_W);
   }
 }
 
@@ -1097,10 +761,9 @@ async function drawPersonalDp(
   const { event, accent } = { event: input.event, accent: theme.colors.accent };
   const config = parsePosterTemplate(event);
   const genderTagline = getGenderTagline(event, input.genderKey);
-  const circular = isCircularLayout(theme);
   const fontScale = DP_W / POSTER_W;
 
-  const headerBottomY = drawBmmHeader(
+  drawBmmHeader(
     ctx,
     event,
     logo,
@@ -1112,32 +775,11 @@ async function drawPersonalDp(
     fontScale
   );
 
-  let photoX: number;
-  let photoY: number;
-  let photoRadius: number;
-  let ringPadding: number;
-
-  if (circular) {
-    ({ photoX, photoY, photoRadius, ringPadding } = layoutCircularPhoto(
-      headerBottomY,
-      layout,
-      DP_W
-    ));
-  } else {
-    const photoPos = getPersonalPhotoPosition(theme);
-    photoX = layoutX(layout, scaleCoord(photoPos.x, DP_W), DP_W);
-    photoY = layoutY(layout, scaleCoordY(photoPos.y, DP_H), DP_H);
-    photoRadius = layoutScale(
-      layout,
-      scaleCoord(photoPos.radius, DP_W),
-      DP_W
-    );
-    ringPadding = layoutScale(
-      layout,
-      scaleCoord(photoPos.ringPadding, DP_W),
-      DP_W
-    );
-  }
+  const photoPos = PERSONAL_DP_PHOTO_POSITION;
+  const photoX = layoutX(layout, photoPos.x, DP_W);
+  const photoY = layoutY(layout, photoPos.y, DP_H);
+  const photoRadius = layoutScale(layout, photoPos.radius, DP_W);
+  const ringPadding = layoutScale(layout, photoPos.ringPadding, DP_W);
 
   drawCircularImage(ctx, photo, photoX, photoY, photoRadius, input.photoCrop);
   ctx.strokeStyle = accent;
@@ -1149,70 +791,21 @@ async function drawPersonalDp(
   const displayName = `${input.firstName} ${input.lastName}`.trim();
   const cityLabel = (input.city?.trim() || event.location || "").trim();
 
-  if (circular) {
-    const nameY = circularAttendeeNameBaseline(
-      photoY,
-      photoRadius,
-      ringPadding,
-      layout,
-      DP_W,
-      fontScale
-    );
-    const attendeeBottomY = drawAttendeeBlockCentered(
-      ctx,
-      displayName,
-      input.role,
-      cityLabel,
-      DP_W / 2,
-      nameY,
-      theme,
-      fontScale
-    );
-
-    const middleY =
-      attendeeBottomY + layoutScale(layout, scaleCoord(40, DP_W), DP_W);
-    const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
-    const qr = qrUrl
-      ? await loadQrCodeImage(qrUrl, Math.round(128 * fontScale))
-      : null;
-    const middleTagline = genderTagline.trim() || event.tagline;
-    drawMiddleSection(
-      ctx,
-      middleTagline,
-      middleY,
-      layout,
-      DP_W,
-      theme,
-      Boolean(qr),
-      fontScale
-    );
-
-    await paintFrameOverlay(ctx, theme, DP_W, DP_H);
-    if (qr) {
-      drawPosterQrCode(ctx, qr, middleY, layout, DP_W, fontScale, theme);
-    }
-    return;
-  }
-
   const textGap = layoutScale(layout, scaleCoord(20, DP_W), DP_W);
   const infoX = photoX + photoRadius + ringPadding + textGap;
   const infoY = photoY - layoutScale(layout, scaleCoordY(22, DP_H), DP_H);
   drawAttendeeBlock(
-      ctx,
-      displayName,
-      input.role,
-      cityLabel,
-      infoX,
-      infoY,
-      theme,
-      fontScale
-    );
-
-  const middleY = layoutY(
-    layout,
-    scaleCoordY(560, DP_H),
-    DP_H
+    ctx,
+    displayName,
+    input.role,
+    cityLabel,
+    infoX,
+    infoY,
+    theme,
+    fontScale
   );
+
+  const middleY = layoutY(layout, scaleCoordY(560, DP_H), DP_H);
   const qrUrl = getEventQrUrl(event, "personal", config.qrUrl);
   const qr = qrUrl
     ? await loadQrCodeImage(qrUrl, Math.round(128 * fontScale))
@@ -1231,7 +824,7 @@ async function drawPersonalDp(
 
   await paintFrameOverlay(ctx, theme, DP_W, DP_H);
   if (qr) {
-    drawPosterQrCode(ctx, qr, middleY, layout, DP_W, fontScale, theme);
+    drawPosterQrCode(ctx, qr, middleY, layout, DP_W, fontScale);
   }
 }
 
@@ -1246,10 +839,9 @@ async function drawGroupDp(
   const { event, accent } = { event: input.event, accent: theme.colors.accent };
   const config = parsePosterTemplate(event);
   const groupTagline = getGenderTagline(event, "group");
-  const circular = isCircularLayout(theme);
   const fontScale = DP_W / POSTER_W;
 
-  const headerBottomY = drawBmmHeader(
+  drawBmmHeader(
     ctx,
     event,
     logo,
@@ -1261,28 +853,11 @@ async function drawGroupDp(
     fontScale
   );
 
-  const groupPhotoRowY = circular
-    ? headerBottomY +
-      layoutScale(layout, scaleCoord(14, DP_W), DP_W) +
-      layoutScale(
-        layout,
-        scaleCoord(
-          input.memberCount === 2 ? 101 : input.memberCount === 3 ? 90 : 75,
-          DP_W
-        ),
-        DP_W
-      )
-    : undefined;
-
-  const positions = getGroupPhotoPositionsForTheme(theme, input.memberCount).map(
-    (pos) => ({
-      x: layoutX(layout, scaleCoord(pos.x, DP_W), DP_W),
-      y:
-        groupPhotoRowY ??
-        layoutY(layout, scaleCoordY(pos.y, DP_H), DP_H),
-      r: layoutScale(layout, scaleCoord(pos.r, DP_W), DP_W),
-    })
-  );
+  const positions = getGroupPhotoPositions(input.memberCount).map((pos) => ({
+    x: layoutX(layout, scaleCoord(pos.x, DP_W), DP_W),
+    y: layoutY(layout, scaleCoordY(pos.y, DP_H), DP_H),
+    r: layoutScale(layout, scaleCoord(pos.r, DP_W), DP_W),
+  }));
 
   photos.forEach((photo, i) => {
     const pos = positions[i];
@@ -1306,7 +881,7 @@ async function drawGroupDp(
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
   ctx.fillStyle = getPosterTextColor(theme);
-  ctx.font = posterFont(700, Math.round((circular ? 32 : 38) * fontScale));
+  ctx.font = posterFont(700, Math.round(38 * fontScale));
   const groupName = input.groupName.trim() || "Our Group";
   ctx.fillText(groupName.toUpperCase(), photoCenterX, nameY);
 
@@ -1340,7 +915,7 @@ async function drawGroupDp(
 
   await paintFrameOverlay(ctx, theme, DP_W, DP_H);
   if (qr) {
-    drawPosterQrCode(ctx, qr, middleY, layout, DP_W, fontScale, theme);
+    drawPosterQrCode(ctx, qr, middleY, layout, DP_W, fontScale);
   }
 }
 
