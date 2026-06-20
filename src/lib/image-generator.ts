@@ -338,6 +338,48 @@ function drawBmmHeader(
   return bottomY;
 }
 
+function drawGroupNameBlockCentered(
+  ctx: CanvasRenderingContext2D,
+  groupName: string,
+  city: string,
+  centerX: number,
+  y: number,
+  theme: ResolvedFrameTheme,
+  fontScale = 1
+): number {
+  const textColor = getPosterTextColor(theme);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
+  ctx.direction = "ltr";
+  ctx.fillStyle = textColor;
+
+  const nameFontSize = Math.round(38 * fontScale);
+  ctx.font = posterFont(700, nameFontSize);
+  const upperName = groupName.toUpperCase();
+  ctx.fillText(upperName, centerX, y);
+
+  const nameWidth = Math.min(ctx.measureText(upperName).width, 420 * fontScale);
+  ctx.strokeStyle = textColor;
+  ctx.lineWidth = Math.max(2, 2 * fontScale);
+  const underlineY = y + Math.round(10 * fontScale);
+  ctx.beginPath();
+  ctx.moveTo(centerX - nameWidth / 2, underlineY);
+  ctx.lineTo(centerX + nameWidth / 2, underlineY);
+  ctx.stroke();
+
+  const cityFontSize = Math.round(26 * fontScale);
+  let bottomY = underlineY;
+  const cityLabel = city.trim();
+  if (cityLabel) {
+    ctx.font = posterFont(600, cityFontSize);
+    const cityY = y + Math.round(48 * fontScale);
+    ctx.fillText(cityLabel.toUpperCase(), centerX, cityY);
+    bottomY = cityY + Math.round(cityFontSize * 0.35);
+  }
+
+  return bottomY;
+}
+
 function scaleCoord(value: number, canvasW: number): number {
   return (value * canvasW) / POSTER_W;
 }
@@ -1015,33 +1057,17 @@ async function drawBmmGroupPoster(
     Math.max(
       ...positions.map((pos) => pos.y + pos.r + getPhotoRingOuterInset(theme, 5))
     ) + layoutScale(layout, 16, POSTER_W);
-  const nameY = photoBottom + layoutScale(layout, 28, POSTER_H);
-
-  ctx.textAlign = "center";
-  ctx.textBaseline = "alphabetic";
-  ctx.direction = "ltr";
-  ctx.fillStyle = getPosterTextColor(theme);
-  ctx.font = posterFont(700, 38);
-  const groupName = input.groupName.trim() || "Our Group";
-  const upperGroupName = groupName.toUpperCase();
-  ctx.fillText(upperGroupName, photoCenterX, nameY);
-
-  const groupNameWidth = Math.min(ctx.measureText(upperGroupName).width, 420);
-  ctx.strokeStyle = getPosterTextColor(theme);
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(photoCenterX - groupNameWidth / 2, nameY + 10);
-  ctx.lineTo(photoCenterX + groupNameWidth / 2, nameY + 10);
-  ctx.stroke();
+  const nameY = photoBottom + layoutScale(layout, 28, POSTER_W);
 
   const groupCity = (input.city?.trim() || event.location || "").trim();
-  let groupTextBottomY = nameY + 34;
-  if (groupCity) {
-    ctx.font = posterFont(600, 26);
-    const cityY = nameY + layoutScale(layout, 34, POSTER_H);
-    ctx.fillText(groupCity.toUpperCase(), photoCenterX, cityY);
-    groupTextBottomY = cityY + Math.round(26 * 0.35);
-  }
+  const groupTextBottomY = drawGroupNameBlockCentered(
+    ctx,
+    input.groupName.trim() || "Our Group",
+    groupCity,
+    photoCenterX,
+    nameY,
+    theme
+  );
   const middleY = resolveMiddleDividerY(
     layout,
     groupTextBottomY,
@@ -1258,34 +1284,16 @@ async function drawGroupDp(
     layoutScale(layout, scaleCoord(16, DP_W), DP_W);
   const nameY = photoBottom + layoutScale(layout, scaleCoordY(28, DP_H), DP_H);
 
-  ctx.textAlign = "center";
-  ctx.textBaseline = "alphabetic";
-  ctx.direction = "ltr";
-  ctx.fillStyle = getPosterTextColor(theme);
-  ctx.font = posterFont(700, Math.round(38 * fontScale));
-  const groupName = input.groupName.trim() || "Our Group";
-  const upperGroupName = groupName.toUpperCase();
-  ctx.fillText(upperGroupName, photoCenterX, nameY);
-
-  const groupNameWidth = Math.min(
-    ctx.measureText(upperGroupName).width,
-    420 * fontScale
-  );
-  ctx.strokeStyle = getPosterTextColor(theme);
-  ctx.lineWidth = Math.max(2, 2 * fontScale);
-  ctx.beginPath();
-  ctx.moveTo(photoCenterX - groupNameWidth / 2, nameY + Math.round(10 * fontScale));
-  ctx.lineTo(photoCenterX + groupNameWidth / 2, nameY + Math.round(10 * fontScale));
-  ctx.stroke();
-
   const groupCity = (input.city?.trim() || event.location || "").trim();
-  let groupTextBottomY = nameY + Math.round(34 * fontScale);
-  if (groupCity) {
-    ctx.font = posterFont(600, Math.round(26 * fontScale));
-    const cityY = nameY + layoutScale(layout, scaleCoordY(34, DP_H), DP_H);
-    ctx.fillText(groupCity.toUpperCase(), photoCenterX, cityY);
-    groupTextBottomY = cityY + Math.round(26 * fontScale * 0.35);
-  }
+  const groupTextBottomY = drawGroupNameBlockCentered(
+    ctx,
+    input.groupName.trim() || "Our Group",
+    groupCity,
+    photoCenterX,
+    nameY,
+    theme,
+    fontScale
+  );
   const middleY = resolveMiddleDividerY(
     layout,
     groupTextBottomY,
