@@ -52,18 +52,26 @@ import {
   paintGsPhotoWarmAccent,
 } from "./gs-poster-layout";
 
-type PersonalInput = PersonalFormData & { event: EventWithOptions };
-type GroupInput = GroupFormData & { event: EventWithOptions };
+type PersonalInput = PersonalFormData & {
+  event: EventWithOptions;
+  attendeeCount?: number;
+};
+type GroupInput = GroupFormData & {
+  event: EventWithOptions;
+  attendeeCount?: number;
+};
 
 const POSTER_W = 1080;
 const POSTER_H = 1080;
 
 export type PersonalPosterRenderInput = Omit<PersonalFormData, "photo"> & {
   event: EventWithOptions;
+  attendeeCount?: number;
 };
 
 export type GroupPosterRenderInput = Omit<GroupFormData, "photos" | "members"> & {
   event: EventWithOptions;
+  attendeeCount?: number;
 };
 
 export const PERSONAL_POSTER_W = POSTER_W;
@@ -162,6 +170,29 @@ const HIGHLIGHTS_MIN_LINE_HEIGHT = 16;
 const HIGHLIGHT_BLOCK_MIN_H = 52;
 const HIGHLIGHT_BLOCK_GAP = 8;
 const TICKET_FOOTER_H = 48;
+const RSVP_SHARE_ATTRIBUTION = "Generated using https://www.rsvpshare.com";
+const RSVP_SHARE_ATTRIBUTION_COLOR = "#2563EB";
+
+function drawRsvpShareAttribution(
+  ctx: CanvasRenderingContext2D,
+  canvasW: number,
+  canvasH: number,
+  fontScale = 1
+) {
+  const fontSize = Math.round(20 * fontScale);
+  ctx.save();
+  ctx.font = posterFont(700, fontSize);
+  ctx.fillStyle = RSVP_SHARE_ATTRIBUTION_COLOR;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+  ctx.direction = "ltr";
+  ctx.fillText(
+    RSVP_SHARE_ATTRIBUTION,
+    canvasW / 2,
+    canvasH - Math.round(8 * fontScale)
+  );
+  ctx.restore();
+}
 
 function photoRingDimensions(fontScale = 1) {
   return {
@@ -1345,7 +1376,8 @@ async function drawBmmPersonalPoster(
       1,
       1080,
       1080,
-      "personal"
+      "personal",
+      input.attendeeCount
     );
     return;
   }
@@ -1439,6 +1471,7 @@ export async function renderPersonalPosterCanvas(
   if (!ctx) return;
 
   await drawBmmPersonalPoster(ctx, input, logo, photo, theme);
+  drawRsvpShareAttribution(ctx, POSTER_W, POSTER_H);
 }
 
 async function drawBmmGroupPoster(
@@ -1569,7 +1602,8 @@ async function drawBmmGroupPoster(
       1,
       1080,
       1080,
-      "group"
+      "group",
+      input.attendeeCount
     );
     return;
   }
@@ -1685,6 +1719,7 @@ export async function renderGroupPosterCanvas(
   if (!ctx) return;
 
   await drawBmmGroupPoster(ctx, input, logo, photos, theme);
+  drawRsvpShareAttribution(ctx, POSTER_W, POSTER_H);
 }
 
 async function drawPersonalDp(

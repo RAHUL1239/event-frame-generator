@@ -10,6 +10,7 @@ import {
   parsePosterTemplate,
   getPosterTicketUrl,
   getPosterVenueBarLine,
+  resolvePosterStats,
   type PosterStat,
 } from "./poster-template";
 import { parseEventHighlights } from "./event-highlights";
@@ -570,10 +571,11 @@ export async function drawGsPosterFooter(
   fontScale = 1,
   designW = 1080,
   _designH = 1080,
-  page: "personal" | "group" = "personal"
+  page: "personal" | "group" = "personal",
+  attendeeCount?: number
 ) {
   const config = parsePosterTemplate(event);
-  const stats = config.stats ?? [];
+  const stats = resolvePosterStats(config.stats ?? [], attendeeCount);
   const highlights = parseEventHighlights(event.eventHighlights);
   const venueLine = getPosterVenueBarLine(config, event, highlights) ?? "";
   const ticketUrl = getPosterTicketUrl(config);

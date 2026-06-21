@@ -20,6 +20,7 @@ type Props = {
   src: string;
   crop?: PhotoCrop;
   onCropChange?: (crop: PhotoCrop) => void;
+  attendeeCount?: number;
 };
 
 export function PhotoFramePreview({
@@ -30,6 +31,7 @@ export function PhotoFramePreview({
   src,
   crop = DEFAULT_PHOTO_CROP,
   onCropChange,
+  attendeeCount,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dragging = useRef(false);
@@ -52,6 +54,7 @@ export function PhotoFramePreview({
           lastName,
           photoCrop: crop,
           frameThemeKey,
+          attendeeCount,
         },
         photo
       );
@@ -64,7 +67,7 @@ export function PhotoFramePreview({
     } finally {
       setRendering(false);
     }
-  }, [event, firstName, lastName, src, crop, frameThemeKey]);
+  }, [event, firstName, lastName, src, crop, frameThemeKey, attendeeCount]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {

@@ -69,6 +69,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
         photo,
         photoCrop,
         frameThemeKey: frameThemeKey || undefined,
+        attendeeCount,
       });
 
       const formData = new FormData();
@@ -196,6 +197,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
                   src={photoPreview}
                   crop={photoCrop}
                   onCropChange={setPhotoCrop}
+                  attendeeCount={attendeeCount}
                 />
                 <div className="mt-3 flex items-center justify-between gap-3 border-t border-gray-200 pt-3">
                   <span className="truncate text-sm text-gray-600">

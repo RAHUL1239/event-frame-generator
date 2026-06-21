@@ -31,6 +31,31 @@ export type PosterTemplateConfig = {
   venueLine?: string;
 };
 
+export function formatPosterAttendeeCount(count: number): string {
+  if (count <= 0) return "0";
+  return `${count.toLocaleString("en-US")}+`;
+}
+
+export function resolvePosterStats(
+  stats: PosterStat[],
+  attendeeCount?: number
+): PosterStat[] {
+  return stats.map((stat) => {
+    const usesCount =
+      stat.value === "$count" ||
+      stat.value === "{{count}}" ||
+      stat.label === "Days Celebration";
+    if (!usesCount) return stat;
+    if (attendeeCount == null) return stat;
+
+    return {
+      ...stat,
+      value: formatPosterAttendeeCount(attendeeCount),
+      label: "Attendees",
+    };
+  });
+}
+
 export function parsePosterTemplate(event: EventWithOptions): PosterTemplateConfig {
   let parsed: PosterTemplateConfig = {};
 

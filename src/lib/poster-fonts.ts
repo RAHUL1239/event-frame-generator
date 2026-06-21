@@ -47,6 +47,7 @@ export async function ensurePosterFontsLoaded(): Promise<void> {
       document.fonts.load(posterFont(500, 18)),
       document.fonts.load(posterFont(500, 16)),
       document.fonts.load(posterFont(700, 26)),
+      document.fonts.load(posterFont(700, 20)),
     ]);
     await document.fonts.ready;
   })();

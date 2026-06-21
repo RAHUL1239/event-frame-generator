@@ -12,7 +12,7 @@ export const MKM_DEFAULT_POSTER_TEMPLATE: PosterTemplateConfig = {
   venueLine: "Droumavalla Farm, Leesburg, VA",
   stats: [
     { value: "51", label: "Years of MKM", color: "accent" },
-    { value: "2", label: "Days Celebration", color: "primary" },
+    { value: "$count", label: "Attendees", color: "primary" },
     { value: "250+", label: "Community Performers", color: "green" },
     { value: "DMV", label: "Marathi Community", color: "gold" },
   ],
