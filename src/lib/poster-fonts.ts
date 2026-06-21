@@ -33,16 +33,20 @@ export async function ensurePosterFontsLoaded(): Promise<void> {
     }
 
     await Promise.all([
-      document.fonts.load(posterFont(700, 34)),
-      document.fonts.load(posterFont(600, 28)),
-      document.fonts.load(posterFont(600, 22)),
+      document.fonts.load(posterFont(700, 49)),
       document.fonts.load(posterFont(700, 40)),
+      document.fonts.load(posterFont(700, 37)),
+      document.fonts.load(posterFont(700, 34)),
+      document.fonts.load(posterFont(700, 32)),
       document.fonts.load(posterFont(700, 36)),
-      document.fonts.load(posterFont(500, 22)),
+      document.fonts.load(posterFont(600, 30)),
+      document.fonts.load(posterFont(600, 29)),
+      document.fonts.load(posterFont(600, 28)),
+      document.fonts.load(posterFont(600, 24)),
+      document.fonts.load(posterFont(600, 22)),
       document.fonts.load(posterFont(500, 18)),
+      document.fonts.load(posterFont(500, 16)),
       document.fonts.load(posterFont(700, 26)),
-      document.fonts.load(posterFont("bold", 15)),
-      document.fonts.load(posterFont("bold", 16)),
     ]);
     await document.fonts.ready;
   })();

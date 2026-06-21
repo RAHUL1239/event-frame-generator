@@ -1,4 +1,9 @@
 import type { EventWithOptions } from "./types";
+import {
+  MKM_DEFAULT_POSTER_TEMPLATE,
+  MKM_EVENT_SLUG,
+  mergePosterTemplate,
+} from "./mkm-poster-template";
 
 export const POSTER_GOLD = "#d4af37";
 export const POSTER_GREEN = "#2d8a4e";
@@ -27,13 +32,21 @@ export type PosterTemplateConfig = {
 };
 
 export function parsePosterTemplate(event: EventWithOptions): PosterTemplateConfig {
-  if (!event.posterTemplate) return {};
+  let parsed: PosterTemplateConfig = {};
 
-  try {
-    return JSON.parse(event.posterTemplate) as PosterTemplateConfig;
-  } catch {
-    return {};
+  if (event.posterTemplate) {
+    try {
+      parsed = JSON.parse(event.posterTemplate) as PosterTemplateConfig;
+    } catch {
+      parsed = {};
+    }
   }
+
+  if (event.slug === MKM_EVENT_SLUG) {
+    return mergePosterTemplate(MKM_DEFAULT_POSTER_TEMPLATE, parsed);
+  }
+
+  return parsed;
 }
 
 export function resolvePosterColor(

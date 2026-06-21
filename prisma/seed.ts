@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { MKM_EVENT_COLORS } from "../src/lib/mkm-event-colors";
+import { MKM_DEFAULT_POSTER_TEMPLATE } from "../src/lib/mkm-poster-template";
 
 const prisma = new PrismaClient();
 
@@ -11,25 +12,7 @@ const MKM_EVENT_HIGHLIGHTS = [
   "Felicitation of seniors",
 ];
 
-const MKM_POSTER_TEMPLATE = {
-  hashtag: "#MKM51",
-  headline: [
-    { text: "JOIN US FOR", color: "accent" },
-    { text: "गौरवशाली सोहळा", color: "primary" },
-    { text: "Celebrating 51 Years of Marathi Kala Mandal", color: "primary" },
-  ],
-  venueLine: "Droumavalla Farm, Leesburg, VA",
-  stats: [
-    { value: "51", label: "Years of MKM", color: "accent" },
-    { value: "2", label: "Days Celebration", color: "primary" },
-    { value: "250+", label: "Community Performers", color: "green" },
-    { value: "DMV", label: "Marathi Community", color: "gold" },
-  ],
-  ticketUrl: "https://mkm51.marathi.com/tickets.html",
-  qrUrl: "https://mkm51.marathi.com/tickets.html",
-  website: "mkm51.marathi.com/tickets",
-  socialHandle: "/mkmdc1",
-};
+const MKM_POSTER_TEMPLATE = MKM_DEFAULT_POSTER_TEMPLATE;
 
 async function main() {
   const passwordHash = await bcrypt.hash(
