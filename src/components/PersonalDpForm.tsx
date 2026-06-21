@@ -125,6 +125,15 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
           Fill in your info, upload your photo, and choose a frame style.
         </p>
 
+        <div className="mt-5">
+          <AttendeeSocialProof
+            count={attendeeCount}
+            primaryColor={event.primaryColor}
+            accentColor={event.accentColor}
+            nextParticipantNumber={attendeeCount + 1}
+          />
+        </div>
+
         <div className="mt-8 space-y-6">
           <div className="grid gap-4 md:grid-cols-2">
             <div>
@@ -244,11 +253,6 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
           </button>
         </div>
       </div>
-
-      <AttendeeSocialProof
-        count={attendeeCount}
-        primaryColor={event.primaryColor}
-      />
     </form>
     </ClientOnly>
   );
