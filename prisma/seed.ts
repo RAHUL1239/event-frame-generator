@@ -1,7 +1,35 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { MKM_EVENT_COLORS } from "../src/lib/mkm-event-colors";
 
 const prisma = new PrismaClient();
+
+const MKM_EVENT_HIGHLIGHTS = [
+  "Droumavalla Farm\nLeesburg, VA",
+  "July 17, 2026\nVIP Gala Night",
+  "July 18, 2026\nGrand Celebration",
+  "Felicitation of seniors",
+];
+
+const MKM_POSTER_TEMPLATE = {
+  hashtag: "#MKM51",
+  headline: [
+    { text: "JOIN US FOR", color: "accent" },
+    { text: "गौरवशाली सोहळा", color: "primary" },
+    { text: "Celebrating 51 Years of Marathi Kala Mandal", color: "primary" },
+  ],
+  venueLine: "Droumavalla Farm, Leesburg, VA",
+  stats: [
+    { value: "51", label: "Years of MKM", color: "accent" },
+    { value: "2", label: "Days Celebration", color: "primary" },
+    { value: "250+", label: "Community Performers", color: "green" },
+    { value: "DMV", label: "Marathi Community", color: "gold" },
+  ],
+  ticketUrl: "https://mkm51.marathi.com/tickets.html",
+  qrUrl: "https://mkm51.marathi.com/tickets.html",
+  website: "mkm51.marathi.com/tickets",
+  socialHandle: "/mkmdc1",
+};
 
 async function main() {
   const passwordHash = await bcrypt.hash(
@@ -22,73 +50,41 @@ async function main() {
   const event = await prisma.event.upsert({
     where: { slug: "mkm-51st-gauravshali-sohla" },
     update: {
-      name: "MKM 51st Gauravshali Sohla",
+      name: "MARATHI KALA MANDAL WASHINGTON DC",
       tagline: "सोहळा कौतुकाचा, सन्मान ज्येष्ठांचा, उत्साह नव्या पिढीचा…",
       dateLabel: "July 17th & 18th, 2026",
       eventDate: new Date("2026-07-17T12:00:00.000Z"),
-      location: "Washington DC",
-      subtitle: "#MKM51",
+      location: "Leesburg",
+      subtitle: "PROFILE FRAME & POSTER GENERATOR",
       isActive: true,
       logoUrl: "/mkm-logo.png",
-      backgroundColor: "#ffffff",
-      primaryColor: "#1e3a6e",
-      accentColor: "#e85d24",
+      ...MKM_EVENT_COLORS,
       enabledFrameThemes: JSON.stringify([
+        "gauravshali-sohla",
         "traditional-maharashtrian",
         "elegant-gold",
-        "family",
       ]),
-      eventHighlights: JSON.stringify([
-        "Felicitation of seniors",
-        "Cultural performances",
-        "Community networking",
-        "Family activities",
-      ]),
-      posterTemplate: JSON.stringify({
-        hashtag: "#MKM51",
-        headline: [
-          { text: "JOIN ME AT THE", color: "accent" },
-          { text: "MKM 51st", color: "primary" },
-          { text: "GAURAVSHALI SOHLA", color: "gold" },
-        ],
-        website: "rsvpshare.com",
-        socialHandle: "/MKMCommunity",
-      }),
+      eventHighlights: JSON.stringify(MKM_EVENT_HIGHLIGHTS),
+      posterTemplate: JSON.stringify(MKM_POSTER_TEMPLATE),
     },
     create: {
       slug: "mkm-51st-gauravshali-sohla",
-      name: "MKM 51st Gauravshali Sohla",
-      subtitle: "#MKM51",
+      name: "MARATHI KALA MANDAL WASHINGTON DC",
+      subtitle: "PROFILE FRAME & POSTER GENERATOR",
       tagline: "सोहळा कौतुकाचा, सन्मान ज्येष्ठांचा, उत्साह नव्या पिढीचा…",
       dateLabel: "July 17th & 18th, 2026",
       eventDate: new Date("2026-07-17T12:00:00.000Z"),
-      location: "Washington DC",
+      location: "Leesburg",
       isActive: true,
-      primaryColor: "#1e3a6e",
-      accentColor: "#e85d24",
-      backgroundColor: "#ffffff",
+      ...MKM_EVENT_COLORS,
       logoUrl: "/mkm-logo.png",
       enabledFrameThemes: JSON.stringify([
+        "gauravshali-sohla",
         "traditional-maharashtrian",
         "elegant-gold",
-        "family",
       ]),
-      eventHighlights: JSON.stringify([
-        "Felicitation of seniors",
-        "Cultural performances",
-        "Community networking",
-        "Family activities",
-      ]),
-      posterTemplate: JSON.stringify({
-        hashtag: "#MKM51",
-        headline: [
-          { text: "JOIN ME AT THE", color: "accent" },
-          { text: "MKM 51st", color: "primary" },
-          { text: "GAURAVSHALI SOHLA", color: "gold" },
-        ],
-        website: "rsvpshare.com",
-        socialHandle: "/MKMCommunity",
-      }),
+      eventHighlights: JSON.stringify(MKM_EVENT_HIGHLIGHTS),
+      posterTemplate: JSON.stringify(MKM_POSTER_TEMPLATE),
     },
   });
 

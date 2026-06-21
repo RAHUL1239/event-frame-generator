@@ -6,8 +6,10 @@ import { formatFileSize } from "@/lib/utils";
 import { EventLogoUpload } from "@/components/admin/EventLogoUpload";
 import { FrameThemeAdminSelect } from "@/components/admin/FrameThemeAdminSelect";
 import { EventHighlightsAdmin } from "@/components/admin/EventHighlightsAdmin";
+import { MiddleTaglinesAdmin } from "@/components/admin/MiddleTaglinesAdmin";
 import { parseEnabledFrameThemes } from "@/lib/frame-themes";
 import { parseEventHighlights } from "@/lib/event-highlights";
+import { parseMiddleTaglines } from "@/lib/middle-taglines";
 import { formatEventDateInputValue } from "@/lib/countdown";
 
 type GenderOption = {
@@ -34,10 +36,10 @@ type EventDetail = {
   primaryColor: string;
   accentColor: string;
   backgroundColor: string;
-  posterTemplate: string | null;
   participantCountBase: number;
   enabledFrameThemes: string | null;
   eventHighlights: string | null;
+  middleTaglines: string | null;
   genderOptions: GenderOption[];
   submissions: {
     id: string;
@@ -87,6 +89,7 @@ export default function AdminEventPage({
             participantCountBase: data.participantCountBase ?? 0,
             enabledFrameThemes: data.enabledFrameThemes ?? null,
             eventHighlights: data.eventHighlights ?? null,
+            middleTaglines: data.middleTaglines ?? null,
             eventDate: data.eventDate ?? null,
             genderOptions: data.genderOptions ?? [],
             submissions: (data.submissions ?? []).map(
@@ -123,10 +126,10 @@ export default function AdminEventPage({
         primaryColor: event.primaryColor,
         accentColor: event.accentColor,
         backgroundColor: event.backgroundColor,
-        posterTemplate: event.posterTemplate,
         participantCountBase: event.participantCountBase,
         enabledFrameThemes: parseEnabledFrameThemes(event.enabledFrameThemes),
         eventHighlights: parseEventHighlights(event.eventHighlights),
+        middleTaglines: parseMiddleTaglines(event.middleTaglines),
         genderOptions: event.genderOptions,
       }),
     });
@@ -311,24 +314,6 @@ export default function AdminEventPage({
               <Field label="Location (default city)" value={event.location ?? ""} onChange={(v) => setEvent({ ...event, location: v })} />
               <Field label="Facebook Group Name" value={event.facebookGroupName ?? ""} onChange={(v) => setEvent({ ...event, facebookGroupName: v })} />
               <Field label="Facebook Group URL" value={event.facebookGroupUrl ?? ""} onChange={(v) => setEvent({ ...event, facebookGroupUrl: v })} hint="e.g. https://www.facebook.com/groups/your-group" />
-              <div className="md:col-span-2">
-                <label className="text-sm font-medium text-gray-600">
-                  Poster template (JSON)
-                </label>
-                <textarea
-                  value={event.posterTemplate ?? ""}
-                  onChange={(e) =>
-                    setEvent({ ...event, posterTemplate: e.target.value || null })
-                  }
-                  rows={8}
-                  className="mt-1 w-full rounded-lg border px-3 py-2 font-mono text-xs"
-                  placeholder='{"hashtag":"#BMM2026","headline":[...],"stats":[...],"website":"...","socialHandle":"..."}'
-                />
-                <p className="mt-1 text-xs text-gray-400">
-                  Controls headline colors, stats bar, footer, and QR link. Subtitle
-                  field can also be a hashtag (e.g. #MKM51).
-                </p>
-              </div>
               <ColorField label="Primary Color" value={event.primaryColor} onChange={(v) => setEvent({ ...event, primaryColor: v })} />
               <ColorField label="Accent Color" value={event.accentColor} onChange={(v) => setEvent({ ...event, accentColor: v })} />
               <ColorField label="Background Color" value={event.backgroundColor} onChange={(v) => setEvent({ ...event, backgroundColor: v })} />
@@ -362,6 +347,16 @@ export default function AdminEventPage({
               value={event.eventHighlights}
               onChange={(serialized) =>
                 setEvent({ ...event, eventHighlights: serialized })
+              }
+            />
+          </section>
+
+          <section className="rounded-xl border bg-white p-6">
+            <h2 className="mb-4 font-semibold">Middle section taglines</h2>
+            <MiddleTaglinesAdmin
+              value={event.middleTaglines}
+              onChange={(serialized) =>
+                setEvent({ ...event, middleTaglines: serialized })
               }
             />
           </section>

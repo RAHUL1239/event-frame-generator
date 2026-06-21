@@ -41,6 +41,8 @@ model Event {
   enabledFrameThemes String?
   /** JSON array of highlight bullets shown under the generated poster. */
   eventHighlights   String?
+  /** JSON array of 3 taglines shown next to the name in the poster middle section. */
+  middleTaglines    String?
   dpTemplate      String?
   groupDpTemplate String?
   createdAt       DateTime @default(now())

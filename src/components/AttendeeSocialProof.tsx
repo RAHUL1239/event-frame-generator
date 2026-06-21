@@ -10,7 +10,7 @@ export function AttendeeSocialProof({ count, primaryColor }: Props) {
     <p className="mt-5 text-center text-sm text-gray-600">
       Join{" "}
       <strong style={{ color: primaryColor }}>
-        {count.toLocaleString()}+
+        {count.toLocaleString("en-US")}+
       </strong>{" "}
       attendees already going
     </p>

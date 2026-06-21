@@ -34,21 +34,14 @@ export default async function PreviewRoute({
     submissionOrdinal
   );
 
-  const backPath =
-    submission.type === "group"
-      ? `/events/${slug}/group`
-      : `/events/${slug}/personal`;
+  const backPath = `/events/${slug}/personal`;
 
   return (
     <div
       className="flex min-h-screen flex-col"
       style={{ backgroundColor: submission.event.backgroundColor }}
     >
-      <EventHeader
-        event={submission.event}
-        activeTab={submission.type === "group" ? "group" : "personal"}
-        basePath={`/events/${slug}`}
-      />
+      <EventHeader event={submission.event} />
       <main className="flex-1">
         <PreviewPage
           submission={submission}

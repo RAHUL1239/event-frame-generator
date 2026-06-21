@@ -48,9 +48,8 @@ export const FRAME_FULL_OVERLAYS: Partial<
   },
   "elegant-gold": {
     src: "/frames/elegant-gold-frame.jpg?v=2",
-    holeInsetRatio: 82 / 1080,
-    contentPadding: 70,
-    overlayScale: 1.12,
+    holeInsetRatio: 72 / 1080,
+    contentPadding: 50,
   },
   "gauravshali-sohla": {
     src: "/frames/gauravshali-sohla-frame.png?v=4",

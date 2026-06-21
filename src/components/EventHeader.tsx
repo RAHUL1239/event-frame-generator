@@ -1,15 +1,12 @@
 import type { EventWithOptions } from "@/lib/types";
 import { getEventLogoUrl } from "@/lib/utils";
-import Link from "next/link";
 import Image from "next/image";
 
 type Props = {
   event: EventWithOptions;
-  activeTab: "personal" | "group";
-  basePath: string;
 };
 
-export function EventHeader({ event, activeTab, basePath }: Props) {
+export function EventHeader({ event }: Props) {
   return (
     <header
       className="text-white shadow-md"
@@ -37,39 +34,6 @@ export function EventHeader({ event, activeTab, basePath }: Props) {
             </p>
           </div>
         </div>
-
-        <nav className="mt-6 flex gap-8 border-b border-white/20">
-          <Link
-            href={`${basePath}/personal`}
-            className={`pb-3 text-sm font-semibold uppercase tracking-wide transition ${
-              activeTab === "personal"
-                ? "border-b-4"
-                : "text-white/70 hover:text-white"
-            }`}
-            style={
-              activeTab === "personal"
-                ? { borderColor: event.accentColor, color: event.accentColor }
-                : undefined
-            }
-          >
-            Personal
-          </Link>
-          <Link
-            href={`${basePath}/group`}
-            className={`pb-3 text-sm font-semibold uppercase tracking-wide transition ${
-              activeTab === "group"
-                ? "border-b-4"
-                : "text-white/70 hover:text-white"
-            }`}
-            style={
-              activeTab === "group"
-                ? { borderColor: event.accentColor, color: event.accentColor }
-                : undefined
-            }
-          >
-            Group
-          </Link>
-        </nav>
       </div>
     </header>
   );

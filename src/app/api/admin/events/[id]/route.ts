@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { serializeEnabledFrameThemesOrNull } from "@/lib/frame-themes";
 import { serializeEventHighlights } from "@/lib/event-highlights";
+import { normalizeMiddleTaglines, serializeMiddleTaglines } from "@/lib/middle-taglines";
 import { getClientIp } from "@/lib/server-utils";
 
 const eventDetailInclude = {
@@ -82,7 +83,6 @@ export async function PATCH(
       accentColor: body.accentColor,
       backgroundColor: body.backgroundColor,
       logoUrl: body.logoUrl,
-      posterTemplate: body.posterTemplate || null,
       participantCountBase: Math.max(0, Number(body.participantCountBase) || 0),
       enabledFrameThemes:
         body.enabledFrameThemes != null
@@ -93,6 +93,10 @@ export async function PATCH(
           ? serializeEventHighlights(
               Array.isArray(body.eventHighlights) ? body.eventHighlights : []
             )
+          : undefined,
+      middleTaglines:
+        body.middleTaglines != null
+          ? serializeMiddleTaglines(normalizeMiddleTaglines(body.middleTaglines))
           : undefined,
     },
     include: { genderOptions: { orderBy: { sortOrder: "asc" } } },

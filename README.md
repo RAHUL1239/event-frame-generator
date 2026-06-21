@@ -48,10 +48,16 @@ Multi-event profile frame and poster generator — inspired by the [BMM 2026 bad
 cd ~/BMMApp
 cp .env.example .env
 npm install
+
+# Start local Postgres (requires Docker)
+docker compose up -d
+
 npx prisma db push
 npm run db:seed
 npm run dev
 ```
+
+**No Docker?** Create a free database at [Neon](https://neon.tech), paste the connection string into `DATABASE_URL` in `.env`, then run `db push` and `db:seed`.
 
 Open:
 - http://localhost:3000 — event list

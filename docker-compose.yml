@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bmmapp
+      POSTGRES_PASSWORD: bmmapp
+      POSTGRES_DB: bmmapp
+    ports:
+      - "5432:5432"
+    volumes:
+      - bmmapp_pgdata:/var/lib/postgresql/data
+
+volumes:
+  bmmapp_pgdata:

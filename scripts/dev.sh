@@ -16,4 +16,15 @@ fi
 
 rm -rf .next
 rm -rf "${TMPDIR:-/tmp}/bmmapp-next"
-exec npx next dev
+
+# WSL: open Windows default browser after the server starts
+if grep -qi microsoft /proc/version 2>/dev/null; then
+  (sleep 2 && cmd.exe /c start http://localhost:3000 >/dev/null 2>&1) &
+fi
+
+echo ""
+echo "  → Open in browser: http://localhost:3000"
+echo "  → Admin:           http://localhost:3000/admin"
+echo ""
+
+exec npx next dev -H 0.0.0.0

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { ClientOnly, FormLoadingShell } from "@/components/ClientOnly";
 import { usePhotoCrop } from "@/components/PhotoCropEditor";
 import { PhotoFramePreview } from "@/components/PhotoFramePreview";
 import { AttendeeSocialProof } from "@/components/AttendeeSocialProof";
@@ -28,11 +29,6 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [genderKey, setGenderKey] = useState(
-    event.genderOptions[0]?.key ?? ""
-  );
-  const [city, setCity] = useState("");
-  const [role, setRole] = useState("Attendee");
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const { crop: photoCrop, setCrop: setPhotoCrop } = usePhotoCrop(photoPreview);
@@ -59,7 +55,6 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
 
     if (!firstName.trim()) return setError("First name is required");
     if (!lastName.trim()) return setError("Last name is required");
-    if (!genderKey) return setError("Please select a tagline option");
     if (!photo) return setError("Please upload your photo");
     if (hasThemeStep && !frameThemeKey) {
       return setError("Please select a frame style");
@@ -71,9 +66,6 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
         event,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
-        genderKey,
-        city: city.trim() || event.location || "",
-        role: role.trim(),
         photo,
         photoCrop,
         frameThemeKey: frameThemeKey || undefined,
@@ -83,10 +75,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
       formData.append("type", "personal");
       formData.append("firstName", firstName.trim());
       formData.append("lastName", lastName.trim());
-      formData.append("genderKey", genderKey);
       if (frameThemeKey) formData.append("frameThemeKey", frameThemeKey);
-      formData.append("city", city.trim() || event.location || "");
-      formData.append("role", role.trim());
       formData.append(
         "fileMeta",
         JSON.stringify({
@@ -113,6 +102,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
   }
 
   return (
+    <ClientOnly fallback={<FormLoadingShell />}>
     <form onSubmit={handleSubmit} className="mx-auto max-w-2xl">
       <div className="rounded-2xl bg-white p-6 shadow-lg md:p-10">
         <span
@@ -165,33 +155,6 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
 
           <div>
             <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Tagline Gender *
-            </label>
-            <div className="grid gap-3 md:grid-cols-3">
-              {event.genderOptions.map((option) => (
-                <button
-                  key={option.key}
-                  type="button"
-                  onClick={() => setGenderKey(option.key)}
-                  className={`rounded-xl border-2 px-4 py-3 text-left text-sm transition ${
-                    genderKey === option.key
-                      ? "border-brand-teal bg-white shadow-sm"
-                      : "border-transparent bg-brand-cream text-gray-700 hover:bg-brand-cream-dark"
-                  }`}
-                  style={
-                    genderKey === option.key
-                      ? { borderColor: event.primaryColor }
-                      : undefined
-                  }
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
               Your Photo *
             </label>
             <input
@@ -222,9 +185,6 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
                   frameThemeKey={frameThemeKey || undefined}
                   firstName={firstName}
                   lastName={lastName}
-                  genderKey={genderKey}
-                  city={city}
-                  role={role}
                   src={photoPreview}
                   crop={photoCrop}
                   onCropChange={setPhotoCrop}
@@ -265,38 +225,6 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
             do not retain any uploaded images.
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                City
-              </label>
-              <input
-                type="text"
-                name="frameCity"
-                id="frame-city"
-                autoComplete="off"
-                data-lpignore="true"
-                data-1p-ignore
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Fairfax"
-                className="input-suggested w-full rounded-xl border border-gray-200 bg-brand-cream px-4 py-3 outline-none focus:border-brand-teal"
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                Role / Designation
-              </label>
-              <input
-                type="text"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                placeholder="Attendee"
-                className="w-full rounded-xl border border-gray-200 bg-brand-cream px-4 py-3 outline-none focus:border-brand-teal"
-              />
-            </div>
-          </div>
-
           {error && (
             <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">
               {error}
@@ -322,5 +250,6 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
         primaryColor={event.primaryColor}
       />
     </form>
+    </ClientOnly>
   );
 }

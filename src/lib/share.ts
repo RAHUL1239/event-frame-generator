@@ -129,6 +129,82 @@ export function openWhatsAppShare(text: string, pageUrl?: string) {
   );
 }
 
+export type GuidedShareResult = {
+  mode: "guided";
+  imageCopied: boolean;
+  captionCopied: boolean;
+};
+
+export type SocialPostFlowResult =
+  | "shared"
+  | "opened"
+  | "cancelled"
+  | GuidedShareResult;
+
+export function getGuidedShareToastMessage(
+  platform: "whatsapp" | "facebook" | "instagram",
+  result: GuidedShareResult
+): string {
+  if (result.imageCopied) {
+    if (platform === "whatsapp") {
+      return "Poster copied! WhatsApp Web is open — click the message box and press Ctrl+V (⌘+V on Mac) to paste the image.";
+    }
+    if (platform === "facebook") {
+      return "Poster copied! Facebook is open — start a new post and press Ctrl+V (⌘+V on Mac) to paste the image. Caption is copied too.";
+    }
+    return "Poster copied! Instagram is open — start a new post and press Ctrl+V (⌘+V on Mac) to paste the image. Caption is copied too.";
+  }
+
+  if (platform === "whatsapp") {
+    return "Poster downloaded and invitation text copied. Attach the PNG in WhatsApp Web, then paste the text.";
+  }
+  if (platform === "facebook") {
+    return "Poster downloaded and caption copied. Upload the PNG on Facebook, then paste the caption.";
+  }
+  return "Poster downloaded and caption copied. Upload the PNG on Instagram (Stories work best in the mobile app).";
+}
+
+/**
+ * Share poster to WhatsApp. Mobile uses the system share sheet when available.
+ * Desktop opens WhatsApp Web with text pre-filled and copies the image for paste.
+ */
+export async function openWhatsAppPostFlow(
+  posterDataUrl: string | null,
+  filename: string,
+  text: string,
+  pageUrl?: string
+): Promise<SocialPostFlowResult> {
+  const caption = pageUrl ? `${text}\n\n${pageUrl}` : text;
+
+  if (posterDataUrl) {
+    const shared = await shareImageNative(
+      posterDataUrl,
+      filename,
+      caption,
+      filename
+    );
+    if (shared === "shared") return "shared";
+  }
+
+  if (!isMobileDevice()) {
+    const guided = posterDataUrl
+      ? await prepareGuidedImageShare(posterDataUrl, filename, caption)
+      : { mode: "guided" as const, captionCopied: await copyTextToClipboard(caption), imageCopied: false, downloaded: false };
+    openWhatsAppShare(text, pageUrl);
+    return {
+      mode: "guided",
+      imageCopied: guided.imageCopied,
+      captionCopied: guided.captionCopied,
+    };
+  }
+
+  if (posterDataUrl) {
+    downloadDataUrl(posterDataUrl, filename);
+  }
+  openWhatsAppShare(text, pageUrl);
+  return "opened";
+}
+
 export function getFacebookWebUrl(groupUrl?: string | null) {
   return groupUrl || "https://www.facebook.com/";
 }
@@ -174,7 +250,7 @@ export async function sharePosterToFacebook(
   filename: string,
   caption: string
 ): Promise<"shared" | "cancelled" | "unsupported"> {
-  if (!isMobileDevice() || !navigator.share) return "unsupported";
+  if (!navigator.share) return "unsupported";
 
   const blob = await (await fetch(dataUrl)).blob();
   const file = new File([blob], filename, { type: "image/png" });
@@ -202,7 +278,7 @@ export async function sharePosterImage(
   dataUrl: string,
   filename: string
 ): Promise<"shared" | "cancelled" | "unsupported"> {
-  if (!isMobileDevice() || !navigator.share) return "unsupported";
+  if (!navigator.share) return "unsupported";
 
   const blob = await (await fetch(dataUrl)).blob();
   const file = new File([blob], filename, { type: "image/png" });
@@ -223,46 +299,95 @@ export function openInstagram() {
   openMobileApp("instagram://app", "https://www.instagram.com/");
 }
 
-/** Mobile: share poster image to Instagram app; desktop: open instagram.com. */
+/** Share poster to Instagram. Desktop copies the image and opens instagram.com. */
 export async function openInstagramPostFlow(
   posterDataUrl: string | null,
-  filename: string
-): Promise<"shared" | "opened" | "cancelled"> {
+  filename: string,
+  caption = ""
+): Promise<SocialPostFlowResult> {
+  if (posterDataUrl) {
+    const shared = await sharePosterImage(posterDataUrl, filename);
+    if (shared === "shared") return "shared";
+    if (shared === "cancelled") return "cancelled";
+
+    const native = await shareImageNative(
+      posterDataUrl,
+      filename,
+      caption,
+      filename
+    );
+    if (native === "shared") return "shared";
+  }
+
   if (!isMobileDevice()) {
+    const guided = posterDataUrl
+      ? await prepareGuidedImageShare(posterDataUrl, filename, caption)
+      : {
+          mode: "guided" as const,
+          captionCopied: false,
+          imageCopied: false,
+          downloaded: false,
+        };
     window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
-    return "opened";
+    return {
+      mode: "guided",
+      imageCopied: guided.imageCopied,
+      captionCopied: guided.captionCopied,
+    };
   }
 
   if (posterDataUrl) {
-    const shared = await sharePosterImage(posterDataUrl, filename);
-    if (shared === "shared" || shared === "cancelled") return shared;
+    downloadDataUrl(posterDataUrl, filename);
   }
-
   openInstagram();
   return "opened";
 }
 
-/** Mobile: share poster + caption to Facebook app; desktop: open browser. */
+/** Share poster to Facebook. Desktop copies the image and opens facebook.com. */
 export async function openFacebookPostFlow(
   posterDataUrl: string | null,
   filename: string,
   caption: string,
-  facebookGroupUrl?: string | null
-): Promise<"shared" | "opened" | "cancelled"> {
-  if (!isMobileDevice()) {
-    openFacebook(facebookGroupUrl);
-    return "opened";
-  }
-
+  _facebookGroupUrl?: string | null
+): Promise<SocialPostFlowResult> {
   if (posterDataUrl) {
     const shared = await sharePosterToFacebook(
       posterDataUrl,
       filename,
       caption
     );
-    if (shared === "shared" || shared === "cancelled") return shared;
+    if (shared === "shared") return "shared";
+    if (shared === "cancelled") return "cancelled";
+
+    const native = await shareImageNative(
+      posterDataUrl,
+      filename,
+      caption,
+      filename
+    );
+    if (native === "shared") return "shared";
   }
 
+  if (!isMobileDevice()) {
+    const guided = posterDataUrl
+      ? await prepareGuidedImageShare(posterDataUrl, filename, caption)
+      : {
+          mode: "guided" as const,
+          captionCopied: await copyTextToClipboard(caption),
+          imageCopied: false,
+          downloaded: false,
+        };
+    openFacebookComposer();
+    return {
+      mode: "guided",
+      imageCopied: guided.imageCopied,
+      captionCopied: guided.captionCopied,
+    };
+  }
+
+  if (posterDataUrl) {
+    downloadDataUrl(posterDataUrl, filename);
+  }
   openFacebookComposer();
   return "opened";
 }
@@ -340,7 +465,8 @@ export type SocialPostResult = {
   downloaded: boolean;
 };
 
-async function prepareSocialImagePost(
+/** Download poster and copy caption/image for manual posting on desktop web apps. */
+export async function prepareGuidedImageShare(
   dataUrl: string,
   filename: string,
   caption: string
@@ -357,6 +483,14 @@ async function prepareSocialImagePost(
     imageCopied,
     downloaded: true,
   };
+}
+
+async function prepareSocialImagePost(
+  dataUrl: string,
+  filename: string,
+  caption: string
+): Promise<SocialPostResult> {
+  return prepareGuidedImageShare(dataUrl, filename, caption);
 }
 
 export async function prepareInstagramPost(

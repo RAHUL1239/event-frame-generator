@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { ClientOnly, FormLoadingShell } from "@/components/ClientOnly";
 import { GroupFramePreview } from "@/components/GroupFramePreview";
 import { AttendeeSocialProof } from "@/components/AttendeeSocialProof";
 import {
@@ -32,7 +33,6 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
   const router = useRouter();
   const [memberCount, setMemberCount] = useState<2 | 3 | 4>(2);
   const [groupName, setGroupName] = useState("");
-  const [city, setCity] = useState("");
   const [photos, setPhotos] = useState<(File | null)[]>([null, null, null, null]);
   const [previews, setPreviews] = useState<(string | null)[]>([
     null,
@@ -112,7 +112,6 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
       const assets = await generateGroupAssets({
         event,
         groupName: groupName.trim(),
-        city: city.trim() || event.location || "",
         memberCount,
         photos: activePhotos as File[],
         members: Array.from({ length: memberCount }, (_, i) => ({
@@ -125,7 +124,6 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
       const formData = new FormData();
       formData.append("type", "group");
       formData.append("groupName", groupName.trim());
-      formData.append("city", city.trim() || event.location || "");
       formData.append("memberCount", String(memberCount));
       if (frameThemeKey) formData.append("frameThemeKey", frameThemeKey);
       formData.append("members", JSON.stringify([]));
@@ -158,6 +156,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
   }
 
   return (
+    <ClientOnly fallback={<FormLoadingShell />}>
     <form onSubmit={handleSubmit} className="mx-auto max-w-2xl">
       <div className="rounded-2xl bg-white p-6 shadow-lg md:p-10">
         <span
@@ -264,31 +263,12 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
             />
           </div>
 
-          <div>
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-              City
-            </label>
-            <input
-              type="text"
-              name="frameCity"
-              id="frame-city"
-              autoComplete="off"
-              data-lpignore="true"
-              data-1p-ignore
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              placeholder="Fairfax"
-              className="input-suggested w-full rounded-xl border border-gray-200 bg-brand-cream px-4 py-3 outline-none focus:border-brand-teal"
-            />
-          </div>
-
           {allPhotosUploaded && (
             <div className="rounded-xl border-2 border-dashed border-gray-300 bg-brand-cream p-4">
               <GroupFramePreview
                 event={event}
                 frameThemeKey={frameThemeKey || undefined}
                 groupName={groupName}
-                city={city}
                 memberCount={memberCount}
                 photoSrcs={activePreviews as string[]}
                 photoCrops={photoCrops.slice(0, memberCount)}
@@ -337,5 +317,6 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
         primaryColor={event.primaryColor}
       />
     </form>
+    </ClientOnly>
   );
 }

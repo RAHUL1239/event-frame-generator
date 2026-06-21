@@ -17,9 +17,6 @@ type Props = {
   frameThemeKey?: string;
   firstName: string;
   lastName: string;
-  genderKey: string;
-  city: string;
-  role: string;
   src: string;
   crop?: PhotoCrop;
   onCropChange?: (crop: PhotoCrop) => void;
@@ -30,9 +27,6 @@ export function PhotoFramePreview({
   frameThemeKey,
   firstName,
   lastName,
-  genderKey,
-  city,
-  role,
   src,
   crop = DEFAULT_PHOTO_CROP,
   onCropChange,
@@ -56,9 +50,6 @@ export function PhotoFramePreview({
           event,
           firstName,
           lastName,
-          genderKey,
-          city,
-          role,
           photoCrop: crop,
           frameThemeKey,
         },
@@ -73,17 +64,7 @@ export function PhotoFramePreview({
     } finally {
       setRendering(false);
     }
-  }, [
-    event,
-    firstName,
-    lastName,
-    genderKey,
-    city,
-    role,
-    src,
-    crop,
-    frameThemeKey,
-  ]);
+  }, [event, firstName, lastName, src, crop, frameThemeKey]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {

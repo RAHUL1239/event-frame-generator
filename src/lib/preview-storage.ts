@@ -1,6 +1,5 @@
 export type PreviewAssets = {
   posterDataUrl: string;
-  dpDataUrl: string;
 };
 
 export function savePreviewAssets(id: string, assets: PreviewAssets) {

@@ -12,9 +12,6 @@ export type MemberDetail = {
 export type PersonalFormData = {
   firstName: string;
   lastName: string;
-  genderKey: string;
-  city: string;
-  role: string;
   photo: File;
   photoCrop: PhotoCrop;
   frameThemeKey?: string;
@@ -22,7 +19,6 @@ export type PersonalFormData = {
 
 export type GroupFormData = {
   groupName: string;
-  city: string;
   memberCount: 2 | 3 | 4;
   photos: File[];
   members: MemberDetail[];
@@ -32,5 +28,4 @@ export type GroupFormData = {
 
 export type GeneratedAssets = {
   posterDataUrl: string;
-  dpDataUrl: string;
 };

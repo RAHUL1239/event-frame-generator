@@ -16,7 +16,6 @@ type Props = {
   event: EventWithOptions;
   frameThemeKey?: string;
   groupName: string;
-  city: string;
   memberCount: 2 | 3 | 4;
   photoSrcs: string[];
   photoCrops: PhotoCrop[];
@@ -29,7 +28,6 @@ export function GroupFramePreview({
   event,
   frameThemeKey,
   groupName,
-  city,
   memberCount,
   photoSrcs,
   photoCrops,
@@ -53,7 +51,6 @@ export function GroupFramePreview({
         {
           event,
           groupName,
-          city,
           memberCount,
           photoCrops,
           frameThemeKey,
@@ -69,15 +66,7 @@ export function GroupFramePreview({
     } finally {
       setRendering(false);
     }
-  }, [
-    event,
-    frameThemeKey,
-    groupName,
-    city,
-    memberCount,
-    photoSrcs,
-    photoCrops,
-  ]);
+  }, [event, frameThemeKey, groupName, memberCount, photoSrcs, photoCrops]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {

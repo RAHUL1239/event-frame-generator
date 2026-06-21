@@ -11,16 +11,16 @@ import {
   buildShareCaption,
   copyTextToClipboard,
   downloadDataUrl,
+  getGuidedShareToastMessage,
   getPreviewPageUrl,
   getShareableInvitationUrl,
   isMobileDevice,
-  openFacebook,
   openFacebookPostFlow,
   openInstagramPostFlow,
+  openWhatsAppPostFlow,
   openWhatsAppShare,
-  prepareInstagramPost,
-  prepareFacebookPost,
   shareImageNative,
+  type SocialPostFlowResult,
 } from "@/lib/share";
 
 type Submission = {
@@ -30,7 +30,6 @@ type Submission = {
   lastName: string | null;
   groupName: string | null;
   posterDataUrl: string | null;
-  dpDataUrl: string | null;
   event: EventWithOptions;
 };
 
@@ -54,7 +53,6 @@ export function PreviewPage({
   const [onLocalhost, setOnLocalhost] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [posterDataUrl, setPosterDataUrl] = useState(submission.posterDataUrl);
-  const [dpDataUrl, setDpDataUrl] = useState(submission.dpDataUrl);
 
   const invitationText = buildShareCaption(event);
   const invitationMessage = buildShareCaption(event, invitationUrl);
@@ -66,14 +64,13 @@ export function PreviewPage({
     setInvitationUrl(url);
     setOnLocalhost(!url && !!getPreviewPageUrl());
 
-    if (!posterDataUrl || !dpDataUrl) {
+    if (!posterDataUrl) {
       const stored = loadPreviewAssets(submission.id);
       if (stored) {
         if (!posterDataUrl) setPosterDataUrl(stored.posterDataUrl);
-        if (!dpDataUrl) setDpDataUrl(stored.dpDataUrl);
       }
     }
-  }, [slug, submission.id, posterDataUrl, dpDataUrl]);
+  }, [slug, submission.id, posterDataUrl]);
 
   function showToast(message: string) {
     setToast(message);
@@ -98,6 +95,23 @@ export function PreviewPage({
     );
   }
 
+  function showSocialShareResult(
+    platform: "whatsapp" | "facebook" | "instagram",
+    result: SocialPostFlowResult,
+    mobileFallback: string
+  ) {
+    if (result === "shared") {
+      if (platform === "facebook") showToast("Shared to Facebook!");
+      return;
+    }
+    if (result === "cancelled") return;
+    if (typeof result === "object" && result.mode === "guided") {
+      showToast(getGuidedShareToastMessage(platform, result));
+      return;
+    }
+    showToast(mobileFallback);
+  }
+
   async function handleShareFacebook() {
     if (!posterDataUrl) {
       showToast("Poster not ready yet. Please wait or regenerate your frames.");
@@ -105,22 +119,18 @@ export function PreviewPage({
     }
 
     const filename = `${slug}-poster.png`;
-    const direct = await openFacebookPostFlow(
+    const result = await openFacebookPostFlow(
       posterDataUrl,
       filename,
       facebookShareText,
       event.facebookGroupUrl
     );
 
-    if (direct === "shared") {
-      showToast("Shared to Facebook!");
-      return;
-    }
-    if (direct === "cancelled") return;
-
-    await prepareFacebookPost(posterDataUrl, filename, facebookShareText);
-    openFacebook(event.facebookGroupUrl);
-    showToast("Poster downloaded and caption copied. Open Facebook to post.");
+    showSocialShareResult(
+      "facebook",
+      result,
+      "Facebook opened. Attach the downloaded poster and paste the copied caption."
+    );
   }
 
   async function handleShareInstagramStory() {
@@ -130,43 +140,54 @@ export function PreviewPage({
     }
 
     const filename = `${slug}-poster.png`;
-    const direct = await openInstagramPostFlow(posterDataUrl, filename);
+    const result = await openInstagramPostFlow(
+      posterDataUrl,
+      filename,
+      instagramShareText
+    );
 
-    if (direct === "opened") {
-      await prepareInstagramPost(posterDataUrl, filename, instagramShareText);
-      showToast("Poster downloaded. Open Instagram to share to your story.");
-    }
+    showSocialShareResult(
+      "instagram",
+      result,
+      "Instagram opened. Attach the downloaded poster to your story or post."
+    );
   }
 
   async function handleShareWhatsApp() {
-    if (posterDataUrl && isMobileDevice()) {
-      const shared = await shareImageNative(
-        posterDataUrl,
-        event.name,
-        invitationMessage,
-        `${slug}-poster.png`
-      );
-      if (shared === "shared") return;
+    if (!posterDataUrl) {
+      openWhatsAppShare(invitationText, invitationUrl);
+      return;
     }
 
-    openWhatsAppShare(invitationText, invitationUrl);
+    const filename = `${slug}-poster.png`;
+    const result = await openWhatsAppPostFlow(
+      posterDataUrl,
+      filename,
+      invitationText,
+      invitationUrl
+    );
+
+    showSocialShareResult(
+      "whatsapp",
+      result,
+      "WhatsApp opened with your invitation text. Attach the downloaded poster in the chat."
+    );
   }
 
-  async function handleShareMore(imageType: "poster" | "dp") {
-    const dataUrl = imageType === "poster" ? posterDataUrl : dpDataUrl;
-    if (!dataUrl) return;
+  async function handleShareMore() {
+    if (!posterDataUrl) return;
 
     if (isMobileDevice()) {
       const result = await shareImageNative(
-        dataUrl,
+        posterDataUrl,
         `${event.name} - ${displayName}`,
         invitationMessage,
-        `${slug}-${imageType}.png`
+        `${slug}-poster.png`
       );
       if (result === "shared") return;
     }
 
-    downloadDataUrl(dataUrl, `${slug}-${imageType}.png`);
+    downloadDataUrl(posterDataUrl, `${slug}-poster.png`);
     showToast(
       "Image downloaded. Attach it in Instagram, Messages, or any app."
     );
@@ -219,8 +240,7 @@ export function PreviewPage({
           Share with friends
         </h2>
         <p className="mt-1 text-sm text-gray-600">
-          Share your poster and invite friends to create their own frame. The
-          WhatsApp DP below is for profile photos only.
+          Share your poster and invite friends to create their own frame.
         </p>
 
         {onLocalhost && (
@@ -254,10 +274,10 @@ export function PreviewPage({
         </div>
       </section>
 
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="max-w-xl mx-auto">
         <PreviewCard
           title="Social Media Poster"
-          subtitle="For Instagram / Facebook"
+          subtitle="For Instagram / Facebook / WhatsApp"
           dataUrl={posterDataUrl}
           accentColor={event.accentColor}
           primaryColor={event.primaryColor}
@@ -266,19 +286,7 @@ export function PreviewPage({
             posterDataUrl &&
             downloadDataUrl(posterDataUrl, `${slug}-poster.png`)
           }
-          onShareMore={() => handleShareMore("poster")}
-        />
-        <PreviewCard
-          title="WhatsApp DP"
-          subtitle="Square profile image with event details & QR"
-          dataUrl={dpDataUrl}
-          accentColor={event.accentColor}
-          primaryColor={event.primaryColor}
-          previewBackground={event.primaryColor}
-          onDownload={() =>
-            dpDataUrl && downloadDataUrl(dpDataUrl, `${slug}-dp.png`)
-          }
-          onShareMore={() => handleShareMore("dp")}
+          onShareMore={() => void handleShareMore()}
         />
       </div>
 

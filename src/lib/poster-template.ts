@@ -21,6 +21,9 @@ export type PosterTemplateConfig = {
   website?: string;
   socialHandle?: string;
   qrUrl?: string;
+  ticketUrl?: string;
+  /** Full-width venue line shown in the light bar above stats (GS layout). */
+  venueLine?: string;
 };
 
 export function parsePosterTemplate(event: EventWithOptions): PosterTemplateConfig {
@@ -99,4 +102,33 @@ export function getPosterVenueLine(event: EventWithOptions): string {
   const date = event.dateLabel.toUpperCase();
   const venue = event.location?.trim();
   return venue ? `${date} • ${venue.toUpperCase()}` : date;
+}
+
+export function getPosterTicketUrl(config: PosterTemplateConfig): string | undefined {
+  const url = config.ticketUrl?.trim();
+  return url || undefined;
+}
+
+export function formatPosterTicketLabel(ticketUrl: string): string {
+  const display = ticketUrl.replace(/^https?:\/\//i, "").replace(/\/$/, "");
+  return `Book Tickets — ${display}`;
+}
+
+export function getPosterVenueBarLine(
+  config: PosterTemplateConfig,
+  event: EventWithOptions,
+  highlights: string[] = []
+): string | undefined {
+  const explicit = config.venueLine?.trim();
+  if (explicit) return explicit;
+
+  const venueHighlight = highlights.find((h) =>
+    /droumavalla|farm|leesburg/i.test(h)
+  );
+  if (venueHighlight) {
+    return venueHighlight.replace(/\n/g, ", ").trim();
+  }
+
+  const loc = event.location?.trim();
+  return loc ? loc : undefined;
 }

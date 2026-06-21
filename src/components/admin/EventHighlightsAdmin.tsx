@@ -50,17 +50,18 @@ export function EventHighlightsAdmin({ value, onChange }: Props) {
   return (
     <div>
       <p className="mb-3 text-sm text-gray-600">
-        Shown under the generated poster on the preview page (up to{" "}
-        {MAX_EVENT_HIGHLIGHTS} items).
+        Shown as info blocks on the poster above the ticket link (up to{" "}
+        {MAX_EVENT_HIGHLIGHTS} items). Use a second line for subtext, e.g.{" "}
+        <span className="font-mono text-xs">Droumavalla Farm\nLeesburg, VA</span>
       </p>
       <div className="space-y-2">
         {rows.map((row, index) => (
           <div key={index} className="flex gap-2">
-            <input
-              type="text"
+            <textarea
               value={row}
               onChange={(e) => updateRow(index, e.target.value)}
-              placeholder="e.g. Cultural performances"
+              placeholder={"e.g. Droumavalla Farm\nLeesburg, VA"}
+              rows={2}
               className="flex-1 rounded-lg border px-3 py-2 text-sm"
             />
             <button

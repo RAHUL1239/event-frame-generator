@@ -31,11 +31,7 @@ export default async function PersonalPage({
       className="flex min-h-screen flex-col"
       style={{ backgroundColor: event.backgroundColor }}
     >
-      <EventHeader
-        event={event}
-        activeTab="personal"
-        basePath={`/events/${slug}`}
-      />
+      <EventHeader event={event} />
       <main className="flex-1 px-4 py-8">
         <PersonalDpForm
           event={event}

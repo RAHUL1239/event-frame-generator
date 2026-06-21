@@ -1,9 +1,4 @@
-import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import { calculateAttendeeCount } from "@/lib/participant-number";
-import { EventHeader } from "@/components/EventHeader";
-import { EventFooter } from "@/components/EventFooter";
-import { GroupDpForm } from "@/components/GroupDpForm";
+import { redirect } from "next/navigation";
 
 export default async function GroupPage({
   params,
@@ -11,35 +6,5 @@ export default async function GroupPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const event = await prisma.event.findUnique({
-    where: { slug },
-    include: { genderOptions: { orderBy: { sortOrder: "asc" } } },
-  });
-
-  if (!event || !event.isActive) notFound();
-
-  const submissionCount = await prisma.submission.count({
-    where: { eventId: event.id },
-  });
-  const attendeeCount = calculateAttendeeCount(
-    event.participantCountBase,
-    submissionCount
-  );
-
-  return (
-    <div
-      className="flex min-h-screen flex-col"
-      style={{ backgroundColor: event.backgroundColor }}
-    >
-      <EventHeader
-        event={event}
-        activeTab="group"
-        basePath={`/events/${slug}`}
-      />
-      <main className="flex-1 px-4 py-8">
-        <GroupDpForm event={event} slug={slug} attendeeCount={attendeeCount} />
-      </main>
-      <EventFooter event={event} />
-    </div>
-  );
+  redirect(`/events/${slug}/personal`);
 }
