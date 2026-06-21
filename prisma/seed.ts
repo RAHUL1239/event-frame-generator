@@ -30,46 +30,52 @@ async function main() {
     },
   });
 
-  const event = await prisma.event.upsert({
+  const defaultEnabledFrameThemes = JSON.stringify([
+    "gauravshali-sohla",
+    "traditional-maharashtrian",
+    "elegant-gold",
+  ]);
+
+  const eventDefaults = {
+    name: "MARATHI KALA MANDAL WASHINGTON DC",
+    tagline: "सोहळा कौतुकाचा, सन्मान ज्येष्ठांचा, उत्साह नव्या पिढीचा…",
+    dateLabel: "July 17th & 18th, 2026",
+    eventDate: new Date("2026-07-17T12:00:00.000Z"),
+    location: "Leesburg",
+    subtitle: "PROFILE FRAME & POSTER GENERATOR",
+    isActive: true,
+    logoUrl: "/mkm-logo.png",
+    ...MKM_EVENT_COLORS,
+    enabledFrameThemes: defaultEnabledFrameThemes,
+    eventHighlights: JSON.stringify(MKM_EVENT_HIGHLIGHTS),
+    posterTemplate: JSON.stringify(MKM_POSTER_TEMPLATE),
+  };
+
+  const existingEvent = await prisma.event.findUnique({
     where: { slug: "mkm-51st-gauravshali-sohla" },
-    update: {
-      name: "MARATHI KALA MANDAL WASHINGTON DC",
-      tagline: "सोहळा कौतुकाचा, सन्मान ज्येष्ठांचा, उत्साह नव्या पिढीचा…",
-      dateLabel: "July 17th & 18th, 2026",
-      eventDate: new Date("2026-07-17T12:00:00.000Z"),
-      location: "Leesburg",
-      subtitle: "PROFILE FRAME & POSTER GENERATOR",
-      isActive: true,
-      logoUrl: "/mkm-logo.png",
-      ...MKM_EVENT_COLORS,
-      enabledFrameThemes: JSON.stringify([
-        "gauravshali-sohla",
-        "traditional-maharashtrian",
-        "elegant-gold",
-      ]),
-      eventHighlights: JSON.stringify(MKM_EVENT_HIGHLIGHTS),
-      posterTemplate: JSON.stringify(MKM_POSTER_TEMPLATE),
-    },
-    create: {
-      slug: "mkm-51st-gauravshali-sohla",
-      name: "MARATHI KALA MANDAL WASHINGTON DC",
-      subtitle: "PROFILE FRAME & POSTER GENERATOR",
-      tagline: "सोहळा कौतुकाचा, सन्मान ज्येष्ठांचा, उत्साह नव्या पिढीचा…",
-      dateLabel: "July 17th & 18th, 2026",
-      eventDate: new Date("2026-07-17T12:00:00.000Z"),
-      location: "Leesburg",
-      isActive: true,
-      ...MKM_EVENT_COLORS,
-      logoUrl: "/mkm-logo.png",
-      enabledFrameThemes: JSON.stringify([
-        "gauravshali-sohla",
-        "traditional-maharashtrian",
-        "elegant-gold",
-      ]),
-      eventHighlights: JSON.stringify(MKM_EVENT_HIGHLIGHTS),
-      posterTemplate: JSON.stringify(MKM_POSTER_TEMPLATE),
-    },
   });
+
+  const event = existingEvent
+    ? await prisma.event.update({
+        where: { slug: "mkm-51st-gauravshali-sohla" },
+        data: {
+          ...(existingEvent.posterTemplate
+            ? {}
+            : { posterTemplate: eventDefaults.posterTemplate }),
+          ...(existingEvent.enabledFrameThemes
+            ? {}
+            : { enabledFrameThemes: eventDefaults.enabledFrameThemes }),
+          ...(existingEvent.eventHighlights
+            ? {}
+            : { eventHighlights: eventDefaults.eventHighlights }),
+        },
+      })
+    : await prisma.event.create({
+        data: {
+          slug: "mkm-51st-gauravshali-sohla",
+          ...eventDefaults,
+        },
+      });
 
   const genderOptions = [
   {
@@ -95,7 +101,7 @@ async function main() {
   for (const option of genderOptions) {
     await prisma.genderOption.upsert({
       where: { eventId_key: { eventId: event.id, key: option.key } },
-      update: option,
+      update: {},
       create: { eventId: event.id, ...option },
     });
   }
