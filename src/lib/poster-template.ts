@@ -80,9 +80,7 @@ export function getPosterHeadline(
   _genderTagline?: string
 ): PosterHeadlineLine[] {
   if (config.headline?.length) {
-    return config.headline.filter(
-      (line) => line.text.trim().toUpperCase() !== "JOIN ME AT THE"
-    );
+    return config.headline.filter((line) => line.text.trim().length > 0);
   }
 
   return [];

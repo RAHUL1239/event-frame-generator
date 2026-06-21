@@ -21,6 +21,8 @@ import {
   getPosterVenueLine,
   parsePosterTemplate,
   resolvePosterColor,
+  resolvePosterTextColor,
+  type PosterHeadlineLine,
   type PosterStat,
 } from "./poster-template";
 import { loadQrCodeImage, getEventQrUrl } from "./qr-code";
@@ -55,9 +57,9 @@ export type GroupPosterRenderInput = Omit<GroupFormData, "photos" | "members"> &
 export const PERSONAL_POSTER_W = POSTER_W;
 export const PERSONAL_POSTER_H = POSTER_H;
 export const PERSONAL_PHOTO_POSITION = {
-  x: POSTER_W / 2,
-  y: 340,
-  radius: 120,
+  x: 250,
+  y: 390,
+  radius: 118,
   ringPadding: 6,
 };
 
@@ -124,7 +126,8 @@ function getPosterDividerStroke(theme: ResolvedFrameTheme): string {
     : "rgba(255, 255, 255, 0.35)";
 }
 
-const CENTERED_PHOTO_DESIGN_Y = 340;
+const LEFT_PHOTO_DESIGN_X = 250;
+const LEFT_PHOTO_DESIGN_Y = 390;
 const DIVIDER_CAP_DESIGN_Y = 520;
 const LOGO_DESIGN_Y = 24;
 const LOGO_TO_TITLE_GAP = 22;
@@ -136,11 +139,15 @@ const QR_AFTER_TAGLINE_GAP = 14;
 const HIGHLIGHTS_FONT_SIZE = 24;
 const HIGHLIGHTS_LINE_HEIGHT = 26;
 const HIGHLIGHTS_MIN_FONT_SIZE = 15;
-const HIGHLIGHTS_MIN_LINE_HEIGHT = 18;
+const HIGHLIGHTS_MIN_LINE_HEIGHT = 16;
 
-function isGauravshaliTheme(theme: ResolvedFrameTheme): boolean {
-  const key = theme.overlayKey ?? theme.key;
-  return key === "gauravshali-sohla";
+function photoRingDimensions(fontScale = 1) {
+  return {
+    innerInset: Math.round(6 * fontScale),
+    innerWidth: Math.max(8, Math.round(10 * fontScale)),
+    outerWidth: Math.max(6, Math.round(8 * fontScale)),
+    ringGap: Math.round(5 * fontScale),
+  };
 }
 
 function resolvePhotoCenterY(
@@ -156,10 +163,32 @@ function resolvePhotoCenterY(
     headerBottomY + headerGap + photoRadius + ringOuterInset;
   const designCenterY = layoutY(
     layout,
-    scaleCoordY(CENTERED_PHOTO_DESIGN_Y, canvasH),
+    scaleCoordY(LEFT_PHOTO_DESIGN_Y, canvasH),
     canvasH
   );
   return Math.max(minCenterY, designCenterY);
+}
+
+function resolveLeftPhotoX(
+  layout: PosterLayoutContext,
+  canvasW: number
+): number {
+  return layoutX(layout, scaleCoord(LEFT_PHOTO_DESIGN_X, canvasW), canvasW);
+}
+
+function resolveTextColumnX(
+  photoX: number,
+  photoRadius: number,
+  ringOuterInset: number,
+  layout: PosterLayoutContext,
+  canvasW: number
+): number {
+  return (
+    photoX +
+    photoRadius +
+    ringOuterInset +
+    layoutScale(layout, 28, canvasW)
+  );
 }
 
 function resolvePhotoRowYOffset(
@@ -194,30 +223,22 @@ function resolveMiddleDividerY(
   return Math.max(minDividerY, afterAttendeeY);
 }
 
-/** Gold inner ring + broken orange outer ring matching Gauravshali branding. */
-function drawGauravshaliPhotoRings(
+/** Thick gold (yellow) inner + red outer rings on all themes. */
+function drawAttendeePhotoRing(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
   photoRadius: number,
+  _ringPadding: number,
   theme: ResolvedFrameTheme,
   fontScale = 1
 ): number {
-  const innerInset = Math.round(5 * fontScale);
-  const innerWidth = Math.max(5, Math.round(6 * fontScale));
-  const ringGap = Math.round(4 * fontScale);
-  const outerWidth = Math.max(2, Math.round(3 * fontScale));
+  const { innerInset, innerWidth, outerWidth, ringGap } =
+    photoRingDimensions(fontScale);
   const innerRadius = photoRadius + innerInset;
   const outerRadius = innerRadius + innerWidth / 2 + ringGap + outerWidth / 2;
 
-  const gapHalf = 0.13;
-  const gapAngles = [Math.PI / 6, (7 * Math.PI) / 6];
-
   ctx.save();
-  ctx.shadowColor = "rgba(60, 30, 10, 0.18)";
-  ctx.shadowBlur = Math.round(6 * fontScale);
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = Math.round(2 * fontScale);
   ctx.lineCap = "round";
 
   ctx.strokeStyle = theme.colors.gold;
@@ -228,60 +249,19 @@ function drawGauravshaliPhotoRings(
 
   ctx.strokeStyle = theme.colors.accent;
   ctx.lineWidth = outerWidth;
-  for (let i = 0; i < gapAngles.length; i++) {
-    const start = gapAngles[i] + gapHalf;
-    let end = gapAngles[(i + 1) % gapAngles.length] - gapHalf;
-    if (end <= start) end += 2 * Math.PI;
-    ctx.beginPath();
-    ctx.arc(x, y, outerRadius, start, end);
-    ctx.stroke();
-  }
+  ctx.beginPath();
+  ctx.arc(x, y, outerRadius, 0, Math.PI * 2);
+  ctx.stroke();
 
   ctx.restore();
 
   return outerRadius + outerWidth / 2;
 }
 
-function gauravshaliPhotoRingOuterInset(fontScale = 1): number {
-  const innerInset = Math.round(5 * fontScale);
-  const innerWidth = Math.max(5, Math.round(6 * fontScale));
-  const ringGap = Math.round(4 * fontScale);
-  const outerWidth = Math.max(2, Math.round(3 * fontScale));
+function getPhotoRingOuterInset(_ringPadding: number, fontScale = 1): number {
+  const { innerInset, innerWidth, outerWidth, ringGap } =
+    photoRingDimensions(fontScale);
   return innerInset + innerWidth + ringGap + outerWidth;
-}
-
-/** Orange + gold double rings matching the Gauravshali frame artwork. */
-function drawAttendeePhotoRing(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  photoRadius: number,
-  ringPadding: number,
-  theme: ResolvedFrameTheme,
-  fontScale = 1
-): number {
-  if (isGauravshaliTheme(theme)) {
-    return drawGauravshaliPhotoRings(ctx, x, y, photoRadius, theme, fontScale);
-  }
-
-  ctx.strokeStyle = theme.colors.accent;
-  ctx.lineWidth = theme.photoRingWidth;
-  ctx.beginPath();
-  ctx.arc(x, y, photoRadius + ringPadding, 0, Math.PI * 2);
-  ctx.stroke();
-
-  return photoRadius + ringPadding + theme.photoRingWidth / 2;
-}
-
-function getPhotoRingOuterInset(
-  theme: ResolvedFrameTheme,
-  ringPadding: number,
-  fontScale = 1
-): number {
-  if (isGauravshaliTheme(theme)) {
-    return gauravshaliPhotoRingOuterInset(fontScale);
-  }
-  return ringPadding + theme.photoRingWidth / 2;
 }
 
 function drawBmmHeader(
@@ -390,47 +370,69 @@ function scaleCoordY(value: number, canvasH: number): number {
 
 function drawHeadlineBlock(
   ctx: CanvasRenderingContext2D,
-  lines: { text: string; color?: string }[],
+  lines: PosterHeadlineLine[],
   x: number,
   y: number,
-  _theme: ResolvedFrameTheme
-) {
-  const maxWidth = POSTER_W - x - 36;
+  theme: ResolvedFrameTheme,
+  maxWidth: number,
+  fontScale = 1
+): number {
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
-  ctx.fillStyle = getPosterTextColor(_theme);
   let currentY = y;
   for (const line of lines) {
-    ctx.font = posterFont(700, 40);
+    ctx.fillStyle = resolveHeadlineLineColor(line.color, theme);
+    ctx.font = posterFont(700, Math.round(38 * fontScale));
     const wrapped = splitTextIntoLines(ctx, line.text, maxWidth);
     for (const segment of wrapped) {
       ctx.fillText(segment, x, currentY);
-      currentY += 48;
+      currentY += Math.round(44 * fontScale);
     }
   }
   return currentY;
 }
 
+function resolveHeadlineLineColor(
+  token: string | undefined,
+  theme: ResolvedFrameTheme
+): string {
+  const { primary, accent, gold, green } = theme.colors;
+  if (theme.posterTextColor) {
+    switch (token) {
+      case "accent":
+        return accent;
+      case "gold":
+        return gold;
+      case "green":
+        return green;
+      default:
+        return getPosterTextColor(theme);
+    }
+  }
+  return resolvePosterTextColor(token, primary, accent, gold, green);
+}
+
 function drawHeadlineBlockCentered(
   ctx: CanvasRenderingContext2D,
-  lines: { text: string; color?: string }[],
+  lines: PosterHeadlineLine[],
   centerX: number,
   startY: number,
   maxWidth: number,
-  _theme: ResolvedFrameTheme
-) {
+  theme: ResolvedFrameTheme,
+  fontScale = 1
+): number {
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
-  ctx.fillStyle = getPosterTextColor(_theme);
   let currentY = startY;
   for (const line of lines) {
-    ctx.font = posterFont(700, 40);
+    ctx.fillStyle = resolveHeadlineLineColor(line.color, theme);
+    ctx.font = posterFont(700, Math.round(38 * fontScale));
     const wrapped = splitTextIntoLines(ctx, line.text, maxWidth);
     for (const segment of wrapped) {
       ctx.fillText(segment, centerX, currentY);
-      currentY += 46;
+      currentY += Math.round(44 * fontScale);
     }
   }
   return currentY;
@@ -445,7 +447,7 @@ function drawAttendeeBlock(
   y: number,
   _theme: ResolvedFrameTheme,
   fontScale = 1
-) {
+): number {
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
@@ -456,23 +458,28 @@ function drawAttendeeBlock(
 
   ctx.strokeStyle = getPosterTextColor(_theme);
   ctx.lineWidth = Math.max(2, 3 * fontScale);
+  const underlineY = y + Math.round(10 * fontScale);
   ctx.beginPath();
-  ctx.moveTo(x, y + Math.round(10 * fontScale));
+  ctx.moveTo(x, underlineY);
   ctx.lineTo(
     x + Math.min(ctx.measureText(upperName).width, 420 * fontScale),
-    y + Math.round(10 * fontScale)
+    underlineY
   );
   ctx.stroke();
 
   ctx.font = posterFont(600, Math.round(26 * fontScale));
   let lineY = y + Math.round(44 * fontScale);
+  let bottomY = underlineY;
   if (role) {
     ctx.fillText(role.toUpperCase(), x, lineY);
+    bottomY = lineY + Math.round(26 * fontScale * 0.35);
     lineY += Math.round(30 * fontScale);
   }
   if (city) {
     ctx.fillText(city.toUpperCase(), x, lineY);
+    bottomY = lineY + Math.round(26 * fontScale * 0.35);
   }
+  return bottomY;
 }
 
 function drawAttendeeBlockCentered(
@@ -612,14 +619,18 @@ function drawStatsBar(
   ctx: CanvasRenderingContext2D,
   stats: PosterStat[],
   y: number,
-  theme: ResolvedFrameTheme
+  theme: ResolvedFrameTheme,
+  layout: PosterLayoutContext,
+  canvasW: number
 ) {
   const { primary, accent, gold, green } = theme.colors;
   const barH = 118;
-  const blockW = POSTER_W / stats.length;
+  const barX = layoutX(layout, scaleCoord(36, canvasW), canvasW);
+  const barW = layout.innerW;
+  const blockW = barW / stats.length;
 
   stats.forEach((stat, i) => {
-    const x = i * blockW;
+    const x = barX + i * blockW;
     let color = resolvePosterColor(stat.color, primary, accent, gold, green);
     if (color === primary) color = accent;
 
@@ -636,6 +647,8 @@ function drawStatsBar(
     ctx.font = posterFont(500, 18);
     ctx.fillText(stat.label, x + blockW / 2, y + 86);
   });
+
+  return y + barH;
 }
 
 function drawFooter(
@@ -790,16 +803,17 @@ function drawPosterFooterSection(
   const countdown = getEventCountdown(event);
   const highlights = parseEventHighlights(event.eventHighlights);
   const hasFooterContent = Boolean(config.website || config.socialHandle);
+  const statsBarH = stats.length > 0 ? 118 : 0;
   const footerBarH = hasFooterContent ? 36 : 0;
-  const footerTop = canvasH - layout.inset - footerBarH - 8;
-  const highlightsMaxBottom = footerTop - (hasFooterContent ? 10 : 6);
-  const sectionGap = 8;
+  const footerTop = canvasH - layout.inset - footerBarH - 6;
+  const highlightsMaxBottom = footerTop - statsBarH - 10;
+  const sectionGap = 6;
 
   let cursorY = middleEndY + sectionGap;
 
   if (countdown && highlights.length > 0) {
-    const totalAvailable = Math.max(80, highlightsMaxBottom - cursorY);
-    const countdownMaxH = Math.min(68, Math.floor(totalAvailable * 0.42));
+    const totalAvailable = Math.max(100, highlightsMaxBottom - cursorY);
+    const countdownMaxH = Math.min(62, Math.floor(totalAvailable * 0.32));
     cursorY =
       drawCountdownBanner(
         ctx,
@@ -836,12 +850,12 @@ function drawPosterFooterSection(
   }
 
   if (stats.length > 0) {
-    drawStatsBar(ctx, stats, cursorY, theme);
-    cursorY += 118 + 8;
+    cursorY =
+      drawStatsBar(ctx, stats, cursorY + 4, theme, layout, canvasW) + 8;
     drawFooter(
       ctx,
       cursorY,
-      Math.max(footerBarH, canvasH - cursorY),
+      Math.max(footerBarH, canvasH - layout.inset - cursorY),
       theme.colors.accent,
       layout,
       canvasW,
@@ -877,6 +891,7 @@ async function drawBmmPersonalPoster(
   const { event } = input;
   const config = parsePosterTemplate(event);
   const genderTagline = getGenderTagline(event, input.genderKey);
+  const headline = getPosterHeadline(config, event, genderTagline);
   const hashtag = getPosterHashtag(config, event);
   const themeKey = theme.overlayKey ?? theme.key;
   const layout = getPosterLayout(themeKey, POSTER_W, POSTER_H);
@@ -897,10 +912,10 @@ async function drawBmmPersonalPoster(
   const displayName = `${input.firstName} ${input.lastName}`.trim();
   const cityLabel = (input.city?.trim() || event.location || "").trim();
 
-  const photoX = POSTER_W / 2;
-  const photoRadius = layoutScale(layout, 120, POSTER_W);
+  const photoX = resolveLeftPhotoX(layout, POSTER_W);
+  const photoRadius = layoutScale(layout, PERSONAL_PHOTO_POSITION.radius, POSTER_W);
   const ringPadding = layoutScale(layout, PERSONAL_PHOTO_POSITION.ringPadding, POSTER_W);
-  const ringOuterInset = getPhotoRingOuterInset(theme, ringPadding);
+  const ringOuterInset = getPhotoRingOuterInset(ringPadding);
   const photoY = resolvePhotoCenterY(
     headerBottomY,
     photoRadius,
@@ -913,24 +928,45 @@ async function drawBmmPersonalPoster(
   drawCircularImage(ctx, photo, photoX, photoY, photoRadius, input.photoCrop);
   drawAttendeePhotoRing(ctx, photoX, photoY, photoRadius, ringPadding, theme);
 
-  const nameY =
-    photoY +
-    photoRadius +
-    getPhotoRingOuterInset(theme, ringPadding) +
-    layoutScale(layout, 22, POSTER_W) +
-    Math.round(32 * 0.85);
-  const attendeeBottomY = drawAttendeeBlockCentered(
+  const textX = resolveTextColumnX(
+    photoX,
+    photoRadius,
+    ringOuterInset,
+    layout,
+    POSTER_W
+  );
+  const textMaxWidth = Math.max(
+    160,
+    POSTER_W - textX - layout.inset - layoutScale(layout, 24, POSTER_W)
+  );
+  let textY = photoY - Math.round(photoRadius * 0.25);
+  if (headline.length > 0) {
+    textY = drawHeadlineBlock(
+      ctx,
+      headline,
+      textX,
+      textY,
+      theme,
+      textMaxWidth
+    );
+    textY += 12;
+  }
+
+  const attendeeBottomY = drawAttendeeBlock(
     ctx,
     displayName,
     input.role,
     cityLabel,
-    POSTER_W / 2,
-    nameY,
+    textX,
+    textY,
     theme
   );
+  const photoBottomY =
+    photoY + photoRadius + ringOuterInset + layoutScale(layout, 16, POSTER_W);
+  const blockBottomY = Math.max(attendeeBottomY, photoBottomY);
   const middleY = resolveMiddleDividerY(
     layout,
-    attendeeBottomY,
+    blockBottomY,
     POSTER_W,
     POSTER_H
   );
@@ -1025,7 +1061,7 @@ async function drawBmmGroupPoster(
     );
   }
 
-  const ringOuterInset = getPhotoRingOuterInset(theme, 5);
+  const ringOuterInset = getPhotoRingOuterInset(5);
   const basePositions = getGroupPhotoPositions(input.memberCount).map((pos) => ({
     x: layoutX(layout, pos.x, POSTER_W),
     y: layoutY(layout, pos.y, POSTER_H),
@@ -1055,7 +1091,7 @@ async function drawBmmGroupPoster(
     positions.reduce((sum, pos) => sum + pos.x, 0) / positions.length;
   const photoBottom =
     Math.max(
-      ...positions.map((pos) => pos.y + pos.r + getPhotoRingOuterInset(theme, 5))
+      ...positions.map((pos) => pos.y + pos.r + getPhotoRingOuterInset(5))
     ) + layoutScale(layout, 16, POSTER_W);
   const nameY = photoBottom + layoutScale(layout, 28, POSTER_W);
 
@@ -1135,6 +1171,7 @@ async function drawPersonalDp(
   const { event, accent } = { event: input.event, accent: theme.colors.accent };
   const config = parsePosterTemplate(event);
   const genderTagline = getGenderTagline(event, input.genderKey);
+  const headline = getPosterHeadline(config, event, genderTagline);
   const fontScale = DP_W / POSTER_W;
 
   const headerBottomY = drawBmmHeader(
@@ -1152,14 +1189,18 @@ async function drawPersonalDp(
   const displayName = `${input.firstName} ${input.lastName}`.trim();
   const cityLabel = (input.city?.trim() || event.location || "").trim();
 
-  const photoX = DP_W / 2;
-  const photoRadius = layoutScale(layout, scaleCoord(120, DP_W), DP_W);
+  const photoX = resolveLeftPhotoX(layout, DP_W);
+  const photoRadius = layoutScale(
+    layout,
+    scaleCoord(PERSONAL_PHOTO_POSITION.radius, DP_W),
+    DP_W
+  );
   const ringPadding = layoutScale(
     layout,
     scaleCoord(PERSONAL_PHOTO_POSITION.ringPadding, DP_W),
     DP_W
   );
-  const ringOuterInset = getPhotoRingOuterInset(theme, ringPadding, fontScale);
+  const ringOuterInset = getPhotoRingOuterInset(ringPadding, fontScale);
   const photoY = resolvePhotoCenterY(
     headerBottomY,
     photoRadius,
@@ -1172,25 +1213,50 @@ async function drawPersonalDp(
   drawCircularImage(ctx, photo, photoX, photoY, photoRadius, input.photoCrop);
   drawAttendeePhotoRing(ctx, photoX, photoY, photoRadius, ringPadding, theme, fontScale);
 
-  const nameY =
-    photoY +
-    photoRadius +
-    getPhotoRingOuterInset(theme, ringPadding, fontScale) +
-    layoutScale(layout, scaleCoord(22, DP_W), DP_W) +
-    Math.round(32 * fontScale * 0.85);
-  const attendeeBottomY = drawAttendeeBlockCentered(
+  const textX = resolveTextColumnX(
+    photoX,
+    photoRadius,
+    ringOuterInset,
+    layout,
+    DP_W
+  );
+  const textMaxWidth = Math.max(
+    120,
+    DP_W - textX - layout.inset - layoutScale(layout, scaleCoord(24, DP_W), DP_W)
+  );
+  let textY = photoY - Math.round(photoRadius * 0.25);
+  if (headline.length > 0) {
+    textY = drawHeadlineBlock(
+      ctx,
+      headline,
+      textX,
+      textY,
+      theme,
+      textMaxWidth,
+      fontScale
+    );
+    textY += Math.round(10 * fontScale);
+  }
+
+  const attendeeBottomY = drawAttendeeBlock(
     ctx,
     displayName,
     input.role,
     cityLabel,
-    DP_W / 2,
-    nameY,
+    textX,
+    textY,
     theme,
     fontScale
   );
+  const photoBottomY =
+    photoY +
+    photoRadius +
+    ringOuterInset +
+    layoutScale(layout, scaleCoord(16, DP_W), DP_W);
+  const blockBottomY = Math.max(attendeeBottomY, photoBottomY);
   const middleY = resolveMiddleDividerY(
     layout,
-    attendeeBottomY,
+    blockBottomY,
     DP_W,
     DP_H
   );
@@ -1246,7 +1312,7 @@ async function drawGroupDp(
     fontScale
   );
 
-  const ringOuterInset = getPhotoRingOuterInset(theme, 5, fontScale);
+  const ringOuterInset = getPhotoRingOuterInset(5, fontScale);
   const basePositions = getGroupDpPositions(input.memberCount).map((pos) => ({
     x: layoutX(layout, scaleCoord(pos.x, DP_W), DP_W),
     y: layoutY(layout, scaleCoordY(pos.y, DP_H), DP_H),
@@ -1278,7 +1344,7 @@ async function drawGroupDp(
   const photoBottom =
     Math.max(
       ...positions.map((pos) =>
-        pos.y + pos.r + getPhotoRingOuterInset(theme, 5, fontScale)
+        pos.y + pos.r + getPhotoRingOuterInset(5, fontScale)
       )
     ) +
     layoutScale(layout, scaleCoord(16, DP_W), DP_W);
