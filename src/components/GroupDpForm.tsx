@@ -316,7 +316,6 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
         count={attendeeCount}
         primaryColor={event.primaryColor}
         accentColor={event.accentColor}
-        nextParticipantNumber={attendeeCount + 1}
       />
     </form>
     </ClientOnly>
