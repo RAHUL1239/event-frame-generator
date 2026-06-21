@@ -170,7 +170,7 @@ const HIGHLIGHTS_MIN_LINE_HEIGHT = 16;
 const HIGHLIGHT_BLOCK_MIN_H = 52;
 const HIGHLIGHT_BLOCK_GAP = 8;
 const TICKET_FOOTER_H = 48;
-const RSVP_SHARE_ATTRIBUTION = "Generated using https://www.rsvpshare.com";
+const RSVP_SHARE_ATTRIBUTION = "https://www.RSVPshare.com";
 const RSVP_SHARE_ATTRIBUTION_COLOR = "#2563EB";
 
 function drawRsvpShareAttribution(
