@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Your attendees become your promoters",
   description:
-    "RSVPShare gives every guest a poster they share on social media and text with their friends, and people they know who already trust them. Event organizers grow attendance while spending less on marketing.",
+    "RSVPShare gives every guest a poster they share on social media and messaging apps with their friends, and people they know who already trust them. Event organizers grow attendance while spending less on marketing.",
 };
 
 const ATTENDEE_BASELINE = 5000;
@@ -36,7 +36,7 @@ const sources = [
   {
     stat: "88%",
     label: "trust a recommendation from someone they know more than any other channel",
-    source: "Nielsen, Trust in Advertising, 2021",
+    source: "Nielsen, Trust in Advertising",
     detail:
       "In a global survey of more than 40,000 people, word of mouth was the most trusted channel. Nielsen also reported that trust in advertising is lower in North America and Europe than in other regions, which makes a friend’s invitation more valuable than another ad placement.",
     href: "https://www.nielsen.com/insights/2021/beyond-martech-building-trust-with-consumers-and-engaging-where-sentiment-is-high/",
@@ -44,7 +44,7 @@ const sources = [
   {
     stat: "20%",
     label: "more ticket sales per share after someone has committed to attend",
-    source: "Eventbrite, Social Commerce, March 22, 2011",
+    source: "Eventbrite, Social Commerce",
     detail:
       "A Facebook share made after purchase drove 20% more ticket sales per share than a share made while someone was still browsing. Ten percent of buyers shared from the confirmation page. One percent of browsers shared from the event page. Eventbrite’s conclusion: effective promotion is no longer reserved for organizers who can afford expensive media buys, because sharing on a social graph is virtually free.",
     href: "https://www.eventbrite.com/blog/press/press-releases/eventbrite-unveils-industry-first-data-to-quantify-the-value-of-social-commerce/",
@@ -91,9 +91,9 @@ export default async function HomePage() {
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-gray-700">
             Give every guest a poster with their name on it. They share it on
-            social media and text with their friends, and people they know who
-            already trust them. Your next event gets seen, and the marketing
-            bill stays smaller.
+            social media and messaging apps with their friends, and people they
+            know who already trust them. Your next event gets seen, and the
+            marketing bill stays smaller.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link

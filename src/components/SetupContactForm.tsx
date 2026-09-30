@@ -5,6 +5,7 @@ import { useState } from "react";
 const fields = {
   name: "",
   email: "",
+  phone: "",
   organization: "",
   eventName: "",
   eventDate: "",
@@ -83,6 +84,18 @@ export function SetupContactForm() {
             type="email"
             value={values.email}
             onChange={(e) => update("email", e.target.value)}
+            className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2 outline-none focus:border-brand-teal"
+            required
+          />
+        </label>
+        <label className="block text-sm font-medium text-gray-700">
+          Phone *
+          <input
+            type="tel"
+            value={values.phone}
+            onChange={(e) => update("phone", e.target.value)}
+            autoComplete="tel"
+            placeholder="Include country code if outside the US"
             className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2 outline-none focus:border-brand-teal"
             required
           />

@@ -19,15 +19,19 @@ export async function POST(request: Request) {
 
   const name = clean(body.name);
   const email = clean(body.email);
+  const phone = clean(body.phone, 40);
   const organization = clean(body.organization);
   const eventName = clean(body.eventName);
   const eventDate = clean(body.eventDate);
   const eventLocation = clean(body.eventLocation);
   const message = clean(body.message, MAX_MESSAGE);
 
-  if (!name || !email || !organization || !eventName) {
+  if (!name || !email || !phone || !organization || !eventName) {
     return NextResponse.json(
-      { error: "Name, email, organization, and event name are required." },
+      {
+        error:
+          "Name, email, phone, organization, and event name are required.",
+      },
       { status: 400 }
     );
   }
@@ -35,6 +39,14 @@ export async function POST(request: Request) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json(
       { error: "Please enter a valid email address." },
+      { status: 400 }
+    );
+  }
+
+  const phoneDigits = phone.replace(/\D/g, "");
+  if (phoneDigits.length < 7 || phoneDigits.length > 15) {
+    return NextResponse.json(
+      { error: "Please enter a valid phone number." },
       { status: 400 }
     );
   }
@@ -53,6 +65,7 @@ export async function POST(request: Request) {
   const lines = [
     `Name: ${name}`,
     `Email: ${email}`,
+    `Phone: ${phone}`,
     `Organization: ${organization}`,
     `Event name: ${eventName}`,
     `Event date: ${eventDate || "(not provided)"}`,
