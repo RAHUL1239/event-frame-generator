@@ -163,7 +163,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
           className="inline-block rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-wide"
           style={{ backgroundColor: `${event.accentColor}22`, color: event.primaryColor }}
         >
-          Create your frame
+          Create your poster
         </span>
 
         <h2

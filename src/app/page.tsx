@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Your attendees become your promoters",
   description:
-    "RSVPShare gives every guest a poster they share with people who already trust them. Event organizers grow attendance while spending less on marketing.",
+    "RSVPShare gives every guest a poster they share on social media and text with their friends, and people they know who already trust them. Event organizers grow attendance while spending less on marketing.",
 };
 
 const ATTENDEE_BASELINE = 5000;
@@ -90,18 +90,37 @@ export default async function HomePage() {
             Your attendees become your promoters
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-gray-700">
-            Give every guest a poster with their name on it. They share it with
-            the people who already trust them. Your next event gets seen, and
-            the marketing bill stays smaller.
+            Give every guest a poster with their name on it. They share it on
+            social media and text with their friends, and people they know who
+            already trust them. Your next event gets seen, and the marketing
+            bill stays smaller.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              href="/admin"
+              href="/setup"
               className="rounded-full bg-brand-teal px-6 py-3 font-semibold text-brand-gold hover:bg-brand-teal-dark"
             >
               Set up your event
             </Link>
           </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-6 pb-16">
+          <h2 className="text-3xl font-bold text-brand-teal">
+            Want to try out RSVPShare?
+          </h2>
+          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-gray-700">
+            Click the Try Out event below and create your poster.
+          </p>
+          <Link
+            href="/events/try-out/personal"
+            className="mt-6 block max-w-md rounded-2xl bg-white px-6 py-5 shadow-sm transition hover:shadow-md"
+          >
+            <span className="font-semibold text-brand-teal">Try Out</span>
+            <span className="mt-1 block text-sm text-gray-500">
+              Create a sample poster
+            </span>
+          </Link>
         </section>
 
         <section className="bg-brand-teal text-brand-cream">
@@ -216,7 +235,7 @@ export default async function HomePage() {
               Market the next event with the people who are already coming.
             </h2>
             <Link
-              href="/admin"
+              href="/setup"
               className="mt-8 inline-block rounded-full bg-brand-gold px-6 py-3 font-semibold text-brand-teal hover:bg-brand-gold-light"
             >
               Set up your event

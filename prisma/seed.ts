@@ -106,6 +106,57 @@ async function main() {
     });
   }
 
+  const tryOutThemes = JSON.stringify([
+    "elegant-gold",
+    "youth",
+    "family",
+  ]);
+
+  const existingTryOut = await prisma.event.findUnique({
+    where: { slug: "try-out" },
+  });
+
+  if (!existingTryOut) {
+    await prisma.event.create({
+      data: {
+        slug: "try-out",
+        name: "Try Out",
+        subtitle: "PROFILE FRAME & POSTER GENERATOR",
+        tagline: "Make a poster and see how RSVPShare works",
+        dateLabel: "Anytime",
+        location: "Anywhere",
+        isActive: true,
+        primaryColor: "#1a4d4a",
+        accentColor: "#c9a227",
+        backgroundColor: "#f5f0e8",
+        enabledFrameThemes: tryOutThemes,
+        genderOptions: {
+          create: [
+            {
+              key: "female",
+              label: "Female",
+              tagline: "I'm attending Try Out",
+              sortOrder: 0,
+            },
+            {
+              key: "male",
+              label: "Male",
+              tagline: "I'm attending Try Out",
+              sortOrder: 1,
+            },
+            {
+              key: "group",
+              label: "Group",
+              tagline: "We're attending Try Out",
+              sortOrder: 2,
+            },
+          ],
+        },
+      },
+    });
+    console.log("Seeded event: try-out");
+  }
+
   console.log("Seeded event:", event.slug);
   console.log("Admin:", process.env.ADMIN_EMAIL || "admin@example.com");
 }

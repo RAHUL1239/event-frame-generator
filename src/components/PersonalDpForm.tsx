@@ -113,7 +113,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
             color: event.primaryColor,
           }}
         >
-          Create your frame
+          Create your poster
         </span>
 
         <h2

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     template: "%s | RSVPShare",
   },
   description:
-    "RSVPShare turns event guests into promoters. They share a personal poster, their friends trust the invitation, and organizers spend less on marketing.",
+    "RSVPShare turns event guests into promoters. They share a personal poster on social media and text with their friends, and people they know who already trust them. Organizers spend less on marketing.",
   icons: {
     icon: "/favicon.png",
     apple: "/favicon.png",
