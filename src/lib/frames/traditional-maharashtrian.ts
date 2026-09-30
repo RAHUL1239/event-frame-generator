@@ -43,6 +43,7 @@ export const traditionalMaharashtrianFrame: PosterFrame = {
     posterTextColor: NAVY,
     nameColor: "#ffffff",
     nameLift: 10,
+    logoSize: 124,
     dividerStroke: "rgba(26, 43, 86, 0.28)",
     headlineColors: "token-or-white",
     attribution: {
@@ -55,6 +56,7 @@ export const traditionalMaharashtrianFrame: PosterFrame = {
     gsHeader: {
       fullBleed: false,
       logoMatte: false,
+      logoSize: 124,
       eventNameColor: ORANGE,
       eventNameSize: 24,
       eventNameLine: 21,

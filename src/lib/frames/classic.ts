@@ -5,7 +5,12 @@ import type {
 } from "../frame-themes";
 import type { FrameFullOverlayConfig } from "../frame-overlays";
 import { DEFAULT_ATTRIBUTION, posterType } from "./typography";
-import type { FramePaint, FrameTypography, PosterFrame } from "./types";
+import type {
+  FramePaint,
+  FrameRoleBadge,
+  FrameTypography,
+  PosterFrame,
+} from "./types";
 
 type ClassicFrameInput = {
   key: FrameThemeKey;
@@ -19,6 +24,8 @@ type ClassicFrameInput = {
   posterTextColor?: string;
   layoutProfile?: "default" | "circular";
   type?: Partial<FrameTypography>;
+  roleBadge?: FrameRoleBadge;
+  logoSize?: number;
 };
 
 /** Shared composition for frames that only change colors, type, and border. */
@@ -36,6 +43,8 @@ export function defineClassicFrame(def: ClassicFrameInput): PosterFrame {
     posterTextColor,
     nameColor: posterTextColor,
     nameLift: 0,
+    logoSize: def.logoSize ?? 96,
+    roleBadge: def.roleBadge,
     dividerStroke: def.posterTextColor
       ? "rgba(139, 52, 24, 0.35)"
       : "rgba(255, 255, 255, 0.35)",

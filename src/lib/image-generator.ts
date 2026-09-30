@@ -419,6 +419,58 @@ function getPhotoRingOuterInset(
   return innerInset + innerWidth + ringGap + outerWidth;
 }
 
+function fillRoundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number
+) {
+  const radius = Math.min(r, h / 2, w / 2);
+  ctx.beginPath();
+  if (typeof ctx.roundRect === "function") {
+    ctx.roundRect(x, y, w, h, radius);
+  } else {
+    ctx.moveTo(x + radius, y);
+    ctx.arcTo(x + w, y, x + w, y + h, radius);
+    ctx.arcTo(x + w, y + h, x, y + h, radius);
+    ctx.arcTo(x, y + h, x, y, radius);
+    ctx.arcTo(x, y, x + w, y, radius);
+    ctx.closePath();
+  }
+  ctx.fill();
+}
+
+function drawRoleBadge(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  background: string,
+  color: string,
+  x: number,
+  centerY: number,
+  theme: ResolvedFrameTheme,
+  fontScale: number,
+  maxRight: number
+) {
+  const fontSize = Math.round(16 * fontScale);
+  ctx.save();
+  ctx.font = frameFont(theme, 700, fontSize);
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  const padX = Math.round(14 * fontScale);
+  const padY = Math.round(7 * fontScale);
+  const textW = ctx.measureText(text).width;
+  const h = fontSize + padY * 2;
+  const w = Math.min(textW + padX * 2, Math.max(40, maxRight - x));
+  const y = centerY - h / 2;
+  ctx.fillStyle = background;
+  fillRoundRect(ctx, x, y, w, h, h / 2);
+  ctx.fillStyle = color;
+  ctx.fillText(text, x + padX, centerY, w - padX * 2);
+  ctx.restore();
+}
+
 function drawBmmHeader(
   ctx: CanvasRenderingContext2D,
   event: EventWithOptions,
@@ -432,10 +484,40 @@ function drawBmmHeader(
 ): number {
   const textColor = getPosterTextColor(theme);
   const type = theme.paint.type;
-  const logoSize = Math.round(52 * fontScale);
+  const logoSize = Math.round((theme.paint.logoSize ?? 96) * fontScale);
   const logoTop = layoutY(layout, scaleCoordY(LOGO_DESIGN_Y, canvasH), canvasH);
+  let logoScale = logoSize / Math.max(1, logo.width);
+  if (logo.height * logoScale > logoSize) {
+    logoScale = logoSize / Math.max(1, logo.height);
+  }
+  const logoW = logo.width * logoScale;
   const logoH = drawLogo(ctx, logo, canvasW / 2, logoTop, logoSize, logoSize);
   const logoBottom = logoTop + logoH;
+
+  const badge = theme.paint.roleBadge;
+  if (badge) {
+    const gap = Math.round(14 * fontScale);
+    const maxRight = layout.inset + layout.innerW - Math.round(8 * fontScale);
+    let badgeX = canvasW / 2 + logoW / 2 + gap;
+    const estimatedW = Math.round(220 * fontScale);
+    if (badgeX + estimatedW > maxRight) {
+      badgeX = Math.max(
+        layout.inset + Math.round(8 * fontScale),
+        canvasW / 2 - logoW / 2 - gap - estimatedW
+      );
+    }
+    drawRoleBadge(
+      ctx,
+      badge.text,
+      badge.background,
+      badge.color,
+      badgeX,
+      logoTop + logoH / 2,
+      theme,
+      fontScale,
+      maxRight
+    );
+  }
 
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
@@ -798,17 +880,24 @@ function drawPersonalNameBlock(
   const nameFontSize = Math.round(theme.paint.type.personalNameSize * fontScale);
   const upperName = displayName.trim().toUpperCase();
   let nameWidth = 0;
+  let nameBottom = contentY;
 
   if (upperName) {
     ctx.fillStyle = nameColor;
     ctx.font = frameFont(theme, 700, nameFontSize);
-    ctx.fillText(upperName, padX, contentY);
-    nameWidth = ctx.measureText(upperName).width;
+    const nameLines = splitTextIntoLines(ctx, upperName, placement.maxWidth);
+    let lineY = contentY;
+    for (const line of nameLines) {
+      ctx.fillText(line, padX, lineY);
+      nameWidth = Math.max(nameWidth, ctx.measureText(line).width);
+      nameBottom = lineY;
+      lineY += Math.round(nameFontSize * 1.08);
+    }
   }
 
   if (activeTaglines.length === 0) {
     if (!upperName) return y;
-    return contentY + Math.round(nameFontSize * 0.4);
+    return nameBottom + Math.round(nameFontSize * 0.28);
   }
 
   const tagFontSize = Math.round(theme.paint.type.personalTaglineSize * fontScale);
@@ -816,9 +905,10 @@ function drawPersonalNameBlock(
   ctx.fillStyle = taglineColor;
   ctx.font = frameFont(theme, 600, tagFontSize);
 
-  let tagX = upperName ? padX + nameWidth + tagGap : padX;
-  let fitsOnRow = true;
-  let totalWidth = upperName ? nameWidth + tagGap : 0;
+  const nameIsSingleLine = upperName && nameBottom === contentY;
+  let tagX = nameIsSingleLine ? padX + nameWidth + tagGap : padX;
+  let fitsOnRow = Boolean(nameIsSingleLine);
+  let totalWidth = nameIsSingleLine ? nameWidth + tagGap : 0;
   for (const tag of activeTaglines) {
     totalWidth += ctx.measureText(tag).width + tagGap;
   }
@@ -831,10 +921,10 @@ function drawPersonalNameBlock(
       ctx.fillText(tag, tagX, contentY);
       tagX += ctx.measureText(tag).width + tagGap;
     }
-    return contentY + Math.round(tagFontSize * 0.45);
+    return contentY + Math.round(Math.max(nameFontSize, tagFontSize) * 0.4);
   }
 
-  let lineY = contentY + (upperName ? Math.round(36 * fontScale) : 0);
+  let lineY = nameBottom + Math.round(nameFontSize * 0.45);
   for (const tag of activeTaglines) {
     ctx.fillText(tag, padX, lineY);
     lineY += Math.round(30 * fontScale);
@@ -877,7 +967,7 @@ function drawMiddleSectionWithName(
   );
 }
 
-/** Headline → tagline → name in the column beside the photo. */
+/** Name beside the photo, then headline/tagline in the same column. */
 function drawPersonalBesidePhotoTextStack(
   ctx: CanvasRenderingContext2D,
   input: {
@@ -912,21 +1002,38 @@ function drawPersonalBesidePhotoTextStack(
     theme,
     fontScale = 1,
     includeGsTagline = false,
-    textStartY,
     textGap,
   } = layoutCtx;
   const placement = { contentX: textX, maxWidth: textMaxWidth };
   const gap =
     textGap ?? layoutScale(layout, includeGsTagline ? 16 : 8, canvasW);
+  const nameFontSize = Math.round(theme.paint.type.personalNameSize * fontScale);
+  const photoTopY = resolvePersonalTextColumnTopY(
+    photoY,
+    photoRadius,
+    ringOuterInset,
+    fontScale
+  );
+  let nameY =
+    photoY - Math.round(photoRadius * 0.18) + Math.round(nameFontSize * 0.35);
+  nameY = Math.max(photoTopY + Math.round(nameFontSize * 0.82), nameY);
+  if (theme.paint.nameLift) {
+    nameY -= Math.round(theme.paint.nameLift * fontScale);
+  }
 
-  let textY =
-    textStartY ??
-    resolvePersonalTextColumnTopY(
-      photoY,
-      photoRadius,
-      ringOuterInset,
-      fontScale
-    );
+  const nameBottom = drawPersonalNameBlock(
+    ctx,
+    input.displayName,
+    input.middleTaglines,
+    nameY,
+    layout,
+    canvasW,
+    theme,
+    placement,
+    fontScale
+  );
+
+  let textY = nameBottom + gap;
 
   if (input.headline.length > 0) {
     const headlineGaps = includeGsTagline
@@ -959,24 +1066,9 @@ function drawPersonalBesidePhotoTextStack(
       undefined,
       theme
     );
-    textY += gap;
   }
 
-  if (theme.paint.nameLift) {
-    textY -= Math.round(theme.paint.nameLift * fontScale);
-  }
-
-  return drawPersonalNameBlock(
-    ctx,
-    input.displayName,
-    input.middleTaglines,
-    textY,
-    layout,
-    canvasW,
-    theme,
-    placement,
-    fontScale
-  );
+  return Math.max(textY, nameBottom);
 }
 
 function drawTicketFooterBar(

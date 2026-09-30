@@ -12,5 +12,10 @@ export const volunteerFrame = defineClassicFrame({
     green: "#1A4D4A",
   },
   borderStyle: "double",
-  photoRingWidth: 8,
+  photoRingWidth: 6,
+  roleBadge: {
+    text: "I am a volunteer",
+    background: "#E85D24",
+    color: "#ffffff",
+  },
 });

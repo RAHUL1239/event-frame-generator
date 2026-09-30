@@ -51,7 +51,7 @@ function getSiteOrigin(): string {
 
 export function getEventQrUrl(
   event: { slug: string },
-  page: "personal" | "group",
+  _page: "personal" | "group",
   configQr?: string
 ): string | undefined {
   const custom = configQr?.trim();
@@ -60,5 +60,5 @@ export function getEventQrUrl(
   const base = getSiteOrigin();
   if (!base) return undefined;
 
-  return `${base}/events/${event.slug}/${page}`;
+  return `${base}/event/${event.slug}`;
 }

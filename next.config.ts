@@ -11,6 +11,35 @@ const distDir =
 
 const nextConfig: NextConfig = {
   distDir,
+  async redirects() {
+    return [
+      {
+        source: "/events/:slug/personal",
+        destination: "/event/:slug",
+        permanent: true,
+      },
+      {
+        source: "/events/:slug/preview/:id",
+        destination: "/event/:slug/preview/:id",
+        permanent: true,
+      },
+      {
+        source: "/events/:slug/guests",
+        destination: "/event/:slug/guests",
+        permanent: true,
+      },
+      {
+        source: "/events/:slug/group",
+        destination: "/event/:slug",
+        permanent: true,
+      },
+      {
+        source: "/events/:slug",
+        destination: "/event/:slug",
+        permanent: true,
+      },
+    ];
+  },
     images: {
     remotePatterns: [
       {

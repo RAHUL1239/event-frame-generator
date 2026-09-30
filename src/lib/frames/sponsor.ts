@@ -12,5 +12,10 @@ export const sponsorFrame = defineClassicFrame({
     green: "#27AE60",
   },
   borderStyle: "premium",
-  photoRingWidth: 7,
+  photoRingWidth: 6,
+  roleBadge: {
+    text: "I am a sponsor",
+    background: "#D4AF37",
+    color: "#1A242F",
+  },
 });

@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
+import { publicEventPath } from "@/lib/event-paths";
 
-export default async function GroupPage({
+export default async function LegacyGroupPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  redirect(`/events/${slug}/personal`);
+  redirect(publicEventPath(slug));
 }

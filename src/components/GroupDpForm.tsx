@@ -147,7 +147,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
       if (!res.ok) throw new Error("Failed to save submission");
       const data = await res.json();
       savePreviewAssets(data.id, assets);
-      router.push(`/events/${slug}/preview/${data.id}`);
+      router.push(`/event/${slug}/preview/${data.id}`);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -203,6 +203,10 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
             <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
               Member Photos *
             </label>
+            <p className="mb-2 text-xs text-gray-500">
+              Use photos at least 1000×1000 pixels with faces toward the center.
+              A phone photo is usually enough; very small pictures look soft.
+            </p>
             <div
               className={`grid gap-4 ${
                 memberCount === 2

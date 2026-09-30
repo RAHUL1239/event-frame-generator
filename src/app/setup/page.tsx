@@ -5,7 +5,7 @@ import { SetupContactForm } from "@/components/SetupContactForm";
 export const metadata: Metadata = {
   title: "Set up your event",
   description:
-    "Tell us about your event. RSVPShare is free for non-profit organizations.",
+    "Tell us about your event. RSVPShare is free for non-profit organizations and for events with fewer than 50 attendees.",
 };
 
 export default function SetupPage() {
@@ -34,7 +34,8 @@ export default function SetupPage() {
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-gray-700">
           Share a few details and we will help you get a guest poster page
-          ready. RSVPShare is free for non-profit organizations.
+          ready. RSVPShare is free for non-profit organizations and for events
+          with fewer than 50 attendees.
         </p>
 
         <div className="mt-8">

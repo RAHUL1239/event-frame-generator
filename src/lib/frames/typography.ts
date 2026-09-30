@@ -6,7 +6,7 @@ export const SHARED_POSTER_TYPE: FrameTypography = {
   fontFamily: POSTER_FONT_FAMILY,
   headlineSize: 38,
   headlineLine: 44,
-  personalNameSize: 30,
+  personalNameSize: 46,
   personalTaglineSize: 24,
   headerNameSize: 40,
   headerNameLine: 36,

@@ -94,7 +94,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
       if (!res.ok) throw new Error("Failed to save submission");
       const data = await res.json();
       savePreviewAssets(data.id, assets);
-      router.push(`/events/${slug}/preview/${data.id}`);
+      router.push(`/event/${slug}/preview/${data.id}`);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -184,7 +184,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
                   Click to upload photo
                 </span>
                 <span className="mt-1 text-sm text-gray-500">
-                  JPG, PNG · Best with clear face
+                  JPG, PNG, or WebP
                 </span>
               </button>
             ) : (
@@ -214,6 +214,11 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
                 </div>
               </div>
             )}
+            <p className="mt-2 text-xs text-gray-500">
+              Use a photo at least 1000×1000 pixels with the face toward the
+              center. A phone photo is usually enough; very small pictures look
+              soft.
+            </p>
           </div>
 
           {hasThemeStep ? (

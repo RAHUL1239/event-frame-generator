@@ -8,7 +8,7 @@ type Props = {
 };
 
 export function EventHeader({ event }: Props) {
-  const homeHref = `/events/${event.slug}/personal`;
+  const homeHref = `/event/${event.slug}`;
 
   return (
     <header

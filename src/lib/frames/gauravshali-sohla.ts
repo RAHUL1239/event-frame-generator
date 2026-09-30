@@ -44,6 +44,7 @@ export const gauravshaliSohlaFrame: PosterFrame = {
     posterTextColor: NAVY,
     nameColor: NAVY,
     nameLift: 0,
+    logoSize: 140,
     dividerStroke: "rgba(26, 43, 86, 0.28)",
     headlineColors: "token-or-poster",
     attribution: { ...DEFAULT_ATTRIBUTION },
@@ -56,6 +57,7 @@ export const gauravshaliSohlaFrame: PosterFrame = {
     gsHeader: {
       fullBleed: true,
       logoMatte: true,
+      logoSize: 140,
       eventNameColor: NAVY,
       eventNameSize: 32,
       eventNameLine: 28,

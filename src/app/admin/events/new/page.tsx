@@ -117,7 +117,7 @@ export default function CreateEventPage() {
               <Field
                 label="URL slug"
                 required
-                hint={`Public URL: /events/${form.slug || "your-slug"}/personal`}
+                hint={`Public URL: /event/${form.slug || "your-slug"}`}
                 value={form.slug}
                 onChange={(v) => {
                   setSlugTouched(true);
@@ -227,6 +227,8 @@ export default function CreateEventPage() {
             <div className="mt-6">
               <label className="text-sm font-medium text-gray-600">Logo (optional)</label>
               <p className="mt-1 text-xs text-gray-500">
+                Recommend a square PNG with a transparent background, about
+                1000×1000 pixels (512×512 minimum). PNG, JPEG, or WebP. Max 5 MB.
                 You can also upload or replace the logo after creating the event.
               </p>
               <input

@@ -35,8 +35,8 @@ export type PosterLayoutContext = {
   contentOffsetY?: number;
 };
 
-/** Inset used for vector-drawn frames (elegant gold, youth, etc.). */
-export const VECTOR_FRAME_INSET = 36;
+/** Inset used for vector-drawn frames so photos match Elegant Gold. */
+export const VECTOR_FRAME_INSET = 122;
 
 /** Filled by each frame module when the frame registry loads. */
 export const FRAME_FULL_OVERLAYS: Partial<

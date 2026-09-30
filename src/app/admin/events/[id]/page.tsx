@@ -247,7 +247,7 @@ export default function AdminEventPage({
           </Link>
           <h1 className="text-xl font-bold text-brand-teal">{event.name}</h1>
           <a
-            href={`/events/${event.slug}/personal`}
+            href={`/event/${event.slug}`}
             target="_blank"
             rel="noopener noreferrer"
             className="ml-auto text-sm text-brand-teal underline"
@@ -268,12 +268,12 @@ export default function AdminEventPage({
               Create a username and password for this event. Share them with
               the event team so they can open{" "}
               <a
-                href={`/events/${event.slug}/guests`}
+                href={`/event/${event.slug}/guests`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-brand-teal underline"
               >
-                /events/{event.slug}/guests
+                /event/{event.slug}/guests
               </a>{" "}
               and see who created a poster. This login cannot change the event.
             </p>
@@ -331,7 +331,7 @@ export default function AdminEventPage({
             <p className="mb-4 text-sm text-gray-500">
               Public URL:{" "}
               <code className="rounded bg-gray-100 px-1">
-                /events/{event.slug}/personal
+                /event/{event.slug}
               </code>
             </p>
             <div className="grid gap-4 md:grid-cols-2">

@@ -224,7 +224,7 @@ export function drawGsCompactHeader(
   const logoX = fullBleed
     ? Math.round(12 * fontScale)
     : layout.inset + Math.round(8 * fontScale);
-  const logoSize = Math.round(101 * fontScale);
+  const logoSize = Math.round((header.logoSize ?? 140) * fontScale);
   const logoY = topY - Math.round(20 * fontScale);
   const contentRight = fullBleed
     ? layoutX(layout, scaleCoord(canvasW - 160, canvasW, designW), canvasW)

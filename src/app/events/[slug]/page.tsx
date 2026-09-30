@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
+import { publicEventPath } from "@/lib/event-paths";
 
-export default async function EventIndex({
+export default async function LegacyEventIndex({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  redirect(`/events/${slug}/personal`);
+  redirect(publicEventPath(slug));
 }

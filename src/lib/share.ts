@@ -36,7 +36,7 @@ export function getShareablePageUrl(): string | undefined {
 /** Public event page where friends create their own frame. */
 export function getEventInvitationUrl(slug: string): string {
   if (typeof window === "undefined") return "";
-  return `${window.location.origin}/events/${slug}/personal`;
+  return `${window.location.origin}/event/${slug}`;
 }
 
 export function getShareableInvitationUrl(slug: string): string | undefined {

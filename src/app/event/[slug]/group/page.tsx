@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { publicEventPath } from "@/lib/event-paths";
 
-export default async function LegacyPersonalPage({
+export default async function EventGroupRedirect({
   params,
 }: {
   params: Promise<{ slug: string }>;

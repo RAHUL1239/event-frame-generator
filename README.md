@@ -9,9 +9,9 @@ Multi-event profile frame and poster generator — inspired by the [BMM 2026 bad
 │                     Next.js App (Vercel)                    │
 ├─────────────────────────────────────────────────────────────┤
 │  Public Routes              │  Admin Routes                 │
-│  /events/[slug]/personal    │  /admin                       │
-│  /events/[slug]/group       │  /admin/events/[id]           │
-│  /events/[slug]/preview/:id │  /admin/login                 │
+│  /event/[slug]              │  /admin                       │
+│  /event/[slug]/preview/:id  │  /admin/events/[id]           │
+│  /event/[slug]/guests       │  /admin/login                 │
 ├─────────────────────────────────────────────────────────────┤
 │  API Routes                                                 │
 │  /api/events/[slug]           → Event config (public)       │
@@ -25,7 +25,7 @@ Multi-event profile frame and poster generator — inspired by the [BMM 2026 bad
 
 ### Multi-event design
 
-- Each event has a unique **slug** (`/events/mkm-51st-gauravshali-sohla/personal`)
+- Each event has a unique **slug** (`/event/mkm-51st-gauravshali-sohla`)
 - Event config is database-driven: name, dates, tagline, colors, gender options
 - Add new events via admin without code changes
 - Swap SQLite (dev) → PostgreSQL (production) by changing `DATABASE_URL`
@@ -61,7 +61,7 @@ npm run dev
 
 Open:
 - http://localhost:3000 — event list
-- http://localhost:3000/events/mkm-51st-gauravshali-sohla/personal — personal DP
+- http://localhost:3000/event/mkm-51st-gauravshali-sohla — event poster form
 - http://localhost:3000/admin — admin dashboard
 
 Default admin: `admin@example.com` / `changeme`

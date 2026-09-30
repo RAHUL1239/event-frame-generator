@@ -67,5 +67,5 @@ export function FrameThemePicker({
 
 export function getGenerateFrameLabel(loading: boolean): string {
   if (loading) return "Generating...";
-  return "✨ Generate my frame";
+  return "✨ Generate my poster";
 }

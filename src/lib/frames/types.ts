@@ -30,9 +30,16 @@ export type CreamBackground = {
   textureDot: string;
 };
 
+export type FrameRoleBadge = {
+  text: string;
+  background: string;
+  color: string;
+};
+
 export type GsHeaderStyle = {
   fullBleed: boolean;
   logoMatte: boolean;
+  logoSize: number;
   eventNameColor: string;
   eventNameSize: number;
   eventNameLine: number;
@@ -85,6 +92,10 @@ export type FramePaint = {
   nameColor: string;
   /** Move the name block up by this many design pixels. */
   nameLift: number;
+  /** Max logo edge in design pixels at 1080. */
+  logoSize: number;
+  /** Optional pill drawn beside the classic header logo. */
+  roleBadge?: FrameRoleBadge;
   dividerStroke: string;
   headlineColors: HeadlineColorMode;
   attribution: FrameAttribution;

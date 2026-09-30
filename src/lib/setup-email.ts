@@ -7,6 +7,6 @@ export function setupInboxAddress() {
 export function setupFromAddress() {
   return (
     process.env.RESEND_FROM_EMAIL?.trim() ||
-    "RSVPShare <onboarding@resend.dev>"
+    "RSVPShare <alerts@mavex.live>"
   );
 }

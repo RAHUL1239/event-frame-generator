@@ -95,6 +95,10 @@ export default async function HomePage() {
             know who already trust them. Your next event gets seen, and the
             marketing bill stays smaller.
           </p>
+          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-gray-700">
+            RSVPShare is free for non-profit organizations and for events with
+            fewer than 50 attendees.
+          </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/setup"
@@ -113,7 +117,7 @@ export default async function HomePage() {
             Click the Try Out event below and create your poster.
           </p>
           <Link
-            href="/events/try-out/personal"
+            href="/event/try-out"
             className="mt-6 block max-w-md rounded-2xl bg-white px-6 py-5 shadow-sm transition hover:shadow-md"
           >
             <span className="font-semibold text-brand-teal">Try Out</span>

@@ -69,7 +69,9 @@ export function EventLogoUpload({ eventId, logoUrl, onUploaded }: Props) {
       <div className="flex-1">
         <p className="text-sm font-medium text-gray-700">Event logo</p>
         <p className="mt-1 text-xs text-gray-500">
-          PNG, JPEG, or WebP. Max 5 MB. Shown on frames and the public header.
+          Recommend a square PNG with a transparent background, about 1000×1000
+          pixels (512×512 minimum). PNG, JPEG, or WebP. Max 5 MB. Shown on
+          frames and the public header.
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <button
