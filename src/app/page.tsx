@@ -52,14 +52,9 @@ const sources = [
 ];
 
 export default async function HomePage() {
-  const [submissionCount, eventCount, events] = await Promise.all([
+  const [submissionCount, eventCount] = await Promise.all([
     prisma.submission.count(),
     prisma.event.count(),
-    prisma.event.findMany({
-      where: { isActive: true },
-      orderBy: { createdAt: "desc" },
-      select: { id: true, slug: true, name: true, dateLabel: true },
-    }),
   ]);
 
   const attendees = ATTENDEE_BASELINE + submissionCount;
@@ -106,14 +101,6 @@ export default async function HomePage() {
             >
               Set up your event
             </Link>
-            {events.length === 1 ? (
-              <Link
-                href={`/events/${events[0].slug}/personal`}
-                className="rounded-full border border-brand-teal px-6 py-3 font-semibold text-brand-teal hover:bg-white"
-              >
-                Make a poster
-              </Link>
-            ) : null}
           </div>
         </section>
 
@@ -222,31 +209,6 @@ export default async function HomePage() {
             ))}
           </ol>
         </section>
-
-        {events.length > 0 ? (
-          <section className="mx-auto max-w-6xl px-6 pb-16">
-            <h2 className="text-2xl font-bold text-brand-teal">
-              Already invited?
-            </h2>
-            <p className="mt-2 text-gray-700">
-              Make your poster and share it with the people you want in the room.
-            </p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              {events.map((event) => (
-                <Link
-                  key={event.id}
-                  href={`/events/${event.slug}/personal`}
-                  className="rounded-xl bg-white px-6 py-4 shadow-sm transition hover:shadow-md"
-                >
-                  <span className="font-semibold text-brand-teal">{event.name}</span>
-                  <span className="mt-1 block text-sm text-gray-500">
-                    {event.dateLabel}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        ) : null}
 
         <section className="bg-brand-teal">
           <div className="mx-auto max-w-6xl px-6 py-16">
