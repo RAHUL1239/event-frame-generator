@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
   isSetupEmailConfigured,
   sendSetupRequestEmail,
+  SetupEmailError,
 } from "@/lib/setup-email";
 
 const MAX_FIELD = 500;
@@ -82,7 +83,16 @@ export async function POST(request: Request) {
       subject: `RSVPShare setup request: ${eventName}`,
       text: lines.join("\n"),
     });
-  } catch {
+  } catch (err) {
+    if (err instanceof SetupEmailError) {
+      console.error("POST /api/setup SES error", {
+        name: err.sesName,
+        code: err.sesCode,
+        httpStatus: err.httpStatus,
+      });
+      return NextResponse.json({ error: err.clientHint }, { status: 502 });
+    }
+    console.error("POST /api/setup unexpected send failure", err);
     return NextResponse.json(
       { error: "The setup email could not be sent. Please try again." },
       { status: 502 }
