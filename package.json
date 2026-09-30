@@ -18,6 +18,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@aws-sdk/client-ses": "^3.787.0",
     "@prisma/client": "^6.5.0",
     "@vercel/blob": "^2.4.0",
     "bcryptjs": "^2.4.3",
@@ -26,7 +27,6 @@
     "qrcode": "^1.5.4",
     "react": "^19.0.3",
     "react-dom": "^19.0.3",
-    "resend": "^6.31.0",
     "uuid": "^11.1.0",
     "zod": "^3.24.2"
   },

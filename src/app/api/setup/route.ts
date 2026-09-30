@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
-import { setupFromAddress, setupInboxAddress } from "@/lib/setup-email";
+import {
+  isSetupEmailConfigured,
+  sendSetupRequestEmail,
+} from "@/lib/setup-email";
 
 const MAX_FIELD = 500;
 const MAX_MESSAGE = 4000;
@@ -51,12 +53,11 @@ export async function POST(request: Request) {
     );
   }
 
-  const apiKey = process.env.RESEND_API_KEY?.trim();
-  if (!apiKey) {
+  if (!isSetupEmailConfigured()) {
     return NextResponse.json(
       {
         error:
-          "Email is not configured. Set RESEND_API_KEY on the server so setup requests can be sent.",
+          "Email is not configured. Set GOVT_AWS_ACCESS_KEY and GOVT_AWS_SECRET_ACCESS_KEY on the server so setup requests can be sent.",
       },
       { status: 503 }
     );
@@ -76,21 +77,11 @@ export async function POST(request: Request) {
   ];
 
   try {
-    const resend = new Resend(apiKey);
-    const { error } = await resend.emails.send({
-      from: setupFromAddress(),
-      to: setupInboxAddress(),
+    await sendSetupRequestEmail({
       replyTo: email,
       subject: `RSVPShare setup request: ${eventName}`,
       text: lines.join("\n"),
     });
-
-    if (error) {
-      return NextResponse.json(
-        { error: error.message || "Resend could not send the email." },
-        { status: 502 }
-      );
-    }
   } catch {
     return NextResponse.json(
       { error: "The setup email could not be sent. Please try again." },
