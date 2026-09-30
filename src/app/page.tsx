@@ -90,10 +90,11 @@ export default async function HomePage() {
             Your attendees become your promoters
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-gray-700">
-            RSVPShare creates custom posters for your event. Guests add their
-            name and photo. They share their posters on social media and
-            messaging apps. Your event reaches people who know and trust them.
-            You reach more people and spend less on marketing.
+            RSVPShare creates custom frames for your event. Guests add their
+            name and photo and create their event posters. They share their
+            posters on social media and messaging apps. Your event reaches
+            people who know and trust them. You reach more people and spend
+            less on marketing.
           </p>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-gray-700">
             RSVPShare is free for non-profit organizations and for events with
