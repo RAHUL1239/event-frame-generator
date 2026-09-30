@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     template: "%s | RSVPShare",
   },
   description:
-    "Create and share event profile frames, posters, and WhatsApp DPs for your community.",
+    "RSVPShare turns event guests into promoters. They share a personal poster, their friends trust the invitation, and organizers spend less on marketing.",
   icons: {
     icon: "/favicon.png",
     apple: "/favicon.png",

@@ -1,71 +1,271 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 
-export default async function HomePage() {
-  const events = await prisma.event.findMany({
-    where: { isActive: true },
-    orderBy: { createdAt: "desc" },
-  });
+export const dynamic = "force-dynamic";
 
-  if (events.length === 1) {
-    redirect(`/events/${events[0].slug}/personal`);
-  }
+export const metadata: Metadata = {
+  title: "Your attendees become your promoters",
+  description:
+    "RSVPShare gives every guest a poster they share with people who already trust them. Event organizers grow attendance while spending less on marketing.",
+};
+
+const ATTENDEE_BASELINE = 5000;
+const EVENT_BASELINE = 10;
+
+function formatCount(value: number) {
+  return new Intl.NumberFormat("en-US").format(value);
+}
+
+const benefits = [
+  {
+    title: "Your attendees become your promoters",
+    body: "A guest puts their name and photo on your event poster, then shares it on WhatsApp, Instagram, and Facebook. The invitation travels with someone their friends already know. Eventbrite’s social commerce research describes the same shift: attendees become promoters, and sharing through a social graph is virtually free.",
+  },
+  {
+    title: "Spend less — or nothing — on the next campaign",
+    body: "A personal poster reaches a friend’s circle. You can keep a small budget for the channels that still matter, and let the people who are already coming carry the rest of the invitation.",
+  },
+  {
+    title: "A recommendation outperforms an ad",
+    body: "Nielsen’s 2021 Trust in Advertising study found that 88% of people worldwide trust a recommendation from someone they know more than any other channel. The same study found that 50% more people trust those recommendations than online banner ads, mobile ads, text messages, and search ads.",
+  },
+];
+
+const sources = [
+  {
+    stat: "88%",
+    label: "trust a recommendation from someone they know more than any other channel",
+    source: "Nielsen, Trust in Advertising, 2021",
+    detail:
+      "In a global survey of more than 40,000 people, word of mouth was the most trusted channel. Nielsen also reported that trust in advertising is lower in North America and Europe than in other regions, which makes a friend’s invitation more valuable than another ad placement.",
+    href: "https://www.nielsen.com/insights/2021/beyond-martech-building-trust-with-consumers-and-engaging-where-sentiment-is-high/",
+  },
+  {
+    stat: "20%",
+    label: "more ticket sales per share after someone has committed to attend",
+    source: "Eventbrite, Social Commerce, March 22, 2011",
+    detail:
+      "A Facebook share made after purchase drove 20% more ticket sales per share than a share made while someone was still browsing. Ten percent of buyers shared from the confirmation page. One percent of browsers shared from the event page. Eventbrite’s conclusion: effective promotion is no longer reserved for organizers who can afford expensive media buys, because sharing on a social graph is virtually free.",
+    href: "https://www.eventbrite.com/blog/press/press-releases/eventbrite-unveils-industry-first-data-to-quantify-the-value-of-social-commerce/",
+  },
+];
+
+export default async function HomePage() {
+  const [submissionCount, eventCount, events] = await Promise.all([
+    prisma.submission.count(),
+    prisma.event.count(),
+    prisma.event.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, slug: true, name: true, dateLabel: true },
+    }),
+  ]);
+
+  const attendees = ATTENDEE_BASELINE + submissionCount;
+  const eventsUsed = EVENT_BASELINE + eventCount;
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-brand-cream px-4">
-      <div className="max-w-lg text-center">
-        <h1 className="text-4xl font-bold text-brand-teal">RSVPShare</h1>
-        <p className="mt-4 text-gray-600">
-          Create personalised profile frames, posters, and WhatsApp DPs — then
-          share your RSVP with friends on Facebook, Instagram, and WhatsApp.
-        </p>
-
-        {events.length > 0 ? (
-          <div className="mt-8 space-y-3">
-            <p className="text-sm font-medium text-gray-500">
-              Select an event to get started
-            </p>
-            {events.map((event) => (
-              <Link
-                key={event.id}
-                href={`/events/${event.slug}/personal`}
-                className="block rounded-xl bg-white px-6 py-4 shadow-md transition hover:shadow-lg"
-              >
-                <span className="font-semibold text-brand-teal">
-                  {event.name}
-                </span>
-                <span className="mt-1 block text-sm text-gray-500">
-                  {event.dateLabel}
-                </span>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="mt-8 rounded-xl border border-amber-200 bg-amber-50 px-6 py-5 text-left text-sm text-amber-900">
-            <p className="font-semibold">No events are set up yet.</p>
-            <p className="mt-2">
-              An admin needs to create an event first. If you are setting up
-              locally, run{" "}
-              <code className="rounded bg-amber-100 px-1">npm run db:seed</code>{" "}
-              in the project folder.
-            </p>
+    <div className="min-h-screen bg-brand-cream text-gray-900">
+      <header className="border-b border-brand-cream-dark bg-brand-cream/90 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <Link href="/" className="text-lg font-bold tracking-tight text-brand-teal">
+            RSVPShare
+          </Link>
+          <nav className="flex items-center gap-6 text-sm">
+            <a href="#research" className="text-brand-teal hover:underline">
+              Research
+            </a>
             <Link
               href="/admin"
-              className="mt-4 inline-block font-medium text-brand-teal underline"
+              className="rounded-full bg-brand-teal px-4 py-2 font-semibold text-brand-gold hover:bg-brand-teal-dark"
             >
-              Go to Admin →
+              Organizer sign-in
+            </Link>
+          </nav>
+        </div>
+      </header>
+
+      <main>
+        <section className="mx-auto max-w-6xl px-6 pb-16 pt-16 md:pt-24">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-brand-gold">
+            For event organizers
+          </p>
+          <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-tight text-brand-teal md:text-6xl">
+            Your attendees become your promoters
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-gray-700">
+            Give every guest a poster with their name on it. They share it with
+            the people who already trust them. Your next event gets seen, and
+            the marketing bill stays smaller.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/admin"
+              className="rounded-full bg-brand-teal px-6 py-3 font-semibold text-brand-gold hover:bg-brand-teal-dark"
+            >
+              Set up your event
+            </Link>
+            {events.length === 1 ? (
+              <Link
+                href={`/events/${events[0].slug}/personal`}
+                className="rounded-full border border-brand-teal px-6 py-3 font-semibold text-brand-teal hover:bg-white"
+              >
+                Make a poster
+              </Link>
+            ) : null}
+          </div>
+        </section>
+
+        <section className="bg-brand-teal text-brand-cream">
+          <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 sm:grid-cols-2">
+            <div>
+              <p className="text-4xl font-bold text-brand-gold md:text-5xl">
+                {formatCount(attendees)}
+              </p>
+              <p className="mt-2 text-lg">attendees have used RSVPShare</p>
+            </div>
+            <div>
+              <p className="text-4xl font-bold text-brand-gold md:text-5xl">
+                {formatCount(eventsUsed)}
+              </p>
+              <p className="mt-2 text-lg">events have used RSVPShare</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-6 py-16">
+          <h2 className="text-3xl font-bold text-brand-teal">
+            Why organizers use it
+          </h2>
+          <div className="mt-8 grid gap-6 md:grid-cols-3">
+            {benefits.map((benefit) => (
+              <article
+                key={benefit.title}
+                className="rounded-2xl bg-white p-6 shadow-sm"
+              >
+                <h3 className="text-xl font-semibold text-brand-teal">
+                  {benefit.title}
+                </h3>
+                <p className="mt-3 leading-relaxed text-gray-700">
+                  {benefit.body}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section id="research" className="border-y border-brand-cream-dark bg-white">
+          <div className="mx-auto max-w-6xl px-6 py-16">
+            <h2 className="text-3xl font-bold text-brand-teal">
+              What published research says
+            </h2>
+            <p className="mt-4 max-w-2xl text-gray-700">
+              Platforms that turn guests into sharers show up in independent
+              research on trust and ticket sales. These are the figures behind
+              the product.
+            </p>
+            <div className="mt-8 grid gap-6 md:grid-cols-2">
+              {sources.map((item) => (
+                <article
+                  key={item.href}
+                  className="rounded-2xl border border-brand-cream-dark p-6"
+                >
+                  <p className="text-5xl font-bold text-brand-gold">{item.stat}</p>
+                  <p className="mt-3 text-lg font-medium text-brand-teal">
+                    {item.label}
+                  </p>
+                  <p className="mt-4 leading-relaxed text-gray-700">{item.detail}</p>
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-5 inline-block text-sm font-semibold text-brand-teal underline"
+                  >
+                    {item.source}
+                  </a>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-6 py-16">
+          <h2 className="text-3xl font-bold text-brand-teal">How it works</h2>
+          <ol className="mt-8 grid gap-6 md:grid-cols-3">
+            {[
+              {
+                step: "01",
+                title: "Publish the event",
+                body: "Add the name, date, place, and the frames your guests will use.",
+              },
+              {
+                step: "02",
+                title: "Guests make a poster",
+                body: "Each person adds their photo and name. The poster is theirs to keep.",
+              },
+              {
+                step: "03",
+                title: "They share it",
+                body: "Friends see the event from someone they know, on the apps they already open.",
+              },
+            ].map((item) => (
+              <li key={item.step} className="rounded-2xl bg-white p-6 shadow-sm">
+                <p className="text-sm font-bold tracking-widest text-brand-gold">
+                  {item.step}
+                </p>
+                <h3 className="mt-2 text-xl font-semibold text-brand-teal">
+                  {item.title}
+                </h3>
+                <p className="mt-3 leading-relaxed text-gray-700">{item.body}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {events.length > 0 ? (
+          <section className="mx-auto max-w-6xl px-6 pb-16">
+            <h2 className="text-2xl font-bold text-brand-teal">
+              Already invited?
+            </h2>
+            <p className="mt-2 text-gray-700">
+              Make your poster and share it with the people you want in the room.
+            </p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              {events.map((event) => (
+                <Link
+                  key={event.id}
+                  href={`/events/${event.slug}/personal`}
+                  className="rounded-xl bg-white px-6 py-4 shadow-sm transition hover:shadow-md"
+                >
+                  <span className="font-semibold text-brand-teal">{event.name}</span>
+                  <span className="mt-1 block text-sm text-gray-500">
+                    {event.dateLabel}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        <section className="bg-brand-teal">
+          <div className="mx-auto max-w-6xl px-6 py-16">
+            <h2 className="max-w-xl text-3xl font-bold text-brand-cream">
+              Market the next event with the people who are already coming.
+            </h2>
+            <Link
+              href="/admin"
+              className="mt-8 inline-block rounded-full bg-brand-gold px-6 py-3 font-semibold text-brand-teal hover:bg-brand-gold-light"
+            >
+              Set up your event
             </Link>
           </div>
-        )}
+        </section>
+      </main>
 
-        <Link
-          href="/admin"
-          className="mt-8 inline-block text-sm text-gray-400 underline hover:text-gray-600"
-        >
-          Admin
-        </Link>
-      </div>
-    </main>
+      <footer className="mx-auto max-w-6xl px-6 py-8 text-sm text-gray-500">
+        <p>RSVPShare · Posters your guests share for you</p>
+      </footer>
+    </div>
   );
 }
