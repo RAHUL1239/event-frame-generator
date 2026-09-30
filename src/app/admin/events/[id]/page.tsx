@@ -43,6 +43,12 @@ type EventDetail = {
   eventHighlights: string | null;
   middleTaglines: string | null;
   genderOptions: GenderOption[];
+  auditLogs: {
+    id: string;
+    action: string;
+    metadata: string | null;
+    createdAt: string;
+  }[];
   submissions: {
     id: string;
     type: string;
@@ -97,6 +103,7 @@ export default function AdminEventPage({
             middleTaglines: data.middleTaglines ?? null,
             eventDate: data.eventDate ?? null,
             genderOptions: data.genderOptions ?? [],
+            auditLogs: data.auditLogs ?? [],
             submissions: (data.submissions ?? []).map(
               (sub: EventDetail["submissions"][number]) => ({
                 ...sub,
@@ -171,6 +178,7 @@ export default function AdminEventPage({
           facebookGroupUrl: updated.facebookGroupUrl ?? null,
           organizerUsername: updated.organizerUsername ?? null,
           hasOrganizerLogin: Boolean(updated.hasOrganizerLogin),
+          auditLogs: updated.auditLogs ?? prev.auditLogs,
         };
       });
       setOrganizerPassword("");
@@ -251,6 +259,64 @@ export default function AdminEventPage({
 
       <main className="mx-auto max-w-6xl px-6 py-8">
         <form onSubmit={handleSave} className="space-y-8">
+          <section
+            id="guest-login"
+            className="scroll-mt-6 rounded-xl border bg-white p-6"
+          >
+            <h2 className="mb-2 font-semibold">Guest list login</h2>
+            <p className="mb-4 text-sm text-gray-500">
+              Create a username and password for this event. Share them with
+              the event team so they can open{" "}
+              <a
+                href={`/events/${event.slug}/guests`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-teal underline"
+              >
+                /events/{event.slug}/guests
+              </a>{" "}
+              and see who created a poster. This login cannot change the event.
+            </p>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="text-sm font-medium text-gray-600">
+                  Username
+                </label>
+                <input
+                  value={event.organizerUsername ?? ""}
+                  onChange={(e) =>
+                    setEvent({ ...event, organizerUsername: e.target.value })
+                  }
+                  autoComplete="off"
+                  className="mt-1 w-full rounded-lg border px-3 py-2"
+                  placeholder="mkm-organizer"
+                />
+                <p className="mt-1 text-xs text-gray-400">
+                  {event.hasOrganizerLogin
+                    ? "Login is active. Clear the username and save to turn it off."
+                    : "Choose a username, set a password, then save."}
+                </p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={organizerPassword}
+                  onChange={(e) => setOrganizerPassword(e.target.value)}
+                  autoComplete="new-password"
+                  className="mt-1 w-full rounded-lg border px-3 py-2"
+                  placeholder={
+                    event.hasOrganizerLogin
+                      ? "Leave blank to keep the current password"
+                      : "At least 8 characters"
+                  }
+                />
+              </div>
+            </div>
+          </section>
+
           <section className="rounded-xl border bg-white p-6">
             <h2 className="mb-4 font-semibold">Logo</h2>
             <EventLogoUpload
@@ -336,61 +402,6 @@ export default function AdminEventPage({
               />
               <span className="text-sm">Event is active</span>
             </label>
-          </section>
-
-          <section className="rounded-xl border bg-white p-6">
-            <h2 className="mb-2 font-semibold">Organizer login</h2>
-            <p className="mb-4 text-sm text-gray-500">
-              Give this username and password to the event team. They can sign
-              in at{" "}
-              <a
-                href={`/events/${event.slug}/guests`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-brand-teal underline"
-              >
-                /events/{event.slug}/guests
-              </a>{" "}
-              and see who created a poster. This login cannot change the event.
-            </p>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="text-sm font-medium text-gray-600">
-                  Username
-                </label>
-                <input
-                  value={event.organizerUsername ?? ""}
-                  onChange={(e) =>
-                    setEvent({ ...event, organizerUsername: e.target.value })
-                  }
-                  autoComplete="off"
-                  className="mt-1 w-full rounded-lg border px-3 py-2"
-                  placeholder="mkm-organizer"
-                />
-                <p className="mt-1 text-xs text-gray-400">
-                  {event.hasOrganizerLogin
-                    ? "Login is active. Clear the username and save to turn it off."
-                    : "Leave blank until you are ready to share a login."}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={organizerPassword}
-                  onChange={(e) => setOrganizerPassword(e.target.value)}
-                  autoComplete="new-password"
-                  className="mt-1 w-full rounded-lg border px-3 py-2"
-                  placeholder={
-                    event.hasOrganizerLogin
-                      ? "Leave blank to keep the current password"
-                      : "At least 8 characters"
-                  }
-                />
-              </div>
-            </div>
           </section>
 
           <section className="rounded-xl border bg-white p-6">
@@ -523,6 +534,44 @@ export default function AdminEventPage({
             </table>
           </div>
         </section>
+
+        <details className="mt-10 rounded-xl border bg-white">
+          <summary className="cursor-pointer px-6 py-4 font-semibold">
+            Audit log ({event.auditLogs?.length ?? 0})
+          </summary>
+          <div className="overflow-x-auto border-t">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Time</th>
+                  <th className="px-4 py-3 font-medium">Action</th>
+                  <th className="px-4 py-3 font-medium">Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(event.auditLogs ?? []).length === 0 ? (
+                  <tr>
+                    <td className="px-4 py-6 text-gray-500" colSpan={3}>
+                      No activity recorded for this event yet.
+                    </td>
+                  </tr>
+                ) : (
+                  event.auditLogs.map((log) => (
+                    <tr key={log.id} className="border-b last:border-0">
+                      <td className="px-4 py-3 text-gray-500">
+                        {new Date(log.createdAt).toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3">{log.action}</td>
+                      <td className="max-w-md truncate px-4 py-3 text-gray-500">
+                        {log.metadata?.slice(0, 120) ?? "—"}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </details>
       </main>
     </div>
   );
