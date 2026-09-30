@@ -65,6 +65,83 @@ export function drawLogoAt(
   return { width: w, height: h };
 }
 
+const logoMatteCache = new Map<string, HTMLCanvasElement>();
+
+function isLogoForegroundPixel(r: number, g: number, b: number) {
+  if (r > 205 && g > 205 && b > 205) return true;
+  if (g > 145 && r > 165 && b < 120) return true;
+  if (r > 118 && g > 88 && r >= b + 22) return true;
+  if (r > 175 && g > 145 && b > 75) return true;
+  return false;
+}
+
+function removeLogoMatte(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  tolerance: number
+) {
+  const imageData = ctx.getImageData(0, 0, width, height);
+  const { data } = imageData;
+  const cx = Math.floor(width / 2);
+  const cy = Math.floor(height / 2);
+  const centerIndex = (cy * width + cx) * 4;
+  const matte = {
+    r: data[centerIndex],
+    g: data[centerIndex + 1],
+    b: data[centerIndex + 2],
+  };
+
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    if (isLogoForegroundPixel(r, g, b)) continue;
+
+    const distance = Math.hypot(r - matte.r, g - matte.g, b - matte.b);
+    if (distance <= tolerance) {
+      data[i + 3] = 0;
+    }
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+}
+
+/** Draw logo without the solid maroon/white matte (Traditional Maharashtrian). */
+export function drawLogoAtWithoutMatte(
+  ctx: CanvasRenderingContext2D,
+  logo: HTMLImageElement,
+  leftX: number,
+  topY: number,
+  maxWidth: number,
+  maxHeight: number,
+  matteTolerance = 52
+): { width: number; height: number } {
+  const scale = Math.min(maxWidth / logo.width, maxHeight / logo.height);
+  const w = Math.max(1, Math.ceil(logo.width * scale));
+  const h = Math.max(1, Math.ceil(logo.height * scale));
+  const cacheKey = `${logo.src}|${w}x${h}|t${matteTolerance}`;
+
+  let processed = logoMatteCache.get(cacheKey);
+  if (!processed) {
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const patch = canvas.getContext("2d");
+    if (!patch) {
+      ctx.drawImage(logo, leftX, topY, w, h);
+      return { width: w, height: h };
+    }
+    patch.drawImage(logo, 0, 0, w, h);
+    removeLogoMatte(patch, w, h, matteTolerance);
+    processed = canvas;
+    logoMatteCache.set(cacheKey, processed);
+  }
+
+  ctx.drawImage(processed, leftX, topY, w, h);
+  return { width: w, height: h };
+}
+
 export function formatDisplayName(
   firstName?: string | null,
   lastName?: string | null

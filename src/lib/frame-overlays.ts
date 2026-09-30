@@ -38,25 +38,17 @@ export type PosterLayoutContext = {
 /** Inset used for vector-drawn frames (elegant gold, youth, etc.). */
 export const VECTOR_FRAME_INSET = 36;
 
+/** Filled by each frame module when the frame registry loads. */
 export const FRAME_FULL_OVERLAYS: Partial<
   Record<FrameThemeKey, FrameFullOverlayConfig>
-> = {
-  "traditional-maharashtrian": {
-    src: "/frames/maharashtrian-frame.jpg",
-    holeInsetRatio: 62 / 1080,
-    contentPadding: 50,
-  },
-  "elegant-gold": {
-    src: "/frames/elegant-gold-frame.jpg?v=2",
-    holeInsetRatio: 72 / 1080,
-    contentPadding: 50,
-  },
-  "gauravshali-sohla": {
-    src: "/frames/gauravshali-sohla-frame.png?v=4",
-    holeInsetRatio: 72 / 1080,
-    contentPadding: 50,
-  },
-};
+> = {};
+
+export function registerFrameOverlay(
+  key: FrameThemeKey,
+  config: FrameFullOverlayConfig
+) {
+  FRAME_FULL_OVERLAYS[key] = config;
+}
 
 const overlayCache = new Map<string, Promise<HTMLImageElement>>();
 

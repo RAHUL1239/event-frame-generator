@@ -1,5 +1,6 @@
 import type { EventWithOptions } from "./types";
 import type { ResolvedFrameTheme } from "./frame-themes";
+import type { CreamBackground } from "./frames/types";
 import {
   layoutScale,
   layoutX,
@@ -15,8 +16,8 @@ import {
 } from "./poster-template";
 import { parseEventHighlights } from "./event-highlights";
 import { splitTextIntoLines } from "./canvas-text";
-import { posterFont } from "./poster-fonts";
-import { drawLogoAt } from "./utils";
+import { POSTER_FONT_FAMILY, posterFont } from "./poster-fonts";
+import { drawLogoAt, drawLogoAtWithoutMatte } from "./utils";
 import { resolvePosterColor } from "./poster-template";
 import { getEventQrUrl, loadQrCodeImage } from "./qr-code";
 
@@ -34,26 +35,59 @@ export const GS_COLORS = {
   textureDot: "rgba(196, 154, 88, 0.48)",
 };
 
+function gsFont(
+  theme: ResolvedFrameTheme,
+  weight: 400 | 500 | 600 | 700,
+  sizePx: number
+) {
+  return posterFont(weight, sizePx, theme.paint.type.fontFamily);
+}
+
+function gsHeaderOf(theme: ResolvedFrameTheme) {
+  const header = theme.paint.gsHeader;
+  if (!header) {
+    throw new Error(`Frame "${theme.key ?? "default"}" is missing header style`);
+  }
+  return header;
+}
+
+function gsFooterOf(theme: ResolvedFrameTheme) {
+  const footer = theme.paint.gsFooter;
+  if (!footer) {
+    throw new Error(`Frame "${theme.key ?? "default"}" is missing footer style`);
+  }
+  return footer;
+}
+
 export function paintGsBackground(
   ctx: CanvasRenderingContext2D,
   width: number,
-  height: number
+  height: number,
+  cream?: CreamBackground
 ) {
   const scale = Math.min(width, height) / 1080;
   const spacing = Math.max(24, Math.round(34 * scale));
   const lineWidth = Math.max(0.75, 1 * scale);
   const dotRadius = Math.max(1.4, 2.1 * scale);
+  const stops = cream?.gradientStops ?? [
+    "#FFF0E8",
+    "#FFF6EF",
+    GS_COLORS.cream,
+    GS_COLORS.creamWarm,
+  ];
+  const textureLine = cream?.textureLine ?? GS_COLORS.textureLine;
+  const textureDot = cream?.textureDot ?? GS_COLORS.textureDot;
 
   const gradient = ctx.createLinearGradient(0, 0, width, 0);
-  gradient.addColorStop(0, "#FFF0E8");
-  gradient.addColorStop(0.35, "#FFF6EF");
-  gradient.addColorStop(0.55, GS_COLORS.cream);
-  gradient.addColorStop(1, GS_COLORS.creamWarm);
+  gradient.addColorStop(0, stops[0]);
+  gradient.addColorStop(0.35, stops[1]);
+  gradient.addColorStop(0.55, stops[2]);
+  gradient.addColorStop(1, stops[3]);
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, width, height);
 
   ctx.lineWidth = lineWidth;
-  ctx.strokeStyle = GS_COLORS.textureLine;
+  ctx.strokeStyle = textureLine;
   ctx.beginPath();
   for (let startX = -height; startX <= width + height; startX += spacing) {
     ctx.moveTo(startX, 0);
@@ -61,7 +95,7 @@ export function paintGsBackground(
   }
   ctx.stroke();
 
-  ctx.fillStyle = GS_COLORS.textureDot;
+  ctx.fillStyle = textureDot;
   for (let startX = -height; startX <= width + height; startX += spacing) {
     if (startX >= 0 && startX <= width) {
       ctx.beginPath();
@@ -143,8 +177,24 @@ export function paintGsGroupPhotosWarmAccent(
   ctx.restore();
 }
 
+export function usesGsContentLayout(theme: ResolvedFrameTheme): boolean {
+  return theme.paint.layout !== "classic";
+}
+
+/** True GS flyer look (cream background, GS colors) — not framed overlay themes. */
+export function isGsVisualTheme(theme: ResolvedFrameTheme): boolean {
+  return theme.paint.background === "gs-cream";
+}
+
+export function isTraditionalMaharashtrianTheme(
+  theme: ResolvedFrameTheme
+): boolean {
+  return theme.paint.layout === "gs-framed";
+}
+
+/** @deprecated Use usesGsContentLayout or isGsVisualTheme */
 export function isGsTheme(theme: ResolvedFrameTheme): boolean {
-  return (theme.overlayKey ?? theme.key) === GS_THEME_KEY;
+  return usesGsContentLayout(theme);
 }
 
 function scaleCoord(value: number, canvasW: number, designW: number): number {
@@ -168,51 +218,53 @@ export function drawGsCompactHeader(
   designW = 1080,
   designH = 1080
 ): number {
+  const header = gsHeaderOf(theme);
+  const fullBleed = header.fullBleed;
   const topY = layoutY(layout, scaleCoordY(22, canvasH, designH), canvasH);
-  const logoX = Math.round(12 * fontScale);
+  const logoX = fullBleed
+    ? Math.round(12 * fontScale)
+    : layout.inset + Math.round(8 * fontScale);
   const logoSize = Math.round(101 * fontScale);
   const logoY = topY - Math.round(20 * fontScale);
+  const contentRight = fullBleed
+    ? layoutX(layout, scaleCoord(canvasW - 160, canvasW, designW), canvasW)
+    : layout.inset + layout.innerW - Math.round(12 * fontScale);
 
-  const { width: logoW, height: logoH } = drawLogoAt(
-    ctx,
-    logo,
-    logoX,
-    logoY,
-    logoSize,
-    logoSize
-  );
+  const { width: logoW, height: logoH } = header.logoMatte
+    ? drawLogoAt(ctx, logo, logoX, logoY, logoSize, logoSize)
+    : drawLogoAtWithoutMatte(ctx, logo, logoX, logoY, logoSize, logoSize);
 
   const textX = logoX + logoW + Math.round(14 * fontScale);
-  const textMaxW =
-    layoutX(layout, scaleCoord(canvasW - 160, canvasW, designW), canvasW) - textX;
+  const textMaxW = Math.max(120, contentRight - textX);
 
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
 
-  ctx.fillStyle = GS_COLORS.navy;
-  ctx.font = posterFont(700, Math.round(32 * fontScale));
+  const eventNameFontSize = Math.round(header.eventNameSize * fontScale);
+  const eventNameLineHeight = Math.round(header.eventNameLine * fontScale);
+
+  ctx.fillStyle = header.eventNameColor;
+  ctx.font = gsFont(theme, 700, eventNameFontSize);
   const nameLines = splitTextIntoLines(ctx, event.name.toUpperCase(), textMaxW);
   let lineY = topY + Math.round(22 * fontScale);
   for (const line of nameLines) {
     ctx.fillText(line, textX, lineY);
-    lineY += Math.round(28 * fontScale);
+    lineY += eventNameLineHeight;
   }
 
-  ctx.fillStyle = GS_COLORS.orange;
-  ctx.font = posterFont(600, Math.round(29 * fontScale));
+  ctx.fillStyle = header.dateColor;
+  ctx.font = gsFont(theme, 600, Math.round(header.dateSize * fontScale));
   const dateY = lineY + Math.round(6 * fontScale);
   ctx.fillText(event.dateLabel.toUpperCase(), textX, dateY);
 
   if (hashtag) {
     ctx.textAlign = "right";
-    ctx.fillStyle = GS_COLORS.teal;
-    ctx.font = posterFont(700, Math.round(37 * fontScale));
-    const tagX = layoutX(
-      layout,
-      scaleCoord(canvasW - 36, canvasW, designW),
-      canvasW
-    );
+    ctx.fillStyle = header.hashtagColor;
+    ctx.font = gsFont(theme, 700, Math.round(header.hashtagSize * fontScale));
+    const tagX = fullBleed
+      ? layoutX(layout, scaleCoord(canvasW - 36, canvasW, designW), canvasW)
+      : layout.inset + layout.innerW - Math.round(12 * fontScale);
     ctx.fillText(hashtag, tagX, topY + Math.round(32 * fontScale));
   }
 
@@ -226,30 +278,39 @@ export function drawGsHeadlineTagline(
   y: number,
   maxWidth: number,
   fontScale = 1,
-  centerX?: number
+  centerX?: number,
+  theme?: ResolvedFrameTheme
 ): number {
   if (!tagline.trim()) return y;
 
+  const header = theme?.paint.gsHeader;
+  const color = header?.taglineColor ?? GS_COLORS.orange;
+  const size = header?.taglineSize ?? 30;
+  const lineHeight = header?.taglineLine ?? 36;
   const lineW = Math.min(maxWidth, 280 * fontScale);
   const lineStart = centerX != null ? centerX - lineW / 2 : x;
 
-  ctx.strokeStyle = GS_COLORS.orange;
+  ctx.strokeStyle = color;
   ctx.lineWidth = Math.max(1, Math.round(2 * fontScale));
   ctx.beginPath();
   ctx.moveTo(lineStart, y);
   ctx.lineTo(lineStart + lineW, y);
   ctx.stroke();
 
-  ctx.fillStyle = GS_COLORS.orange;
+  ctx.fillStyle = color;
   ctx.textAlign = centerX != null ? "center" : "left";
   ctx.textBaseline = "alphabetic";
-  ctx.font = posterFont(600, Math.round(30 * fontScale));
+  ctx.font = posterFont(
+    600,
+    Math.round(size * fontScale),
+    theme?.paint.type.fontFamily
+  );
   const lines = splitTextIntoLines(ctx, tagline, maxWidth);
   let lineY = y + Math.round(34 * fontScale);
   const textX = centerX ?? x;
   for (const line of lines) {
     ctx.fillText(line, textX, lineY);
-    lineY += Math.round(36 * fontScale);
+    lineY += Math.round(lineHeight * fontScale);
   }
   return lineY;
 }
@@ -260,18 +321,56 @@ export function drawGsVenueBar(
   y: number,
   layout: PosterLayoutContext,
   canvasW: number,
+  theme: ResolvedFrameTheme,
   fontScale = 1,
   designW = 1080
 ): number {
-  return drawGsVenueQrBar(ctx, venueLine, null, y, layout, canvasW, fontScale, designW);
+  return drawGsVenueQrBar(
+    ctx,
+    venueLine,
+    null,
+    y,
+    layout,
+    canvasW,
+    theme,
+    fontScale,
+    designW
+  );
 }
 
-/** Venue text and optional QR code in one light bar, sized to fit the QR. */
-function gsFooterBarBounds(canvasW: number): { barX: number; barW: number } {
+/** Full-width footer on the cream flyer; inset frames set their own side inset. */
+function gsFooterBarBounds(
+  canvasW: number,
+  theme: ResolvedFrameTheme
+): { barX: number; barW: number } {
+  const footer = gsFooterOf(theme);
+  if (footer.barBounds === "inset-50") {
+    const side = footer.sideInset;
+    return { barX: side, barW: canvasW - side * 2 };
+  }
   return { barX: 0, barW: canvasW };
 }
 
+function gsContentBottomY(
+  canvasH: number,
+  layout: PosterLayoutContext,
+  theme: ResolvedFrameTheme,
+  fontScale: number
+): number {
+  const footer = gsFooterOf(theme);
+  if (footer.contentBottom === "framed") {
+    return (
+      canvasH -
+      layout.inset -
+      Math.round(14 * fontScale) +
+      Math.round(GS_FOOTER_STACK_DOWN_OFFSET * fontScale)
+    );
+  }
+  return canvasH - layout.inset - Math.round(6 * fontScale);
+}
+
 const GS_FOOTER_BAR_DESIGN_H = 68;
+const GS_FOOTER_STACK_DOWN_OFFSET = 20;
 
 type GsSocialPlatform = "instagram" | "facebook" | "youtube";
 
@@ -301,7 +400,9 @@ function drawGsSocialIconCircle(
   cx: number,
   cy: number,
   radius: number,
-  platform: GsSocialPlatform
+  platform: GsSocialPlatform,
+  color = GS_COLORS.navy,
+  fontFamily = POSTER_FONT_FAMILY
 ) {
   ctx.save();
 
@@ -310,7 +411,6 @@ function drawGsSocialIconCircle(
   ctx.fillStyle = "#ffffff";
   ctx.fill();
 
-  const color = GS_COLORS.navy;
   ctx.fillStyle = color;
   ctx.strokeStyle = color;
   ctx.lineWidth = Math.max(1.2, radius * 0.13);
@@ -338,7 +438,7 @@ function drawGsSocialIconCircle(
     case "facebook": {
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.font = posterFont(700, Math.round(radius * 1.4));
+      ctx.font = posterFont(700, Math.round(radius * 1.4), fontFamily);
       ctx.fillText("f", cx, cy + radius * 0.05);
       break;
     }
@@ -377,7 +477,10 @@ function drawGsFooterSocialIcons(
   centerY: number,
   barHeight: number,
   socialHandle: string | undefined,
-  fontScale: number
+  fontScale: number,
+  iconColor = GS_COLORS.navy,
+  handleColor = GS_COLORS.gold,
+  fontFamily = POSTER_FONT_FAMILY
 ) {
   const iconRadius = Math.round(
     Math.min(22 * fontScale, barHeight / 2 - Math.round(8 * fontScale))
@@ -389,8 +492,8 @@ function drawGsFooterSocialIcons(
   if (socialHandle?.trim()) {
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
-    ctx.fillStyle = GS_COLORS.gold;
-    ctx.font = posterFont(600, Math.round(24 * fontScale));
+    ctx.fillStyle = handleColor;
+    ctx.font = posterFont(600, Math.round(24 * fontScale), fontFamily);
     ctx.fillText(socialHandle.trim(), cursorX, centerY);
     cursorX -= ctx.measureText(socialHandle.trim()).width + iconGap * 1.5;
   }
@@ -401,7 +504,9 @@ function drawGsFooterSocialIcons(
       cursorX - iconRadius,
       centerY,
       iconRadius,
-      GS_FOOTER_SOCIAL_PLATFORMS[i]
+      GS_FOOTER_SOCIAL_PLATFORMS[i],
+      iconColor,
+      fontFamily
     );
     cursorX -= iconRadius * 2 + iconGap;
   }
@@ -414,16 +519,18 @@ export function drawGsVenueQrBar(
   y: number,
   layout: PosterLayoutContext,
   canvasW: number,
+  theme: ResolvedFrameTheme,
   fontScale = 1,
   designW = 1080
 ): number {
-  const { barX, barW } = gsFooterBarBounds(canvasW);
+  const { barX, barW } = gsFooterBarBounds(canvasW, theme);
+  const footer = gsFooterOf(theme);
   const qrSize = Math.round(58 * fontScale);
   const qrPad = Math.round(7 * fontScale);
   const qrBoxSize = qrSize + qrPad * 2;
   const barH = qrImage ? Math.round(72 * fontScale) : Math.round(48 * fontScale);
 
-  ctx.fillStyle = GS_COLORS.venueBar;
+  ctx.fillStyle = footer.venueBarColor;
   ctx.fillRect(barX, y, barW, barH);
 
   const textPadX = Math.round(18 * fontScale);
@@ -447,11 +554,11 @@ export function drawGsVenueQrBar(
     const textCenterX = barX + textAreaW / 2;
     const textMaxWForCenter = textAreaW - textPadX * 2;
 
-    ctx.fillStyle = GS_COLORS.navy;
+    ctx.fillStyle = footer.venueTextColor;
     ctx.textAlign = "center";
     ctx.direction = "ltr";
     const fontSize = Math.round(28 * fontScale);
-    ctx.font = posterFont(700, fontSize);
+    ctx.font = gsFont(theme, 700, fontSize);
     const lines = splitTextIntoLines(ctx, trimmedVenue, textMaxWForCenter);
     const lineHeight = Math.round(32 * fontScale);
     const barCenterY = y + barH / 2;
@@ -488,7 +595,7 @@ export function drawGsStatsBar(
   designW = 1080
 ): number {
   const barH = 118;
-  const { barX, barW } = gsFooterBarBounds(canvasW);
+  const { barX, barW } = gsFooterBarBounds(canvasW, theme);
   const blockW = barW / stats.length;
   const { primary, accent, gold, green } = theme.colors;
 
@@ -503,9 +610,9 @@ export function drawGsStatsBar(
     ctx.textBaseline = "alphabetic";
     ctx.direction = "ltr";
     ctx.fillStyle = "#ffffff";
-    ctx.font = posterFont(700, 34);
+    ctx.font = gsFont(theme, 700, 34);
     ctx.fillText(stat.value, x + blockW / 2, y + 52);
-    ctx.font = posterFont(500, 16);
+    ctx.font = gsFont(theme, 500, 16);
     const labelLines = splitTextIntoLines(ctx, stat.label, blockW - 12);
     let labelY = y + 82;
     for (const line of labelLines.slice(0, 2)) {
@@ -523,16 +630,18 @@ export function drawGsFooterBar(
   height: number,
   layout: PosterLayoutContext,
   canvasW: number,
+  theme: ResolvedFrameTheme,
   ticketUrl?: string,
   website?: string,
   socialHandle?: string,
   designW = 1080,
   fontScale = 1
 ) {
-  const { barX, barW } = gsFooterBarBounds(canvasW);
+  const { barX, barW } = gsFooterBarBounds(canvasW, theme);
+  const footer = gsFooterOf(theme);
   const centerY = y + height / 2;
 
-  ctx.fillStyle = GS_COLORS.navy;
+  ctx.fillStyle = footer.barColor;
   ctx.fillRect(barX, y, barW, height);
 
   const ticketLabel = ticketUrl
@@ -545,8 +654,12 @@ export function drawGsFooterBar(
   if (ticketLabel) {
     ctx.textAlign = "left";
     ctx.fillStyle = "#ffffff";
-    ctx.font = posterFont(600, Math.round(24 * fontScale));
-    ctx.fillText(`🌐 ${ticketLabel}`, barX + Math.round(18 * fontScale), centerY);
+    ctx.font = gsFont(theme, 600, Math.round(24 * fontScale));
+    ctx.fillText(
+      `🌐 ${ticketLabel}`,
+      barX + Math.round(18 * fontScale),
+      centerY
+    );
   }
 
   drawGsFooterSocialIcons(
@@ -556,7 +669,10 @@ export function drawGsFooterBar(
     centerY,
     height,
     socialHandle,
-    fontScale
+    fontScale,
+    footer.iconColor,
+    footer.socialHandleColor,
+    theme.paint.type.fontFamily
   );
 }
 
@@ -596,9 +712,9 @@ export async function drawGsPosterFooter(
       ? Math.round(72 * fontScale)
       : Math.round(48 * fontScale)
     : 0;
-  const sectionGap = 4;
-
-  const footerTop = canvasH - layout.inset - footerH - 6;
+  const sectionGap = gsFooterOf(theme).sectionGap;
+  const contentBottom = gsContentBottomY(canvasH, layout, theme, fontScale);
+  const footerTop = contentBottom - footerH;
 
   drawGsFooterBar(
     ctx,
@@ -606,6 +722,7 @@ export async function drawGsPosterFooter(
     footerH,
     layout,
     canvasW,
+    theme,
     ticketUrl,
     config.website,
     config.socialHandle,
@@ -629,6 +746,7 @@ export async function drawGsPosterFooter(
       venueY,
       layout,
       canvasW,
+      theme,
       fontScale,
       designW
     );
@@ -640,7 +758,11 @@ export function drawGsPhotoRings(
   x: number,
   y: number,
   photoRadius: number,
-  fontScale = 1
+  fontScale = 1,
+  colors: { inner: string; outer: string } = {
+    inner: GS_COLORS.gold,
+    outer: GS_COLORS.orange,
+  }
 ) {
   const innerInset = Math.round(6 * fontScale);
   const innerWidth = Math.max(8, Math.round(10 * fontScale));
@@ -652,13 +774,13 @@ export function drawGsPhotoRings(
   ctx.save();
   ctx.lineCap = "round";
 
-  ctx.strokeStyle = GS_COLORS.gold;
+  ctx.strokeStyle = colors.inner;
   ctx.lineWidth = innerWidth;
   ctx.beginPath();
   ctx.arc(x, y, innerRadius, 0, Math.PI * 2);
   ctx.stroke();
 
-  ctx.strokeStyle = GS_COLORS.orange;
+  ctx.strokeStyle = colors.outer;
   ctx.lineWidth = outerWidth;
   ctx.beginPath();
   ctx.arc(x, y, outerRadius, 0, Math.PI * 2);

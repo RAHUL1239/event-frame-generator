@@ -8,6 +8,7 @@ import {
 } from "@/lib/logo-storage";
 import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/server-utils";
+import { hideOrganizerSecret } from "@/lib/public-event";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
@@ -70,7 +71,7 @@ export async function POST(
       },
     });
 
-    return NextResponse.json(updated);
+    return NextResponse.json(hideOrganizerSecret(updated));
   } catch (error) {
     console.error("Logo upload error:", error);
     const message =

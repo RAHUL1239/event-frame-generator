@@ -19,6 +19,7 @@ function toResolvedTheme(key: FrameThemeKey): ResolvedFrameTheme {
     overlayKey: theme.overlayKey,
     posterTextColor: theme.posterTextColor,
     layoutProfile: theme.layoutProfile,
+    paint: theme.paint,
   };
 }
 

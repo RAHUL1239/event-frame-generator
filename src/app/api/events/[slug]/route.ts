@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { toPublicEvent } from "@/lib/public-event";
 
 export async function GET(
   _request: Request,
@@ -18,5 +19,5 @@ export async function GET(
     return NextResponse.json({ error: "Event not found" }, { status: 404 });
   }
 
-  return NextResponse.json(event);
+  return NextResponse.json(toPublicEvent(event));
 }

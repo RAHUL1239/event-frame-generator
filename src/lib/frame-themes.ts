@@ -1,3 +1,10 @@
+import type { FramePaint } from "./frames/types";
+import { POSTER_FRAMES } from "./frames";
+import { eventDefaultPaint } from "./frames/classic";
+
+export type { FramePaint } from "./frames/types";
+export { drawFrameThemeDecoration } from "./frames/vector-border";
+
 export const FRAME_THEME_KEYS = [
   "traditional-maharashtrian",
   "elegant-gold",
@@ -38,112 +45,24 @@ export type FrameThemeDefinition = {
   posterTextColor?: string;
   /** Circular frames keep content inside the round boundary. */
   layoutProfile?: "default" | "circular";
+  paint: FramePaint;
 };
 
-export const FRAME_THEMES: Record<FrameThemeKey, FrameThemeDefinition> = {
-  "traditional-maharashtrian": {
-    key: "traditional-maharashtrian",
-    name: "Traditional Maharashtrian",
-    description: "Maroon and gold with classic ornamental borders",
-    colors: {
-      primary: "#5C1020",
-      accent: "#D4AF37",
-      background: "#f5f0e8",
-      gold: "#D4AF37",
-      green: "#2D6A4F",
-    },
-    borderStyle: "ornate",
-    photoRingWidth: 10,
-    overlayKey: "traditional-maharashtrian",
-  },
-  "elegant-gold": {
-    key: "elegant-gold",
-    name: "Elegant Gold",
-    description: "Navy and gold with an ornate artisan frame",
-    colors: {
-      primary: "#1E3A6E",
-      accent: "#C9A227",
-      background: "#f5f0e8",
-      gold: "#C9A227",
-      green: "#2D8A4E",
-    },
-    borderStyle: "minimal",
-    photoRingWidth: 6,
-    overlayKey: "elegant-gold",
-  },
-  "gauravshali-sohla": {
-    key: "gauravshali-sohla",
-    name: "Gauravshali Sohla",
-    description: "Cream flyer with navy, orange, and teal accents",
-    colors: {
-      primary: "#1A2B56",
-      accent: "#E85D33",
-      background: "#FFF9F0",
-      gold: "#D4AF37",
-      green: "#1B827E",
-    },
-    borderStyle: "classic",
-    photoRingWidth: 5,
-    overlayKey: "gauravshali-sohla",
-    posterTextColor: "#1A2B56",
-  },
-  youth: {
-    key: "youth",
-    name: "Youth Theme",
-    description: "Bold purple and orange for a vibrant look",
-    colors: {
-      primary: "#870A82",
-      accent: "#E85D24",
-      background: "#f5f0e8",
-      gold: "#F4B400",
-      green: "#00A86B",
-    },
-    borderStyle: "bold",
-    photoRingWidth: 12,
-  },
-  family: {
-    key: "family",
-    name: "Family Theme",
-    description: "Warm greens and orange for a welcoming feel",
-    colors: {
-      primary: "#2D5A3D",
-      accent: "#E07830",
-      background: "#f5f0e8",
-      gold: "#D4A574",
-      green: "#2D5A3D",
-    },
-    borderStyle: "classic",
-    photoRingWidth: 8,
-  },
-  volunteer: {
-    key: "volunteer",
-    name: "Volunteer Theme",
-    description: "Teal and coral celebrating community service",
-    colors: {
-      primary: "#1A4D4A",
-      accent: "#E85D24",
-      background: "#f5f0e8",
-      gold: "#C9A227",
-      green: "#1A4D4A",
-    },
-    borderStyle: "double",
-    photoRingWidth: 8,
-  },
-  sponsor: {
-    key: "sponsor",
-    name: "Sponsor Theme",
-    description: "Charcoal and gold for a premium sponsor look",
-    colors: {
-      primary: "#2C3E50",
-      accent: "#D4AF37",
-      background: "#f5f0e8",
-      gold: "#D4AF37",
-      green: "#27AE60",
-    },
-    borderStyle: "premium",
-    photoRingWidth: 7,
-  },
-};
+function framesByKey(): Record<FrameThemeKey, FrameThemeDefinition> {
+  const record = {} as Record<FrameThemeKey, FrameThemeDefinition>;
+  for (const frame of POSTER_FRAMES) {
+    record[frame.key] = frame;
+  }
+  for (const key of FRAME_THEME_KEYS) {
+    if (!record[key]) {
+      throw new Error(`Missing frame module for "${key}"`);
+    }
+  }
+  return record;
+}
+
+export const FRAME_THEMES: Record<FrameThemeKey, FrameThemeDefinition> =
+  framesByKey();
 
 export const FRAME_THEME_LIST = FRAME_THEME_KEYS.map((key) => FRAME_THEMES[key]);
 
@@ -156,6 +75,7 @@ export type ResolvedFrameTheme = {
   overlayKey?: FrameThemeKey;
   posterTextColor?: string;
   layoutProfile?: "default" | "circular";
+  paint: FramePaint;
 };
 
 export function isFrameThemeKey(value: string): value is FrameThemeKey {
@@ -222,6 +142,7 @@ export function resolveFrameTheme(
       },
       borderStyle: "minimal",
       photoRingWidth: 8,
+      paint: eventDefaultPaint(),
     };
   }
 
@@ -240,107 +161,6 @@ export function resolveFrameTheme(
     overlayKey: theme.overlayKey,
     posterTextColor: theme.posterTextColor,
     layoutProfile: theme.layoutProfile,
+    paint: theme.paint,
   };
-}
-
-export function drawFrameThemeDecoration(
-  ctx: CanvasRenderingContext2D,
-  theme: ResolvedFrameTheme,
-  width: number,
-  height: number,
-  options?: { onDarkBackground?: boolean; skipWhenOverlay?: boolean }
-) {
-  if (options?.skipWhenOverlay && theme.overlayKey) return;
-
-  const { primary, accent } = theme.colors;
-  const outerStroke = options?.onDarkBackground ? accent : primary;
-  const innerStroke = accent;
-  const inset = Math.max(8, Math.round((width * 36) / 1080));
-  const lineScale = width / 1080;
-
-  switch (theme.borderStyle) {
-    case "ornate": {
-      ctx.strokeStyle = outerStroke;
-      ctx.lineWidth = 5;
-      ctx.strokeRect(inset, inset, width - inset * 2, height - inset * 2);
-      ctx.strokeStyle = innerStroke;
-      ctx.lineWidth = 2;
-      ctx.strokeRect(inset + 10, inset + 10, width - (inset + 10) * 2, height - (inset + 10) * 2);
-      break;
-    }
-    case "bold": {
-      ctx.strokeStyle = outerStroke;
-      ctx.lineWidth = 14;
-      ctx.strokeRect(8, 8, width - 16, height - 16);
-      ctx.strokeStyle = innerStroke;
-      ctx.lineWidth = 4;
-      ctx.strokeRect(22, 22, width - 44, height - 44);
-      break;
-    }
-    case "double": {
-      ctx.strokeStyle = outerStroke;
-      ctx.lineWidth = 4;
-      ctx.strokeRect(inset, inset, width - inset * 2, height - inset * 2);
-      ctx.strokeStyle = innerStroke;
-      ctx.lineWidth = 2;
-      ctx.strokeRect(inset + 8, inset + 8, width - (inset + 8) * 2, height - (inset + 8) * 2);
-      break;
-    }
-    case "premium": {
-      ctx.strokeStyle = innerStroke;
-      ctx.lineWidth = 3;
-      ctx.strokeRect(inset, inset, width - inset * 2, height - inset * 2);
-      ctx.strokeStyle = options?.onDarkBackground ? "#ffffff" : primary;
-      ctx.lineWidth = 1;
-      ctx.strokeRect(inset + 6, inset + 6, width - (inset + 6) * 2, height - (inset + 6) * 2);
-      break;
-    }
-    case "classic": {
-      const corner = 48;
-      ctx.strokeStyle = accent;
-      ctx.lineWidth = 4;
-      [
-        [inset, inset + corner, inset, inset, inset + corner, inset],
-        [width - inset - corner, inset, width - inset, inset, width - inset, inset + corner],
-        [inset, height - inset - corner, inset, height - inset, inset + corner, height - inset],
-        [
-          width - inset - corner,
-          height - inset,
-          width - inset,
-          height - inset,
-          width - inset,
-          height - inset - corner,
-        ],
-      ].forEach((segment) => {
-        ctx.beginPath();
-        ctx.moveTo(segment[0], segment[1]);
-        ctx.lineTo(segment[2], segment[3]);
-        ctx.lineTo(segment[4], segment[5]);
-        ctx.stroke();
-      });
-      break;
-    }
-    case "minimal":
-    default: {
-      const outerWidth = Math.max(3, 8 * lineScale);
-      const innerWidth = Math.max(1, 2 * lineScale);
-      const innerGap = Math.max(4, 8 * lineScale);
-
-      ctx.strokeStyle = accent;
-      ctx.lineWidth = outerWidth;
-      ctx.strokeRect(inset, inset, width - inset * 2, height - inset * 2);
-
-      if (options?.onDarkBackground) {
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = innerWidth;
-        ctx.strokeRect(
-          inset + innerGap,
-          inset + innerGap,
-          width - (inset + innerGap) * 2,
-          height - (inset + innerGap) * 2
-        );
-      }
-      break;
-    }
-  }
 }

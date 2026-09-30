@@ -4,6 +4,7 @@ import { calculateParticipantNumber } from "@/lib/participant-number";
 import { EventHeader } from "@/components/EventHeader";
 import { EventFooter } from "@/components/EventFooter";
 import { PreviewPage } from "@/components/PreviewPage";
+import { toPublicEvent } from "@/lib/public-event";
 
 export default async function PreviewRoute({
   params,
@@ -36,21 +37,23 @@ export default async function PreviewRoute({
 
   const backPath = `/events/${slug}/personal`;
 
+  const publicEvent = toPublicEvent(submission.event);
+
   return (
     <div
       className="flex min-h-screen flex-col"
       style={{ backgroundColor: submission.event.backgroundColor }}
     >
-      <EventHeader event={submission.event} />
+      <EventHeader event={publicEvent} />
       <main className="flex-1">
         <PreviewPage
-          submission={submission}
+          submission={{ ...submission, event: publicEvent }}
           slug={slug}
           backPath={backPath}
           participantNumber={participantNumber}
         />
       </main>
-      <EventFooter event={submission.event} />
+      <EventFooter event={publicEvent} />
     </div>
   );
 }

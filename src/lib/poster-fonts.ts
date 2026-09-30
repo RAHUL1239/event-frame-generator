@@ -7,11 +7,12 @@ let fontsReady: Promise<void> | null = null;
 
 export function posterFont(
   weight: 400 | 500 | 600 | 700 | "bold" | "normal",
-  sizePx: number
+  sizePx: number,
+  family: string = POSTER_FONT_FAMILY
 ): string {
   const numeric =
     weight === "bold" ? 700 : weight === "normal" ? 400 : weight;
-  return `${numeric} ${sizePx}px ${POSTER_FONT_FAMILY}`;
+  return `${numeric} ${sizePx}px ${family}`;
 }
 
 export async function ensurePosterFontsLoaded(): Promise<void> {

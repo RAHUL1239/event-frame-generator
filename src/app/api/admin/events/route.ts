@@ -7,6 +7,7 @@ import { normalizeEnabledFrameThemes, serializeEnabledFrameThemesOrNull } from "
 import { serializeEventHighlights } from "@/lib/event-highlights";
 import { getClientIp } from "@/lib/server-utils";
 import { slugify } from "@/lib/slug";
+import { hideOrganizerSecret } from "@/lib/public-event";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -22,7 +23,7 @@ export async function GET() {
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(events);
+  return NextResponse.json(events.map(hideOrganizerSecret));
 }
 
 export async function POST(request: Request) {
@@ -100,5 +101,5 @@ export async function POST(request: Request) {
     },
   });
 
-  return NextResponse.json(event, { status: 201 });
+  return NextResponse.json(hideOrganizerSecret(event), { status: 201 });
 }

@@ -37,6 +37,8 @@ type EventDetail = {
   accentColor: string;
   backgroundColor: string;
   participantCountBase: number;
+  organizerUsername: string | null;
+  hasOrganizerLogin: boolean;
   enabledFrameThemes: string | null;
   eventHighlights: string | null;
   middleTaglines: string | null;
@@ -69,6 +71,7 @@ export default function AdminEventPage({
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loadError, setLoadError] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
+  const [organizerPassword, setOrganizerPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -87,6 +90,8 @@ export default function AdminEventPage({
             facebookGroupName: data.facebookGroupName ?? null,
             facebookGroupUrl: data.facebookGroupUrl ?? null,
             participantCountBase: data.participantCountBase ?? 0,
+            organizerUsername: data.organizerUsername ?? null,
+            hasOrganizerLogin: Boolean(data.hasOrganizerLogin),
             enabledFrameThemes: data.enabledFrameThemes ?? null,
             eventHighlights: data.eventHighlights ?? null,
             middleTaglines: data.middleTaglines ?? null,
@@ -131,6 +136,8 @@ export default function AdminEventPage({
         eventHighlights: parseEventHighlights(event.eventHighlights),
         middleTaglines: parseMiddleTaglines(event.middleTaglines),
         genderOptions: event.genderOptions,
+        organizerUsername: event.organizerUsername ?? "",
+        organizerPassword,
       }),
     });
 
@@ -162,8 +169,11 @@ export default function AdminEventPage({
           })),
           facebookGroupName: updated.facebookGroupName ?? null,
           facebookGroupUrl: updated.facebookGroupUrl ?? null,
+          organizerUsername: updated.organizerUsername ?? null,
+          hasOrganizerLogin: Boolean(updated.hasOrganizerLogin),
         };
       });
+      setOrganizerPassword("");
     } else {
       const data = await res.json().catch(() => ({}));
       setMessage(data.error ?? "Failed to save");
@@ -326,6 +336,61 @@ export default function AdminEventPage({
               />
               <span className="text-sm">Event is active</span>
             </label>
+          </section>
+
+          <section className="rounded-xl border bg-white p-6">
+            <h2 className="mb-2 font-semibold">Organizer login</h2>
+            <p className="mb-4 text-sm text-gray-500">
+              Give this username and password to the event team. They can sign
+              in at{" "}
+              <a
+                href={`/events/${event.slug}/guests`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-teal underline"
+              >
+                /events/{event.slug}/guests
+              </a>{" "}
+              and see who created a poster. This login cannot change the event.
+            </p>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="text-sm font-medium text-gray-600">
+                  Username
+                </label>
+                <input
+                  value={event.organizerUsername ?? ""}
+                  onChange={(e) =>
+                    setEvent({ ...event, organizerUsername: e.target.value })
+                  }
+                  autoComplete="off"
+                  className="mt-1 w-full rounded-lg border px-3 py-2"
+                  placeholder="mkm-organizer"
+                />
+                <p className="mt-1 text-xs text-gray-400">
+                  {event.hasOrganizerLogin
+                    ? "Login is active. Clear the username and save to turn it off."
+                    : "Leave blank until you are ready to share a login."}
+                </p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={organizerPassword}
+                  onChange={(e) => setOrganizerPassword(e.target.value)}
+                  autoComplete="new-password"
+                  className="mt-1 w-full rounded-lg border px-3 py-2"
+                  placeholder={
+                    event.hasOrganizerLogin
+                      ? "Leave blank to keep the current password"
+                      : "At least 8 characters"
+                  }
+                />
+              </div>
+            </div>
           </section>
 
           <section className="rounded-xl border bg-white p-6">
