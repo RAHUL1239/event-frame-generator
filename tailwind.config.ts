@@ -16,6 +16,9 @@ const config: Config = {
           "gold-light": "#e8c84a",
           cream: "#f5f0e8",
           "cream-dark": "#ebe4d8",
+          purple: "#6d28d9",
+          "purple-dark": "#5b21b6",
+          "purple-soft": "#f5f3ff",
         },
       },
       fontFamily: {

@@ -13,6 +13,14 @@ body {
   font-family: system-ui, -apple-system, sans-serif;
 }
 
+details > summary {
+  list-style: none;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
 /* Optional/suggested form fields — grey text even when browser autofills */
 .input-suggested {
   color: #6b7280 !important;
