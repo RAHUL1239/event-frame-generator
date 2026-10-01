@@ -267,24 +267,6 @@ export default function PricingPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-6 py-16">
-          <h2 className="text-3xl font-bold text-brand-teal">
-            A close alternative
-          </h2>
-          <p className="mt-4 max-w-2xl leading-relaxed text-gray-700">
-            <a
-              href="https://make-frame.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-brand-teal underline"
-            >
-              Make-Frame
-            </a>{" "}
-            also sells personalized frames that turn attendees into promoters.
-            Compare it if you are looking at this kind of tool.
-          </p>
-        </section>
-
         <section className="bg-brand-teal">
           <div className="mx-auto max-w-6xl px-6 py-16">
             <h2 className="max-w-xl text-3xl font-bold text-brand-cream">
