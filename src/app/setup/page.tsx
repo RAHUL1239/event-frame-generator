@@ -47,9 +47,9 @@ export default function SetupPage() {
           <SetupContactForm />
         </div>
 
-        <section className="mt-12" aria-labelledby="launch-pricing">
-          <h2 id="launch-pricing" className="text-2xl font-bold text-brand-teal">
-            Launch pricing
+        <section className="mt-12" aria-labelledby="pricing">
+          <h2 id="pricing" className="text-2xl font-bold text-brand-teal">
+            Pricing
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-gray-700">
             One-time fee per event. Guests create and share posters at no
