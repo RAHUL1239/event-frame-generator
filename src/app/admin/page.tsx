@@ -15,7 +15,7 @@ export default async function AdminDashboard() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <header className="border-b bg-white px-6 py-4">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <h1 className="text-xl font-bold text-brand-teal">Admin Dashboard</h1>

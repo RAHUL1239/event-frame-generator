@@ -27,7 +27,7 @@ export default async function EventGuestsPage({
   const loginReady = Boolean(event.organizerUsername && event.organizerPasswordHash);
   if (!loginReady) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-brand-cream px-4">
+      <main className="flex min-h-screen items-center justify-center bg-white px-4">
         <div className="max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
           <h1 className="text-2xl font-bold text-brand-teal">{event.name}</h1>
           <p className="mt-3 text-sm text-gray-600">

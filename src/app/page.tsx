@@ -206,7 +206,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-white text-gray-900">
       <header className="sticky top-0 z-50 border-b border-violet-100/80 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 lg:px-6">
           <Link href="/" className="flex items-center gap-2 font-bold tracking-tight text-brand-purple">
             <LogoMark />
             <span className="text-lg">RSVPShare</span>
@@ -222,6 +222,9 @@ export default function HomePage() {
             <a href="#research" className="hover:text-brand-purple">
               Research
             </a>
+            <Link href="/pricing" className="hover:text-brand-purple">
+              Pricing
+            </Link>
           </nav>
 
           <div className="hidden items-center gap-4 lg:flex">
@@ -250,6 +253,9 @@ export default function HomePage() {
               <a href="#research" className="block rounded-lg px-3 py-2 text-sm hover:bg-brand-purple-soft">
                 Research
               </a>
+              <Link href="/pricing" className="block rounded-lg px-3 py-2 text-sm hover:bg-brand-purple-soft">
+                Pricing
+              </Link>
               <Link href="/admin" className="block rounded-lg px-3 py-2 text-sm hover:bg-brand-purple-soft">
                 Organizer sign-in
               </Link>
@@ -270,7 +276,7 @@ export default function HomePage() {
           <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full bg-amber-100/70 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 left-1/3 h-40 w-40 rounded-full bg-cyan-100/60 blur-3xl" />
 
-          <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-10 pt-12 lg:grid-cols-[1.05fr_0.95fr] lg:pb-6 lg:pt-16">
+          <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 pb-10 pt-12 lg:grid-cols-[1.05fr_0.95fr] lg:px-6 lg:pb-6 lg:pt-16">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-brand-purple">
                 For event organizers
@@ -344,7 +350,7 @@ export default function HomePage() {
         </section>
 
         <section className="border-y border-violet-100 bg-white">
-          <div className="mx-auto grid max-w-4xl gap-10 px-5 py-12 sm:grid-cols-2">
+          <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:grid-cols-2 lg:px-6">
             <div className="flex items-center justify-center gap-4 text-center sm:justify-start sm:text-left">
               <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-purple-soft text-brand-purple">
                 <IconPeople />
@@ -374,7 +380,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-5 py-20">
+        <section className="mx-auto max-w-7xl px-4 py-20 lg:px-6">
           <h2 className="text-center text-3xl font-extrabold text-gray-900 md:text-4xl">
             Why organizers use it
           </h2>
@@ -400,7 +406,7 @@ export default function HomePage() {
         </section>
 
         <section id="how-it-works" className="scroll-mt-24 bg-slate-50">
-          <div className="mx-auto max-w-6xl px-5 py-20">
+          <div className="mx-auto max-w-7xl px-4 py-20 lg:px-6">
             <h2 className="text-center text-3xl font-extrabold text-gray-900 md:text-4xl">
               One event. Three simple steps.
             </h2>
@@ -426,7 +432,7 @@ export default function HomePage() {
         </section>
 
         <section id="examples" className="scroll-mt-24">
-          <div className="mx-auto max-w-6xl px-5 py-20">
+          <div className="mx-auto max-w-7xl px-4 py-20 lg:px-6">
             <h2 className="text-center text-3xl font-extrabold text-gray-900 md:text-4xl">
               Make every invitation personal
             </h2>
@@ -467,7 +473,7 @@ export default function HomePage() {
         </section>
 
         <section id="research" className="scroll-mt-24 border-y border-violet-100 bg-white">
-          <div className="mx-auto max-w-6xl px-5 py-20">
+          <div className="mx-auto max-w-7xl px-4 py-20 lg:px-6">
             <p className="text-center text-xs font-bold uppercase tracking-[0.22em] text-brand-purple">
               Published research
             </p>
@@ -506,7 +512,7 @@ export default function HomePage() {
         </section>
 
         <section className="bg-white">
-          <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-6 px-5 py-16 text-center md:flex-row md:text-left">
+          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-16 text-center md:flex-row md:text-left lg:px-6">
             <div className="flex items-start gap-4">
               <span className="mt-1 hidden text-brand-purple md:block">
                 <IconShare />
@@ -526,7 +532,7 @@ export default function HomePage() {
       </main>
 
       <footer className="border-t border-violet-100">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 py-8 text-sm text-gray-500 sm:flex-row">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-gray-500 sm:flex-row lg:px-6">
           <div>
             <p className="font-semibold text-gray-700">RSVPShare</p>
             <p className="mt-1">Posters your guests share for you</p>
@@ -535,6 +541,9 @@ export default function HomePage() {
             <a href="#research" className="hover:text-brand-purple">
               Research
             </a>
+            <Link href="/pricing" className="hover:text-brand-purple">
+              Pricing
+            </Link>
             <Link href="/admin" className="hover:text-brand-purple">
               Organizer sign-in
             </Link>

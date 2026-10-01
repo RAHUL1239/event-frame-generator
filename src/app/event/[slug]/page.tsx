@@ -29,10 +29,7 @@ export default async function EventHomePage({
   const publicEvent = toPublicEvent(event);
 
   return (
-    <div
-      className="flex min-h-screen flex-col"
-      style={{ backgroundColor: event.backgroundColor }}
-    >
+    <div className="flex min-h-screen flex-col bg-white">
       <EventHeader event={publicEvent} />
       <main className="flex-1 px-4 py-8">
         <PersonalDpForm

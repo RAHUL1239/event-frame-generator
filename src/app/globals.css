@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --background: #f5f0e8;
+  --background: #ffffff;
   --foreground: #1a1a1a;
 }
 
@@ -35,8 +35,8 @@ details > summary::-webkit-details-marker {
 .input-suggested:-webkit-autofill:hover,
 .input-suggested:-webkit-autofill:focus,
 .input-suggested:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px #f5f0e8 inset !important;
-  box-shadow: 0 0 0 1000px #f5f0e8 inset !important;
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
   -webkit-text-fill-color: #6b7280 !important;
   transition: background-color 5000s ease-in-out 0s;
 }

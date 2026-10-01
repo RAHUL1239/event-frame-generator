@@ -92,7 +92,7 @@ export default function CreateEventPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <header className="border-b bg-white px-6 py-4">
         <div className="mx-auto flex max-w-3xl items-center gap-4">
           <Link href="/admin" className="text-sm text-gray-500 hover:text-gray-700">

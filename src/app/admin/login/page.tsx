@@ -32,7 +32,7 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-brand-cream px-4">
+    <main className="flex min-h-screen items-center justify-center bg-white px-4">
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg"

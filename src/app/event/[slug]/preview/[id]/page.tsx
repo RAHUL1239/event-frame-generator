@@ -39,10 +39,7 @@ export default async function PreviewRoute({
   const publicEvent = toPublicEvent(submission.event);
 
   return (
-    <div
-      className="flex min-h-screen flex-col"
-      style={{ backgroundColor: submission.event.backgroundColor }}
-    >
+    <div className="flex min-h-screen flex-col bg-white">
       <EventHeader event={publicEvent} />
       <main className="flex-1">
         <PreviewPage

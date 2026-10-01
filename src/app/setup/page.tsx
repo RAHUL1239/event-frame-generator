@@ -10,18 +10,23 @@ export const metadata: Metadata = {
 
 export default function SetupPage() {
   return (
-    <div className="min-h-screen bg-brand-cream text-gray-900">
-      <header className="border-b border-brand-cream-dark bg-brand-cream/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+    <div className="min-h-screen bg-white text-gray-900">
+      <header className="border-b border-violet-100/80 bg-white/90 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-6">
           <Link href="/" className="text-lg font-bold tracking-tight text-brand-teal">
             RSVPShare
           </Link>
-          <Link
-            href="/admin"
-            className="rounded-full bg-brand-teal px-4 py-2 text-sm font-semibold text-brand-gold hover:bg-brand-teal-dark"
-          >
-            Organizer sign-in
-          </Link>
+          <nav className="flex items-center gap-6 text-sm">
+            <Link href="/pricing" className="font-medium text-brand-teal hover:underline">
+              Pricing
+            </Link>
+            <Link
+              href="/admin"
+              className="rounded-full bg-brand-teal px-4 py-2 text-sm font-semibold text-brand-gold hover:bg-brand-teal-dark"
+            >
+              Organizer sign-in
+            </Link>
+          </nav>
         </div>
       </header>
 
