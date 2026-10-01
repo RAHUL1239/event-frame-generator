@@ -41,6 +41,77 @@ export default function SetupPage() {
         <div className="mt-8">
           <SetupContactForm />
         </div>
+
+        <section className="mt-12" aria-labelledby="launch-pricing">
+          <h2 id="launch-pricing" className="text-2xl font-bold text-brand-teal">
+            Launch pricing
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-gray-700">
+            One-time fee per event. Guests create and share posters at no
+            charge.
+          </p>
+
+          <div className="mt-5 overflow-x-auto rounded-2xl bg-white shadow-sm">
+            <table className="w-full min-w-[28rem] text-left text-sm">
+              <thead>
+                <tr className="border-b border-brand-cream-dark text-brand-teal">
+                  <th className="px-5 py-3 font-semibold">Option</th>
+                  <th className="px-5 py-3 font-semibold">Public price</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-brand-cream-dark align-top">
+                  <td className="px-5 py-4">
+                    <p className="font-semibold text-brand-teal">
+                      Supply your own poster design
+                    </p>
+                    <p className="mt-1 leading-relaxed text-gray-600">
+                      You supply the poster design. RSVPShare provides the
+                      public event link, photo and name personalization, and
+                      sharing tools for social and messaging apps. Guests use
+                      these tools at no charge.
+                    </p>
+                  </td>
+                  <td className="whitespace-nowrap px-5 py-4 font-semibold text-brand-teal">
+                    $99 per event
+                  </td>
+                </tr>
+                <tr className="border-b border-brand-cream-dark align-top bg-brand-cream/60">
+                  <td className="border-l-4 border-brand-gold px-5 py-4">
+                    <p className="font-semibold text-brand-teal">
+                      We design your poster and set everything up
+                    </p>
+                    <p className="mt-1 leading-relaxed text-gray-600">
+                      We prepare one custom poster, set up the event, and send
+                      launch instructions. Two design revisions are included.
+                    </p>
+                  </td>
+                  <td className="whitespace-nowrap px-5 py-4 font-semibold text-brand-teal">
+                    $199 per event
+                  </td>
+                </tr>
+                <tr className="align-top">
+                  <td className="px-5 py-4">
+                    <p className="font-semibold text-brand-teal">
+                      Multiple designs or custom requirements
+                    </p>
+                    <p className="mt-1 leading-relaxed text-gray-600">
+                      Multiple poster designs, sponsor branding, and additional
+                      setup support are quoted from the work involved.
+                    </p>
+                  </td>
+                  <td className="whitespace-nowrap px-5 py-4 font-semibold text-brand-teal">
+                    Contact us
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p className="mt-4 text-sm text-gray-600">
+            Discounts available for nonprofits and community groups.
+          </p>
+        </section>
       </main>
     </div>
   );
