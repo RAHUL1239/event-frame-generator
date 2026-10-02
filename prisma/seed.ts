@@ -107,9 +107,9 @@ async function main() {
   }
 
   const tryOutThemes = JSON.stringify([
-    "one-world",
+    "grand-gala",
+    "wild-zoo",
     "elegant-gold",
-    "youth",
   ]);
 
   const existingTryOut = await prisma.event.findUnique({
@@ -117,21 +117,11 @@ async function main() {
   });
 
   if (existingTryOut) {
-    let enabled: string[] = [];
-    try {
-      const parsed = JSON.parse(existingTryOut.enabledFrameThemes ?? "[]");
-      enabled = Array.isArray(parsed) ? parsed.filter((k) => typeof k === "string") : [];
-    } catch {
-      enabled = [];
-    }
-    if (!enabled.includes("one-world")) {
-      const next = ["one-world", ...enabled.filter((k) => k !== "one-world")].slice(0, 3);
-      await prisma.event.update({
-        where: { slug: "try-out" },
-        data: { enabledFrameThemes: JSON.stringify(next) },
-      });
-      console.log("Updated try-out frames:", next.join(", "));
-    }
+    await prisma.event.update({
+      where: { slug: "try-out" },
+      data: { enabledFrameThemes: tryOutThemes },
+    });
+    console.log("Updated try-out frames: grand-gala, wild-zoo, elegant-gold");
   } else {
     await prisma.event.create({
       data: {

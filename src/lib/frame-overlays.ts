@@ -17,6 +17,10 @@ export type FrameFullOverlayConfig = {
   /** Transparent hole radius as a fraction of canvas width (circular holes). */
   holeRadiusRatio?: number;
   holeShape?: FrameHoleShape;
+  /** Circle hole center X as a fraction of overlay width (default 0.5). */
+  holeCenterXRatio?: number;
+  /** Circle hole center Y as a fraction of overlay height (default 0.5). */
+  holeCenterYRatio?: number;
   /** Extra inner padding (px at 1080) keeping text away from the frame art. */
   contentPadding?: number;
   /** How closely pixels must match the sampled matte to be removed. */
@@ -53,7 +57,16 @@ export function registerFrameOverlay(
 const overlayCache = new Map<string, Promise<HTMLImageElement>>();
 
 function overlayCacheKey(key: FrameThemeKey, config: FrameFullOverlayConfig) {
-  return `${key}:${config.src}:${config.overlayScale ?? 1}:${config.overlayOffsetY ?? 0}`;
+  return [
+    key,
+    config.src,
+    config.overlayScale ?? 1,
+    config.overlayOffsetY ?? 0,
+    config.holeShape ?? "square",
+    config.holeRadiusRatio ?? "",
+    config.holeCenterXRatio ?? "",
+    config.holeCenterYRatio ?? "",
+  ].join(":");
 }
 
 function overlayImageUrl(src: string): string {
@@ -253,7 +266,7 @@ async function prepareOverlayWithHole(
   }
 
   if (config.holeShape === "circle" && config.holeRadiusRatio) {
-    clearCircularHole(ctx, width, height, config.holeRadiusRatio);
+    clearCircularHole(ctx, width, height, config);
   } else {
     const inset = Math.round(width * (config.holeInsetRatio ?? 0));
     ctx.clearRect(inset, inset, width - inset * 2, height - inset * 2);
@@ -266,15 +279,40 @@ function clearCircularHole(
   ctx: CanvasRenderingContext2D,
   width: number,
   height: number,
-  radiusRatio: number
+  config: FrameFullOverlayConfig
 ) {
-  const radius = width * radiusRatio;
+  const radius = width * (config.holeRadiusRatio ?? 0);
+  const cx = width * (config.holeCenterXRatio ?? 0.5);
+  const cy = height * (config.holeCenterYRatio ?? 0.5);
   ctx.save();
   ctx.globalCompositeOperation = "destination-out";
   ctx.beginPath();
-  ctx.arc(width / 2, height / 2, radius, 0, Math.PI * 2);
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
+}
+
+export function getOverlayPhotoHole(
+  themeKey: FrameThemeKey | string | null | undefined,
+  canvasWidth: number,
+  canvasHeight: number
+): { x: number; y: number; radius: number } | null {
+  if (!themeKey || !FRAME_FULL_OVERLAYS[themeKey as FrameThemeKey]) return null;
+  const config = FRAME_FULL_OVERLAYS[themeKey as FrameThemeKey]!;
+  if (config.holeShape !== "circle" || !config.holeRadiusRatio) return null;
+
+  const scale = config.overlayScale ?? 1;
+  const radius = canvasWidth * config.holeRadiusRatio * scale;
+  const cx = canvasWidth * (config.holeCenterXRatio ?? 0.5);
+  const cy =
+    canvasHeight * (config.holeCenterYRatio ?? 0.5) +
+    (config.overlayOffsetY ?? 0) * canvasHeight;
+
+  return {
+    x: Math.round(cx),
+    y: Math.round(cy),
+    radius: Math.round(radius),
+  };
 }
 
 function sampleMatteColor(

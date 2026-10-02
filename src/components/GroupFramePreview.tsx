@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  getGroupPosterPhotoPositions,
+  getGroupPosterPhotoHitTargets,
   renderGroupPosterCanvas,
 } from "@/lib/image-generator";
 import {
@@ -92,7 +92,7 @@ export function GroupFramePreview({
   }
 
   function findPhotoIndexAtPoint(point: { x: number; y: number }) {
-    const positions = getGroupPosterPhotoPositions(memberCount);
+    const positions = getGroupPosterPhotoHitTargets(memberCount, frameThemeKey);
     for (let i = positions.length - 1; i >= 0; i--) {
       const { x, y, r } = positions[i];
       const dx = point.x - x;

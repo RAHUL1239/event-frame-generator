@@ -44,6 +44,11 @@ export async function renderFrameThemeThumbnail(
     return;
   }
 
+  if (theme.paint.layout === "overlay-hole") {
+    ctx.fillStyle = theme.colors.background;
+    ctx.fillRect(0, 0, size, size);
+  }
+
   if (hasFrameOverlayTheme(themeKey)) {
     await paintFrameFullOverlay(ctx, themeKey, size, size);
     return;

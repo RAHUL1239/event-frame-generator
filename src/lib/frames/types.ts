@@ -5,7 +5,24 @@ import type {
 } from "../frame-themes";
 import type { FrameFullOverlayConfig } from "../frame-overlays";
 
-export type FrameLayout = "gs-flyer" | "gs-framed" | "classic" | "one-world";
+export type OverlayNameSlot = {
+  /** Name anchor X as a fraction of canvas width. */
+  xRatio: number;
+  /** Name baseline Y as a fraction of canvas height. */
+  yRatio: number;
+  maxWidthRatio: number;
+  align: "center" | "left";
+  color: string;
+  /** Font size in design pixels at 1080. */
+  fontSize: number;
+};
+
+export type FrameLayout =
+  | "gs-flyer"
+  | "gs-framed"
+  | "classic"
+  | "one-world"
+  | "overlay-hole";
 export type FrameBackground = "gs-cream" | "solid-primary" | "one-world";
 export type FramePhotoRing = "none" | "gs" | "gold-accent" | "rainbow";
 export type HeadlineColorMode = "token-or-white" | "token-or-poster" | "palette";
@@ -103,6 +120,8 @@ export type FramePaint = {
   creamBackground?: CreamBackground;
   gsHeader?: GsHeaderStyle;
   gsFooter?: GsFooterStyle;
+  /** Guest name drawn after the PNG overlay, in a safe empty area. */
+  overlayName?: OverlayNameSlot;
 };
 
 export type PosterFrame = {

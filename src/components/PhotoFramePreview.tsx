@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  PERSONAL_PHOTO_POSITION,
+  getPersonalPhotoHitTarget,
   renderPersonalPosterCanvas,
 } from "@/lib/image-generator";
 import {
@@ -93,7 +93,9 @@ export function PhotoFramePreview({
   }
 
   function isOnPhoto(point: { x: number; y: number }) {
-    const { x, y, radius, ringPadding } = PERSONAL_PHOTO_POSITION;
+    const { x, y, radius, ringPadding } = getPersonalPhotoHitTarget(
+      frameThemeKey
+    );
     const dx = point.x - x;
     const dy = point.y - y;
     return Math.sqrt(dx * dx + dy * dy) <= radius + ringPadding + 12;

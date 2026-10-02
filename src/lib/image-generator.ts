@@ -6,6 +6,7 @@ import {
 } from "./frame-themes";
 import {
   getFrameOverlayInset,
+  getOverlayPhotoHole,
   getPosterLayout,
   hasFrameOverlayTheme,
   layoutScale,
@@ -59,6 +60,11 @@ import {
   drawOneWorldPersonalPoster,
   isOneWorldLayout,
 } from "./one-world-poster-layout";
+import {
+  drawOverlayHoleName,
+  drawOverlayHolePhoto,
+  isOverlayHoleLayout,
+} from "./overlay-hole-layout";
 
 type PersonalInput = PersonalFormData & {
   event: EventWithOptions;
@@ -90,6 +96,25 @@ export const PERSONAL_PHOTO_POSITION = {
   radius: 248,
   ringPadding: 6,
 };
+
+export function getPersonalPhotoHitTarget(themeKey?: string | null) {
+  const hole = getOverlayPhotoHole(themeKey, POSTER_W, POSTER_H);
+  if (hole) {
+    return { ...hole, ringPadding: 0 };
+  }
+  return PERSONAL_PHOTO_POSITION;
+}
+
+export function getGroupPosterPhotoHitTargets(
+  count: 2 | 3 | 4,
+  themeKey?: string | null
+) {
+  const hole = getOverlayPhotoHole(themeKey, POSTER_W, POSTER_H);
+  if (hole) {
+    return [{ x: hole.x, y: hole.y, r: hole.radius }];
+  }
+  return getGroupPhotoPositions(count);
+}
 
 const DP_W = 640;
 const DP_H = 640;
@@ -129,6 +154,11 @@ function paintFrameBackground(
     return;
   }
   if (theme.paint.background === "one-world") {
+    return;
+  }
+  if (theme.paint.layout === "overlay-hole") {
+    ctx.fillStyle = theme.colors.background;
+    ctx.fillRect(0, 0, width, height);
     return;
   }
   ctx.fillStyle = theme.colors.primary;
@@ -1477,6 +1507,7 @@ async function drawBmmPersonalPoster(
   const headline = getPosterHeadline(config, event);
   const hashtag = getPosterHashtag(config, event);
   const themeKey = theme.overlayKey ?? theme.key;
+  const useOverlayHole = isOverlayHoleLayout(theme);
   const useOneWorld = isOneWorldLayout(theme);
   const useGsContent = usesGsContentLayout(theme);
   const layout = theme.paint.fullBleedLayout
@@ -1487,7 +1518,16 @@ async function drawBmmPersonalPoster(
 
   const displayName = `${input.firstName} ${input.lastName}`.trim();
 
-  if (useOneWorld) {
+  if (useOverlayHole) {
+    drawOverlayHolePhoto(
+      ctx,
+      theme,
+      photo,
+      input.photoCrop,
+      POSTER_W,
+      POSTER_H
+    );
+  } else if (useOneWorld) {
     drawOneWorldPersonalPoster(
       ctx,
       event,
@@ -1669,6 +1709,9 @@ async function drawBmmPersonalPoster(
   if (theme.paint.paintOverlay) {
     await paintFrameOverlay(ctx, theme, POSTER_W, POSTER_H);
   }
+  if (useOverlayHole) {
+    drawOverlayHoleName(ctx, theme, displayName, POSTER_W, POSTER_H);
+  }
 }
 
 export async function renderPersonalPosterCanvas(
@@ -1703,6 +1746,7 @@ async function drawBmmGroupPoster(
   const groupTagline = getEventGenderTagline(event, "group");
   const headline = getPosterHeadline(config, event, groupTagline);
   const themeKey = theme.overlayKey ?? theme.key;
+  const useOverlayHole = isOverlayHoleLayout(theme);
   const useOneWorld = isOneWorldLayout(theme);
   const useGsContent = usesGsContentLayout(theme);
   const layout = theme.paint.fullBleedLayout
@@ -1711,14 +1755,25 @@ async function drawBmmGroupPoster(
 
   paintFrameBackground(ctx, theme, POSTER_W, POSTER_H);
 
-  if (useOneWorld) {
+  const groupName = input.groupName.trim() || "Our Group";
+
+  if (useOverlayHole) {
+    drawOverlayHolePhoto(
+      ctx,
+      theme,
+      photos[0],
+      input.photoCrops[0],
+      POSTER_W,
+      POSTER_H
+    );
+  } else if (useOneWorld) {
     drawOneWorldGroupPoster(
       ctx,
       event,
       theme,
       photos,
       input.photoCrops,
-      input.groupName.trim() || "Our Group",
+      groupName,
       POSTER_W,
       POSTER_H
     );
@@ -1932,6 +1987,9 @@ async function drawBmmGroupPoster(
 
   if (theme.paint.paintOverlay) {
     await paintFrameOverlay(ctx, theme, POSTER_W, POSTER_H);
+  }
+  if (useOverlayHole) {
+    drawOverlayHoleName(ctx, theme, groupName, POSTER_W, POSTER_H);
   }
 }
 
@@ -2191,6 +2249,13 @@ export async function renderPersonalDpCanvas(
     );
     return;
   }
+  if (isOverlayHoleLayout(theme)) {
+    const displayName = `${input.firstName} ${input.lastName}`.trim();
+    drawOverlayHolePhoto(ctx, theme, photo, input.photoCrop, DP_W, DP_H);
+    await paintFrameOverlay(ctx, theme, DP_W, DP_H);
+    drawOverlayHoleName(ctx, theme, displayName, DP_W, DP_H);
+    return;
+  }
   await drawPersonalDp(ctx, input, logo, photo, theme, layout);
 }
 
@@ -2223,6 +2288,13 @@ export async function renderGroupDpCanvas(
       DP_W,
       DP_H
     );
+    return;
+  }
+  if (isOverlayHoleLayout(theme)) {
+    const groupName = input.groupName.trim() || "Our Group";
+    drawOverlayHolePhoto(ctx, theme, photos[0], input.photoCrops[0], DP_W, DP_H);
+    await paintFrameOverlay(ctx, theme, DP_W, DP_H);
+    drawOverlayHoleName(ctx, theme, groupName, DP_W, DP_H);
     return;
   }
   await drawGroupDp(ctx, input, logo, photos, theme, layout);

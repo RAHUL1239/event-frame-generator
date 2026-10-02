@@ -14,6 +14,8 @@ export const FRAME_THEME_KEYS = [
   "volunteer",
   "sponsor",
   "one-world",
+  "grand-gala",
+  "wild-zoo",
 ] as const;
 
 export type FrameThemeKey = (typeof FRAME_THEME_KEYS)[number];
