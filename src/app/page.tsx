@@ -312,6 +312,9 @@ export default function HomePage() {
                 RSVPShare is free for non-profit organizations and for events
                 with fewer than 50 attendees.
               </p>
+              <p className="mt-3 max-w-md text-sm text-gray-500">
+                RSVPShare does not store any pictures or posters on the system.
+              </p>
             </div>
 
             <div className="relative mx-auto h-[360px] w-full max-w-[520px] sm:h-[420px] lg:h-[460px]">
