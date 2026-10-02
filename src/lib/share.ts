@@ -33,10 +33,22 @@ export function getShareablePageUrl(): string | undefined {
   return url;
 }
 
+function getSiteOrigin(): string {
+  if (typeof window !== "undefined") return window.location.origin;
+  return (process.env.NEXT_PUBLIC_SITE_URL || "https://rsvpshare.com").replace(
+    /\/$/,
+    ""
+  );
+}
+
 /** Public event page where friends create their own frame. */
 export function getEventInvitationUrl(slug: string): string {
-  if (typeof window === "undefined") return "";
-  return `${window.location.origin}/event/${slug}`;
+  return `${getSiteOrigin()}/event/${slug}`;
+}
+
+/** Facebook share dialog for a public invitation URL. */
+export function getFacebookShareUrl(pageUrl: string) {
+  return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
 }
 
 export function getShareableInvitationUrl(slug: string): string | undefined {

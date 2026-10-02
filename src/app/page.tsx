@@ -1,6 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { HomepageSharePreview } from "@/components/HomepageSharePreview";
+import {
+  buildShareCaption,
+  getEventInvitationUrl,
+  getFacebookShareUrl,
+  getWhatsAppShareUrl,
+} from "@/lib/share";
 
 export const metadata: Metadata = {
   title: "Your attendees become your promoters",
@@ -34,13 +41,9 @@ const examples = [
     guest: "Daniel Chen",
     caption: "Alumni reunion",
   },
-  {
-    src: "/examples/brighter-tomorrows-gala.png",
-    event: "Brighter Tomorrows Gala",
-    guest: "Priya Shah",
-    caption: "Fundraiser",
-  },
 ];
+
+const TRY_OUT_EVENT = { name: "Try Out", dateLabel: "Anytime" };
 
 const benefits = [
   {
@@ -203,6 +206,13 @@ function stepIcon(name: string) {
 }
 
 export default function HomePage() {
+  const invitationUrl = getEventInvitationUrl("try-out");
+  const whatsappHref = getWhatsAppShareUrl(
+    buildShareCaption(TRY_OUT_EVENT),
+    invitationUrl
+  );
+  const facebookHref = getFacebookShareUrl(invitationUrl);
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-white text-gray-900">
       <header className="sticky top-0 z-50 border-b border-violet-100/80 bg-white/90 backdrop-blur">
@@ -312,7 +322,10 @@ export default function HomePage() {
                 RSVPShare is free for non-profit organizations and for events
                 with fewer than 50 attendees.
               </p>
-              <p className="mt-3 max-w-md text-sm text-gray-500">
+              <p className="mt-3 flex max-w-md items-start gap-2 text-sm text-gray-500">
+                <span className="mt-0.5 text-brand-gold">
+                  <IconGift />
+                </span>
                 RSVPShare does not store any pictures or posters on the system.
               </p>
             </div>
@@ -437,7 +450,7 @@ export default function HomePage() {
         <section id="examples" className="scroll-mt-24">
           <div className="mx-auto max-w-7xl px-4 py-20 lg:px-6">
             <h2 className="text-center text-3xl font-extrabold text-gray-900 md:text-4xl">
-              Make every invitation personal
+              Make every invitation personal. Then share it.
             </h2>
             <div className="mt-12 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
               {examples.map((example) => (
@@ -461,6 +474,12 @@ export default function HomePage() {
                   </figcaption>
                 </figure>
               ))}
+              <HomepageSharePreview
+                invitationUrl={invitationUrl}
+                whatsappHref={whatsappHref}
+                facebookHref={facebookHref}
+                instagramHref={invitationUrl}
+              />
             </div>
             <p className="mt-8 text-center text-sm text-gray-500">
               Want to try out RSVPShare?{" "}
