@@ -50,7 +50,15 @@ import {
   paintGsBackground,
   paintGsGroupPhotosWarmAccent,
   paintGsPhotoWarmAccent,
+  usesGsContentLayout,
 } from "./gs-poster-layout";
+import {
+  drawOneWorldGroupDp,
+  drawOneWorldGroupPoster,
+  drawOneWorldPersonalDp,
+  drawOneWorldPersonalPoster,
+  isOneWorldLayout,
+} from "./one-world-poster-layout";
 
 type PersonalInput = PersonalFormData & {
   event: EventWithOptions;
@@ -118,6 +126,9 @@ function paintFrameBackground(
 ) {
   if (theme.paint.background === "gs-cream") {
     paintGsBackground(ctx, width, height, theme.paint.creamBackground);
+    return;
+  }
+  if (theme.paint.background === "one-world") {
     return;
   }
   ctx.fillStyle = theme.colors.primary;
@@ -203,6 +214,9 @@ function drawPosterAttribution(
   canvasH: number,
   fontScale = 1
 ) {
+  if (isOneWorldLayout(theme) || !theme.paint.attribution.text) {
+    return;
+  }
   const attribution = theme.paint.attribution;
   const fontFamily = theme.paint.type.fontFamily;
   if (attribution.useOverlayInset) {
@@ -378,6 +392,10 @@ function drawAttendeePhotoRing(
       inner: theme.colors.gold,
       outer: theme.colors.accent,
     });
+    return photoRadius + getPhotoRingOuterInset(_ringPadding, fontScale, theme);
+  }
+
+  if (theme.paint.photoRing === "rainbow") {
     return photoRadius + getPhotoRingOuterInset(_ringPadding, fontScale, theme);
   }
 
@@ -1459,7 +1477,8 @@ async function drawBmmPersonalPoster(
   const headline = getPosterHeadline(config, event);
   const hashtag = getPosterHashtag(config, event);
   const themeKey = theme.overlayKey ?? theme.key;
-  const useGsContent = theme.paint.layout !== "classic";
+  const useOneWorld = isOneWorldLayout(theme);
+  const useGsContent = usesGsContentLayout(theme);
   const layout = theme.paint.fullBleedLayout
     ? getPosterLayout(null, POSTER_W, POSTER_H)
     : getPosterLayout(themeKey, POSTER_W, POSTER_H);
@@ -1468,7 +1487,18 @@ async function drawBmmPersonalPoster(
 
   const displayName = `${input.firstName} ${input.lastName}`.trim();
 
-  if (useGsContent) {
+  if (useOneWorld) {
+    drawOneWorldPersonalPoster(
+      ctx,
+      event,
+      theme,
+      photo,
+      input.photoCrop,
+      displayName,
+      POSTER_W,
+      POSTER_H
+    );
+  } else if (useGsContent) {
     const headerBottomY = drawGsCompactHeader(
       ctx,
       event,
@@ -1673,14 +1703,26 @@ async function drawBmmGroupPoster(
   const groupTagline = getEventGenderTagline(event, "group");
   const headline = getPosterHeadline(config, event, groupTagline);
   const themeKey = theme.overlayKey ?? theme.key;
-  const useGsContent = theme.paint.layout !== "classic";
+  const useOneWorld = isOneWorldLayout(theme);
+  const useGsContent = usesGsContentLayout(theme);
   const layout = theme.paint.fullBleedLayout
     ? getPosterLayout(null, POSTER_W, POSTER_H)
     : getPosterLayout(themeKey, POSTER_W, POSTER_H);
 
   paintFrameBackground(ctx, theme, POSTER_W, POSTER_H);
 
-  if (useGsContent) {
+  if (useOneWorld) {
+    drawOneWorldGroupPoster(
+      ctx,
+      event,
+      theme,
+      photos,
+      input.photoCrops,
+      input.groupName.trim() || "Our Group",
+      POSTER_W,
+      POSTER_H
+    );
+  } else if (useGsContent) {
     const headerBottomY = drawGsCompactHeader(
       ctx,
       event,
@@ -2135,6 +2177,20 @@ export async function renderPersonalDpCanvas(
   const layout = getPosterLayout(themeKey, DP_W, DP_H);
 
   paintFrameBackground(ctx, theme, DP_W, DP_H);
+  if (isOneWorldLayout(theme)) {
+    const displayName = `${input.firstName} ${input.lastName}`.trim();
+    drawOneWorldPersonalDp(
+      ctx,
+      input.event,
+      theme,
+      photo,
+      input.photoCrop,
+      displayName,
+      DP_W,
+      DP_H
+    );
+    return;
+  }
   await drawPersonalDp(ctx, input, logo, photo, theme, layout);
 }
 
@@ -2156,6 +2212,19 @@ export async function renderGroupDpCanvas(
   const layout = getPosterLayout(themeKey, DP_W, DP_H);
 
   paintFrameBackground(ctx, theme, DP_W, DP_H);
+  if (isOneWorldLayout(theme)) {
+    drawOneWorldGroupDp(
+      ctx,
+      input.event,
+      theme,
+      photos,
+      input.photoCrops,
+      input.groupName.trim() || "Our Group",
+      DP_W,
+      DP_H
+    );
+    return;
+  }
   await drawGroupDp(ctx, input, logo, photos, theme, layout);
 }
 

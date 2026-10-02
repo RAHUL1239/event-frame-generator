@@ -13,6 +13,7 @@ export const FRAME_THEME_KEYS = [
   "family",
   "volunteer",
   "sponsor",
+  "one-world",
 ] as const;
 
 export type FrameThemeKey = (typeof FRAME_THEME_KEYS)[number];

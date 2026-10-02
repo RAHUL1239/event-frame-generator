@@ -2,6 +2,7 @@ import { registerFrameOverlay } from "../frame-overlays";
 import { elegantGoldFrame } from "./elegant-gold";
 import { familyFrame } from "./family";
 import { gauravshaliSohlaFrame } from "./gauravshali-sohla";
+import { oneWorldFrame } from "./one-world";
 import { sponsorFrame } from "./sponsor";
 import { traditionalMaharashtrianFrame } from "./traditional-maharashtrian";
 import { volunteerFrame } from "./volunteer";
@@ -22,6 +23,7 @@ export const POSTER_FRAMES: PosterFrame[] = [
   familyFrame,
   volunteerFrame,
   sponsorFrame,
+  oneWorldFrame,
 ];
 
 for (const frame of POSTER_FRAMES) {

@@ -107,29 +107,50 @@ async function main() {
   }
 
   const tryOutThemes = JSON.stringify([
+    "one-world",
     "elegant-gold",
     "youth",
-    "family",
   ]);
 
   const existingTryOut = await prisma.event.findUnique({
     where: { slug: "try-out" },
   });
 
-  if (!existingTryOut) {
+  if (existingTryOut) {
+    let enabled: string[] = [];
+    try {
+      const parsed = JSON.parse(existingTryOut.enabledFrameThemes ?? "[]");
+      enabled = Array.isArray(parsed) ? parsed.filter((k) => typeof k === "string") : [];
+    } catch {
+      enabled = [];
+    }
+    if (!enabled.includes("one-world")) {
+      const next = ["one-world", ...enabled.filter((k) => k !== "one-world")].slice(0, 3);
+      await prisma.event.update({
+        where: { slug: "try-out" },
+        data: { enabledFrameThemes: JSON.stringify(next) },
+      });
+      console.log("Updated try-out frames:", next.join(", "));
+    }
+  } else {
     await prisma.event.create({
       data: {
         slug: "try-out",
         name: "Try Out",
-        subtitle: "PROFILE FRAME & POSTER GENERATOR",
-        tagline: "Make a poster and see how RSVPShare works",
+        subtitle: "CELEBRATE WITH US!",
+        tagline: "Many cultures. One celebration.",
         dateLabel: "Anytime",
         location: "Anywhere",
         isActive: true,
-        primaryColor: "#1a4d4a",
-        accentColor: "#c9a227",
-        backgroundColor: "#f5f0e8",
+        primaryColor: "#1A2744",
+        accentColor: "#F15A24",
+        backgroundColor: "#FFF8F2",
         enabledFrameThemes: tryOutThemes,
+        eventHighlights: JSON.stringify([
+          "CONNECT\nMeet new people",
+          "CELEBRATE\nMusic • Food • Culture",
+          "BE PART OF IT\nA stronger, kinder community",
+        ]),
         genderOptions: {
           create: [
             {

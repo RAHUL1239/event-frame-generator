@@ -5,6 +5,7 @@ import {
   type ResolvedFrameTheme,
 } from "./frame-themes";
 import { hasFrameOverlayTheme, paintFrameFullOverlay } from "./frame-overlays";
+import { paintOneWorldThumbnail } from "./one-world-poster-layout";
 
 const THUMBNAIL_SIZE = 96;
 
@@ -37,6 +38,11 @@ export async function renderFrameThemeThumbnail(
 
   ctx.fillStyle = theme.colors.primary;
   ctx.fillRect(0, 0, size, size);
+
+  if (theme.paint.layout === "one-world") {
+    paintOneWorldThumbnail(ctx, size);
+    return;
+  }
 
   if (hasFrameOverlayTheme(themeKey)) {
     await paintFrameFullOverlay(ctx, themeKey, size, size);

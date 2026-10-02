@@ -25,7 +25,7 @@ export async function ensurePosterFontsLoaded(): Promise<void> {
       link.id = FONT_LINK_ID;
       link.rel = "stylesheet";
       link.href =
-        "https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap";
+        "https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap";
       document.head.appendChild(link);
       await new Promise<void>((resolve) => {
         link.onload = () => resolve();
@@ -34,6 +34,10 @@ export async function ensurePosterFontsLoaded(): Promise<void> {
     }
 
     await Promise.all([
+      document.fonts.load('800 52px "Nunito"'),
+      document.fonts.load('700 44px "Nunito"'),
+      document.fonts.load('700 34px "Nunito"'),
+      document.fonts.load('600 24px "Nunito"'),
       document.fonts.load(posterFont(700, 49)),
       document.fonts.load(posterFont(700, 40)),
       document.fonts.load(posterFont(700, 37)),

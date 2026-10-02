@@ -178,7 +178,7 @@ export function paintGsGroupPhotosWarmAccent(
 }
 
 export function usesGsContentLayout(theme: ResolvedFrameTheme): boolean {
-  return theme.paint.layout !== "classic";
+  return theme.paint.layout === "gs-flyer" || theme.paint.layout === "gs-framed";
 }
 
 /** True GS flyer look (cream background, GS colors) — not framed overlay themes. */

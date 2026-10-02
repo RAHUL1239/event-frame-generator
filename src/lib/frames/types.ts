@@ -5,9 +5,9 @@ import type {
 } from "../frame-themes";
 import type { FrameFullOverlayConfig } from "../frame-overlays";
 
-export type FrameLayout = "gs-flyer" | "gs-framed" | "classic";
-export type FrameBackground = "gs-cream" | "solid-primary";
-export type FramePhotoRing = "none" | "gs" | "gold-accent";
+export type FrameLayout = "gs-flyer" | "gs-framed" | "classic" | "one-world";
+export type FrameBackground = "gs-cream" | "solid-primary" | "one-world";
+export type FramePhotoRing = "none" | "gs" | "gold-accent" | "rainbow";
 export type HeadlineColorMode = "token-or-white" | "token-or-poster" | "palette";
 
 /** Type scale for poster copy. Sizes are design pixels at 1080, before layout scale. */
