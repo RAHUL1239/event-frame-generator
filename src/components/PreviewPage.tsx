@@ -23,6 +23,11 @@ import {
   type SocialPostFlowResult,
 } from "@/lib/share";
 
+const SHARE_TEAL = "#2EC4C8";
+const SHARE_WHATSAPP = "#22C55E";
+const SHARE_FACEBOOK = "#3B82F6";
+const SHARE_INSTAGRAM = "#E11D74";
+
 type Submission = {
   id: string;
   type: string;
@@ -194,11 +199,11 @@ export function PreviewPage({
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto max-w-md px-4 py-8">
       {toast && (
         <div
           className="fixed bottom-6 left-1/2 z-50 max-w-md -translate-x-1/2 rounded-xl px-5 py-3 text-sm text-white shadow-lg"
-          style={{ backgroundColor: event.primaryColor }}
+          style={{ backgroundColor: SHARE_TEAL }}
         >
           {toast}
         </div>
@@ -213,33 +218,32 @@ export function PreviewPage({
         </Link>
       </div>
 
-      <div
-        className="mb-6 rounded-2xl px-6 py-5 text-center shadow-lg"
-        style={{
-          backgroundColor: `${event.accentColor}18`,
-          borderColor: event.accentColor,
-          borderWidth: 2,
-        }}
-      >
+      <div className="mb-5 rounded-[1.75rem] border-2 border-brand-gold bg-[#f6ecd6] px-6 py-7 text-center shadow-sm">
         <p
-          className="text-2xl font-bold md:text-3xl"
-          style={{ color: event.primaryColor }}
+          className="flex items-center justify-center gap-2 text-[1.65rem] font-bold leading-tight md:text-3xl"
+          style={{ color: SHARE_TEAL }}
         >
-          🎉 You are participant #{participantNumber.toLocaleString()}
+          <span aria-hidden className="text-2xl md:text-3xl">
+            🎉
+          </span>
+          You are participant
         </p>
-        <p className="mt-2 text-sm text-gray-600">
+        <p
+          className="mt-1 text-4xl font-bold tracking-tight md:text-5xl"
+          style={{ color: SHARE_TEAL }}
+        >
+          #{participantNumber.toLocaleString("en-US")}
+        </p>
+        <p className="mt-4 text-sm leading-relaxed text-gray-600">
           Share your poster and invite friends to join the celebration!
         </p>
       </div>
 
-      <section className="mb-8 rounded-2xl bg-white p-6 shadow-lg">
-        <h2
-          className="text-lg font-bold"
-          style={{ color: event.primaryColor }}
-        >
+      <section className="mb-8 rounded-[1.75rem] bg-white px-6 py-7 shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
+        <h2 className="text-xl font-bold" style={{ color: SHARE_TEAL }}>
           Share with friends
         </h2>
-        <p className="mt-1 text-sm text-gray-600">
+        <p className="mt-2 text-sm leading-relaxed text-gray-600">
           Share your poster and invite friends to create their own frame.
         </p>
 
@@ -250,31 +254,31 @@ export function PreviewPage({
           </p>
         )}
 
-        <div className="mt-4 flex flex-wrap gap-3">
+        <div className="mt-6 flex flex-col gap-3">
           <ShareButton
             label="Share to WhatsApp"
-            color="#25D366"
+            color={SHARE_WHATSAPP}
             onClick={() => void handleShareWhatsApp()}
           />
           <ShareButton
             label="Share to Facebook"
-            color="#1877F2"
+            color={SHARE_FACEBOOK}
             onClick={() => void handleShareFacebook()}
           />
           <ShareButton
             label="Share to Instagram Story"
-            color="#E1306C"
+            color={SHARE_INSTAGRAM}
             onClick={() => void handleShareInstagramStory()}
           />
           <ShareButton
             label="Copy invitation link"
-            color={event.primaryColor}
+            color={SHARE_TEAL}
             onClick={() => void handleCopyInvitationLink()}
           />
         </div>
       </section>
 
-      <div className="max-w-xl mx-auto">
+      <div>
         <PreviewCard
           title="Social Media Poster"
           subtitle="For Instagram / Facebook / WhatsApp"
@@ -296,12 +300,10 @@ export function PreviewPage({
 
 function ShareButton({
   label,
-  sublabel,
   color,
   onClick,
 }: {
   label: string;
-  sublabel?: string;
   color: string;
   onClick: () => void;
 }) {
@@ -309,11 +311,10 @@ function ShareButton({
     <button
       type="button"
       onClick={onClick}
-      className="flex min-w-[130px] flex-col items-start rounded-xl px-4 py-3 text-left text-white transition hover:opacity-90"
+      className="w-full rounded-full px-6 py-3.5 text-center text-base font-semibold text-white shadow-sm transition hover:opacity-90 active:scale-[0.99]"
       style={{ backgroundColor: color }}
     >
-      <span className="text-sm font-bold">{label}</span>
-      {sublabel && <span className="text-xs opacity-80">{sublabel}</span>}
+      {label}
     </button>
   );
 }
