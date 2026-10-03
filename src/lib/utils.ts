@@ -176,6 +176,24 @@ export function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
+export function pathRoundedRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number
+) {
+  const r = Math.max(0, Math.min(radius, width / 2, height / 2));
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + width, y, x + width, y + height, r);
+  ctx.arcTo(x + width, y + height, x, y + height, r);
+  ctx.arcTo(x, y + height, x, y, r);
+  ctx.arcTo(x, y, x + width, y, r);
+  ctx.closePath();
+}
+
 export function drawCircularImage(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
@@ -202,6 +220,39 @@ export function drawCircularImage(
   const drawY = y - h / 2 + crop.offsetY * maxPanY;
 
   ctx.drawImage(img, drawX, drawY, w, h);
+  ctx.restore();
+}
+
+export function drawRoundedRectImage(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+  crop: PhotoCrop = DEFAULT_PHOTO_CROP
+) {
+  ctx.save();
+  pathRoundedRect(ctx, x, y, width, height, radius);
+  ctx.clip();
+
+  const baseScale = Math.max(width / img.width, height / img.height);
+  const scale = baseScale * crop.scale;
+  const w = img.width * scale;
+  const h = img.height * scale;
+  const cx = x + width / 2;
+  const cy = y + height / 2;
+  const maxPanX = Math.max(0, (w - width) / 2);
+  const maxPanY = Math.max(0, (h - height) / 2);
+
+  ctx.drawImage(
+    img,
+    cx - w / 2 + crop.offsetX * maxPanX,
+    cy - h / 2 + crop.offsetY * maxPanY,
+    w,
+    h
+  );
   ctx.restore();
 }
 

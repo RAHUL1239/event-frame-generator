@@ -1,9 +1,9 @@
 import type { ResolvedFrameTheme } from "./frame-themes";
-import { getOverlayPhotoHole } from "./frame-overlays";
+import { getOverlayPhotoSlot } from "./frame-overlays";
 import type { PhotoCrop } from "./photo-crop";
 import { splitTextIntoLines } from "./canvas-text";
 import { posterFont } from "./poster-fonts";
-import { drawCircularImage } from "./utils";
+import { drawCircularImage, drawRoundedRectImage } from "./utils";
 
 export function isOverlayHoleLayout(theme: ResolvedFrameTheme): boolean {
   return theme.paint.layout === "overlay-hole";
@@ -17,8 +17,21 @@ export function drawOverlayHolePhoto(
   width: number,
   height: number
 ) {
-  const hole = getOverlayPhotoHole(theme.overlayKey ?? theme.key, width, height);
+  const hole = getOverlayPhotoSlot(theme.overlayKey ?? theme.key, width, height);
   if (!hole || !photo) return hole;
+  if (hole.shape === "rounded-rect") {
+    drawRoundedRectImage(
+      ctx,
+      photo,
+      hole.x,
+      hole.y,
+      hole.width,
+      hole.height,
+      hole.radius,
+      crop
+    );
+    return hole;
+  }
   drawCircularImage(ctx, photo, hole.x, hole.y, hole.radius, crop);
   return hole;
 }

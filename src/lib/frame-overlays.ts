@@ -1,5 +1,5 @@
 import type { FrameThemeKey } from "./frame-themes";
-import { loadImage } from "./utils";
+import { loadImage, pathRoundedRect } from "./utils";
 
 export type FrameContentInsets = {
   top: number;
@@ -8,7 +8,18 @@ export type FrameContentInsets = {
   left: number;
 };
 
-export type FrameHoleShape = "square" | "circle";
+export type FrameHoleShape = "square" | "circle" | "rounded-rect";
+
+export type OverlayPhotoSlot =
+  | { shape: "circle"; x: number; y: number; radius: number }
+  | {
+      shape: "rounded-rect";
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      radius: number;
+    };
 
 export type FrameFullOverlayConfig = {
   src: string;
@@ -21,6 +32,16 @@ export type FrameFullOverlayConfig = {
   holeCenterXRatio?: number;
   /** Circle hole center Y as a fraction of overlay height (default 0.5). */
   holeCenterYRatio?: number;
+  /** Rounded-rect hole left as a fraction of overlay width. */
+  holeXRatio?: number;
+  /** Rounded-rect hole top as a fraction of overlay height. */
+  holeYRatio?: number;
+  /** Rounded-rect hole width as a fraction of overlay width. */
+  holeWidthRatio?: number;
+  /** Rounded-rect hole height as a fraction of overlay height. */
+  holeHeightRatio?: number;
+  /** Rounded-rect corner radius as a fraction of overlay width. */
+  holeCornerRadiusRatio?: number;
   /** Extra inner padding (px at 1080) keeping text away from the frame art. */
   contentPadding?: number;
   /** How closely pixels must match the sampled matte to be removed. */
@@ -66,6 +87,11 @@ function overlayCacheKey(key: FrameThemeKey, config: FrameFullOverlayConfig) {
     config.holeRadiusRatio ?? "",
     config.holeCenterXRatio ?? "",
     config.holeCenterYRatio ?? "",
+    config.holeXRatio ?? "",
+    config.holeYRatio ?? "",
+    config.holeWidthRatio ?? "",
+    config.holeHeightRatio ?? "",
+    config.holeCornerRadiusRatio ?? "",
   ].join(":");
 }
 
@@ -267,6 +293,8 @@ async function prepareOverlayWithHole(
 
   if (config.holeShape === "circle" && config.holeRadiusRatio) {
     clearCircularHole(ctx, width, height, config);
+  } else if (config.holeShape === "rounded-rect") {
+    clearRoundedRectHole(ctx, width, height, config);
   } else {
     const inset = Math.round(width * (config.holeInsetRatio ?? 0));
     ctx.clearRect(inset, inset, width - inset * 2, height - inset * 2);
@@ -292,26 +320,77 @@ function clearCircularHole(
   ctx.restore();
 }
 
+function clearRoundedRectHole(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  config: FrameFullOverlayConfig
+) {
+  const x = width * (config.holeXRatio ?? 0);
+  const y = height * (config.holeYRatio ?? 0);
+  const w = width * (config.holeWidthRatio ?? 0);
+  const h = height * (config.holeHeightRatio ?? 0);
+  const radius = width * (config.holeCornerRadiusRatio ?? 0.04);
+  ctx.save();
+  ctx.globalCompositeOperation = "destination-out";
+  pathRoundedRect(ctx, x, y, w, h, radius);
+  ctx.fill();
+  ctx.restore();
+}
+
+export function getOverlayPhotoSlot(
+  themeKey: FrameThemeKey | string | null | undefined,
+  canvasWidth: number,
+  canvasHeight: number
+): OverlayPhotoSlot | null {
+  if (!themeKey || !FRAME_FULL_OVERLAYS[themeKey as FrameThemeKey]) return null;
+  const config = FRAME_FULL_OVERLAYS[themeKey as FrameThemeKey]!;
+  const scale = config.overlayScale ?? 1;
+  const offsetY = (config.overlayOffsetY ?? 0) * canvasHeight;
+
+  if (config.holeShape === "circle" && config.holeRadiusRatio) {
+    return {
+      shape: "circle",
+      x: Math.round(canvasWidth * (config.holeCenterXRatio ?? 0.5)),
+      y: Math.round(
+        canvasHeight * (config.holeCenterYRatio ?? 0.5) + offsetY
+      ),
+      radius: Math.round(canvasWidth * config.holeRadiusRatio * scale),
+    };
+  }
+
+  if (
+    config.holeShape === "rounded-rect" &&
+    config.holeWidthRatio &&
+    config.holeHeightRatio
+  ) {
+    return {
+      shape: "rounded-rect",
+      x: Math.round(canvasWidth * (config.holeXRatio ?? 0) * scale),
+      y: Math.round(canvasHeight * (config.holeYRatio ?? 0) * scale + offsetY),
+      width: Math.round(canvasWidth * config.holeWidthRatio * scale),
+      height: Math.round(canvasHeight * config.holeHeightRatio * scale),
+      radius: Math.round(
+        canvasWidth * (config.holeCornerRadiusRatio ?? 0.04) * scale
+      ),
+    };
+  }
+
+  return null;
+}
+
 export function getOverlayPhotoHole(
   themeKey: FrameThemeKey | string | null | undefined,
   canvasWidth: number,
   canvasHeight: number
 ): { x: number; y: number; radius: number } | null {
-  if (!themeKey || !FRAME_FULL_OVERLAYS[themeKey as FrameThemeKey]) return null;
-  const config = FRAME_FULL_OVERLAYS[themeKey as FrameThemeKey]!;
-  if (config.holeShape !== "circle" || !config.holeRadiusRatio) return null;
-
-  const scale = config.overlayScale ?? 1;
-  const radius = canvasWidth * config.holeRadiusRatio * scale;
-  const cx = canvasWidth * (config.holeCenterXRatio ?? 0.5);
-  const cy =
-    canvasHeight * (config.holeCenterYRatio ?? 0.5) +
-    (config.overlayOffsetY ?? 0) * canvasHeight;
-
+  const slot = getOverlayPhotoSlot(themeKey, canvasWidth, canvasHeight);
+  if (!slot) return null;
+  if (slot.shape === "circle") return slot;
   return {
-    x: Math.round(cx),
-    y: Math.round(cy),
-    radius: Math.round(radius),
+    x: Math.round(slot.x + slot.width / 2),
+    y: Math.round(slot.y + slot.height / 2),
+    radius: Math.round(Math.max(slot.width, slot.height) / 2),
   };
 }
 

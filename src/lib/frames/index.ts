@@ -1,10 +1,13 @@
 import { registerFrameOverlay } from "../frame-overlays";
+import { christmasTogetherFrame } from "./christmas-together";
 import { elegantGoldFrame } from "./elegant-gold";
 import { familyFrame } from "./family";
 import { gauravshaliSohlaFrame } from "./gauravshali-sohla";
 import { grandGalaFrame } from "./grand-gala";
+import { ideasImpactFrame } from "./ideas-impact";
 import { oneWorldFrame } from "./one-world";
 import { sponsorFrame } from "./sponsor";
+import { sunsetSoundFrame } from "./sunset-sound";
 import { traditionalMaharashtrianFrame } from "./traditional-maharashtrian";
 import { volunteerFrame } from "./volunteer";
 import { wildZooFrame } from "./wild-zoo";
@@ -28,6 +31,9 @@ export const POSTER_FRAMES: PosterFrame[] = [
   oneWorldFrame,
   grandGalaFrame,
   wildZooFrame,
+  christmasTogetherFrame,
+  ideasImpactFrame,
+  sunsetSoundFrame,
 ];
 
 for (const frame of POSTER_FRAMES) {

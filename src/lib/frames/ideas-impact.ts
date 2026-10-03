@@ -1,36 +1,38 @@
 import { DEFAULT_ATTRIBUTION, posterType } from "./typography";
 import type { PosterFrame } from "./types";
 
-const NAVY = "#2C3A4A";
-const SAGE = "#4A5D4E";
-const GOLD = "#C9A86C";
-const CREAM = "#F3EEE4";
+const NAVY = "#243447";
+const GOLD = "#C4A574";
+const SLATE = "#6B8499";
+const CREAM = "#F6F3EE";
 
 /**
- * Full PNG overlay. Photo composites into the left-center circular hole.
- * Florals, title, and taglines stay as designed — not redrawn.
+ * Full PNG overlay. Photo composites into the left rounded-rect hole.
+ * Title, headline, and taglines stay as designed — not redrawn.
  */
-export const grandGalaFrame: PosterFrame = {
-  key: "grand-gala",
-  name: "Grand Gala",
-  description: "Pastel gala invitation with a circular photo hole",
+export const ideasImpactFrame: PosterFrame = {
+  key: "ideas-impact",
+  name: "Ideas & Impact Summit",
+  description: "Summit invitation with a rounded rectangular photo hole",
   colors: {
     primary: NAVY,
     accent: GOLD,
     background: CREAM,
     gold: GOLD,
-    green: SAGE,
+    green: SLATE,
   },
   borderStyle: "minimal",
   photoRingWidth: 0,
-  overlayKey: "grand-gala",
+  overlayKey: "ideas-impact",
   posterTextColor: NAVY,
   overlay: {
-    src: "/frames/grand-gala-frame.png?v=1",
-    holeShape: "circle",
-    holeCenterXRatio: 315.1 / 1024,
-    holeCenterYRatio: 518.35 / 1024,
-    holeRadiusRatio: 270.5 / 1024,
+    src: "/frames/ideas-impact-summit-frame.png?v=1",
+    holeShape: "rounded-rect",
+    holeXRatio: 57 / 1024,
+    holeYRatio: 249 / 1024,
+    holeWidthRatio: 467 / 1024,
+    holeHeightRatio: 624 / 1024,
+    holeCornerRadiusRatio: 40 / 1024,
   },
   paint: {
     layout: "overlay-hole",
@@ -45,7 +47,7 @@ export const grandGalaFrame: PosterFrame = {
     nameColor: NAVY,
     nameLift: 0,
     logoSize: 0,
-    dividerStroke: "rgba(44, 58, 74, 0.2)",
+    dividerStroke: "rgba(36, 52, 71, 0.2)",
     headlineColors: "token-or-poster",
     attribution: {
       ...DEFAULT_ATTRIBUTION,
@@ -56,9 +58,9 @@ export const grandGalaFrame: PosterFrame = {
       personalNameSize: 46,
     }),
     overlayName: {
-      xRatio: 0.6,
-      yRatio: 0.7,
-      maxWidthRatio: 0.36,
+      xRatio: 0.54,
+      yRatio: 0.705,
+      maxWidthRatio: 0.42,
       align: "left",
       color: NAVY,
       fontSize: 46,

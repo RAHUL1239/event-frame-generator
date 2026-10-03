@@ -54,15 +54,15 @@ export const wildZooFrame: PosterFrame = {
     },
     type: posterType({
       fontFamily: '"Nunito", "Noto Sans", system-ui, sans-serif',
-      personalNameSize: 28,
+      personalNameSize: 46,
     }),
     overlayName: {
       xRatio: 0.54,
-      yRatio: 0.635,
-      maxWidthRatio: 0.4,
+      yRatio: 0.615,
+      maxWidthRatio: 0.42,
       align: "left",
       color: GREEN,
-      fontSize: 26,
+      fontSize: 46,
     },
   },
 };

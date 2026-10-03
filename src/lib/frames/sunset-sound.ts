@@ -1,36 +1,36 @@
 import { DEFAULT_ATTRIBUTION, posterType } from "./typography";
 import type { PosterFrame } from "./types";
 
-const NAVY = "#2C3A4A";
-const SAGE = "#4A5D4E";
+const PURPLE = "#5C2A5A";
+const TERRACOTTA = "#C4785A";
+const CREAM = "#F8EEE6";
 const GOLD = "#C9A86C";
-const CREAM = "#F3EEE4";
 
 /**
  * Full PNG overlay. Photo composites into the left-center circular hole.
- * Florals, title, and taglines stay as designed — not redrawn.
+ * Waves, title, and taglines stay as designed — not redrawn.
  */
-export const grandGalaFrame: PosterFrame = {
-  key: "grand-gala",
-  name: "Grand Gala",
-  description: "Pastel gala invitation with a circular photo hole",
+export const sunsetSoundFrame: PosterFrame = {
+  key: "sunset-sound",
+  name: "Sunset Sound Festival",
+  description: "Music festival flyer with a circular photo hole",
   colors: {
-    primary: NAVY,
-    accent: GOLD,
+    primary: PURPLE,
+    accent: TERRACOTTA,
     background: CREAM,
     gold: GOLD,
-    green: SAGE,
+    green: PURPLE,
   },
   borderStyle: "minimal",
   photoRingWidth: 0,
-  overlayKey: "grand-gala",
-  posterTextColor: NAVY,
+  overlayKey: "sunset-sound",
+  posterTextColor: PURPLE,
   overlay: {
-    src: "/frames/grand-gala-frame.png?v=1",
+    src: "/frames/sunset-sound-festival-frame.png?v=1",
     holeShape: "circle",
-    holeCenterXRatio: 315.1 / 1024,
-    holeCenterYRatio: 518.35 / 1024,
-    holeRadiusRatio: 270.5 / 1024,
+    holeCenterXRatio: 333 / 1024,
+    holeCenterYRatio: 529 / 1024,
+    holeRadiusRatio: 283 / 1024,
   },
   paint: {
     layout: "overlay-hole",
@@ -41,11 +41,11 @@ export const grandGalaFrame: PosterFrame = {
     photoWarmAccent: false,
     besidePhotoScale: 1,
     includeEventTagline: false,
-    posterTextColor: NAVY,
-    nameColor: NAVY,
+    posterTextColor: PURPLE,
+    nameColor: PURPLE,
     nameLift: 0,
     logoSize: 0,
-    dividerStroke: "rgba(44, 58, 74, 0.2)",
+    dividerStroke: "rgba(92, 42, 90, 0.2)",
     headlineColors: "token-or-poster",
     attribution: {
       ...DEFAULT_ATTRIBUTION,
@@ -56,11 +56,11 @@ export const grandGalaFrame: PosterFrame = {
       personalNameSize: 46,
     }),
     overlayName: {
-      xRatio: 0.6,
-      yRatio: 0.7,
+      xRatio: 0.62,
+      yRatio: 0.658,
       maxWidthRatio: 0.36,
       align: "left",
-      color: NAVY,
+      color: PURPLE,
       fontSize: 46,
     },
   },
