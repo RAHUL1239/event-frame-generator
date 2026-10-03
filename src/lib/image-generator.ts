@@ -39,6 +39,8 @@ import {
 } from "./utils";
 import {
   fillCenteredLine,
+  fillTextWithSpaces,
+  measureLineWidth,
   splitTextIntoLines,
   wrapCanvasText,
 } from "./canvas-text";
@@ -936,8 +938,8 @@ function drawPersonalNameBlock(
     const nameLines = splitTextIntoLines(ctx, upperName, placement.maxWidth);
     let lineY = contentY;
     for (const line of nameLines) {
-      ctx.fillText(line, padX, lineY);
-      nameWidth = Math.max(nameWidth, ctx.measureText(line).width);
+      fillTextWithSpaces(ctx, line, padX, lineY);
+      nameWidth = Math.max(nameWidth, measureLineWidth(ctx, line));
       nameBottom = lineY;
       lineY += Math.round(nameFontSize * 1.08);
     }
@@ -958,7 +960,7 @@ function drawPersonalNameBlock(
   let fitsOnRow = Boolean(nameIsSingleLine);
   let totalWidth = nameIsSingleLine ? nameWidth + tagGap : 0;
   for (const tag of activeTaglines) {
-    totalWidth += ctx.measureText(tag).width + tagGap;
+    totalWidth += measureLineWidth(ctx, tag) + tagGap;
   }
   if (padX + totalWidth > maxRight) {
     fitsOnRow = false;
@@ -966,15 +968,15 @@ function drawPersonalNameBlock(
 
   if (fitsOnRow) {
     for (const tag of activeTaglines) {
-      ctx.fillText(tag, tagX, contentY);
-      tagX += ctx.measureText(tag).width + tagGap;
+      fillTextWithSpaces(ctx, tag, tagX, contentY);
+      tagX += measureLineWidth(ctx, tag) + tagGap;
     }
     return contentY + Math.round(Math.max(nameFontSize, tagFontSize) * 0.4);
   }
 
   let lineY = nameBottom + Math.round(nameFontSize * 0.45);
   for (const tag of activeTaglines) {
-    ctx.fillText(tag, padX, lineY);
+    fillTextWithSpaces(ctx, tag, padX, lineY);
     lineY += Math.round(30 * fontScale);
   }
   return lineY + Math.round(4 * fontScale);

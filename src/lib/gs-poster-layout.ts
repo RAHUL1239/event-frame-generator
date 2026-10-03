@@ -15,7 +15,7 @@ import {
   type PosterStat,
 } from "./poster-template";
 import { parseEventHighlights } from "./event-highlights";
-import { splitTextIntoLines } from "./canvas-text";
+import { fillTextWithSpaces, splitTextIntoLines } from "./canvas-text";
 import { POSTER_FONT_FAMILY, posterFont } from "./poster-fonts";
 import { drawLogoAt, drawLogoAtWithoutMatte } from "./utils";
 import { resolvePosterColor } from "./poster-template";
@@ -309,7 +309,7 @@ export function drawGsHeadlineTagline(
   let lineY = y + Math.round(34 * fontScale);
   const textX = centerX ?? x;
   for (const line of lines) {
-    ctx.fillText(line, textX, lineY);
+    fillTextWithSpaces(ctx, line, textX, lineY);
     lineY += Math.round(lineHeight * fontScale);
   }
   return lineY;

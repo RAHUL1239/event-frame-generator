@@ -10,7 +10,7 @@ export function parseMiddleTaglines(raw: string | null | undefined): string[] {
       return Array.from({ length: MIDDLE_TAGLINE_COUNT }, () => "");
     }
     return Array.from({ length: MIDDLE_TAGLINE_COUNT }, (_, i) =>
-      String(parsed[i] ?? "").trim()
+      String(parsed[i] ?? "")
     );
   } catch {
     return Array.from({ length: MIDDLE_TAGLINE_COUNT }, () => "");
@@ -19,9 +19,11 @@ export function parseMiddleTaglines(raw: string | null | undefined): string[] {
 
 export function serializeMiddleTaglines(taglines: string[]): string | null {
   const normalized = Array.from({ length: MIDDLE_TAGLINE_COUNT }, (_, i) =>
-    String(taglines[i] ?? "").trim()
+    String(taglines[i] ?? "")
   );
-  return normalized.some(Boolean) ? JSON.stringify(normalized) : null;
+  return normalized.some((text) => text.trim())
+    ? JSON.stringify(normalized)
+    : null;
 }
 
 export function normalizeMiddleTaglines(input: unknown): string[] {

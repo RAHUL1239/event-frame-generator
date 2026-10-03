@@ -1,3 +1,65 @@
+const SPACE = " ";
+
+/** Some canvas fonts report 0 advance for U+0020. Infer a real space width. */
+export function measureGlyphWidth(
+  ctx: CanvasRenderingContext2D,
+  ch: string
+): number {
+  const native = ctx.measureText(ch).width;
+  if (ch !== SPACE || native > 0.5) return native;
+  const inferred =
+    ctx.measureText(`x${SPACE}x`).width - ctx.measureText("xx").width;
+  if (inferred > 0.5) return inferred;
+  const em = ctx.measureText("M").width || 16;
+  return em * 0.33;
+}
+
+export function measureLineWidth(
+  ctx: CanvasRenderingContext2D,
+  text: string
+): number {
+  const nativeSpace = ctx.measureText(SPACE).width;
+  if (nativeSpace > 0.5 || !text.includes(SPACE)) {
+    return ctx.measureText(text).width;
+  }
+  let width = 0;
+  for (const ch of text) {
+    width += measureGlyphWidth(ctx, ch);
+  }
+  return width;
+}
+
+export function fillTextWithSpaces(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth?: number
+) {
+  const nativeSpace = ctx.measureText(SPACE).width;
+  if (nativeSpace > 0.5 || !text.includes(SPACE)) {
+    if (maxWidth != null) ctx.fillText(text, x, y, maxWidth);
+    else ctx.fillText(text, x, y);
+    return;
+  }
+
+  const width = measureLineWidth(ctx, text);
+  let cursor = x;
+  if (ctx.textAlign === "center") cursor = x - width / 2;
+  else if (ctx.textAlign === "right" || ctx.textAlign === "end") {
+    cursor = x - width;
+  }
+
+  const prevAlign = ctx.textAlign;
+  ctx.textAlign = "left";
+  for (const ch of text) {
+    const advance = measureGlyphWidth(ctx, ch);
+    if (ch !== SPACE) ctx.fillText(ch, cursor, y);
+    cursor += advance;
+  }
+  ctx.textAlign = prevAlign;
+}
+
 export function splitTextIntoLines(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -16,7 +78,7 @@ export function splitTextIntoLines(
       let line = "";
       for (const word of trimmed.split(/\s+/)) {
         const test = line ? `${line} ${word}` : word;
-        if (ctx.measureText(test).width > maxWidth && line) {
+        if (measureLineWidth(ctx, test) > maxWidth && line) {
           lines.push(line);
           line = word;
         } else {
@@ -30,7 +92,7 @@ export function splitTextIntoLines(
     let line = "";
     for (const char of trimmed) {
       const test = line + char;
-      if (ctx.measureText(test).width > maxWidth && line) {
+      if (measureLineWidth(ctx, test) > maxWidth && line) {
         lines.push(line);
         line = char;
       } else {
@@ -52,8 +114,8 @@ export function fillCenteredLine(
   ctx.direction = "ltr";
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
-  const width = ctx.measureText(line).width;
-  ctx.fillText(line, centerX - width / 2, y);
+  const width = measureLineWidth(ctx, line);
+  fillTextWithSpaces(ctx, line, centerX - width / 2, y);
 }
 
 export function wrapCanvasText(

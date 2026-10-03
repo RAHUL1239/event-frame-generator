@@ -4,6 +4,11 @@ import type { PhotoCrop } from "./photo-crop";
 import { parseEventHighlights } from "./event-highlights";
 import { drawCircularImage } from "./utils";
 import { posterFont } from "./poster-fonts";
+import {
+  fillTextWithSpaces,
+  measureGlyphWidth,
+  measureLineWidth,
+} from "./canvas-text";
 import { ONE_WORLD_COLORS } from "./frames/one-world";
 
 const DEFAULT_SHOUT = "CELEBRATE WITH US!";
@@ -326,7 +331,7 @@ function wrapWords(ctx: CanvasRenderingContext2D, text: string, maxWidth: number
   let current = words[0];
   for (let i = 1; i < words.length; i++) {
     const test = `${current} ${words[i]}`;
-    if (ctx.measureText(test).width <= maxWidth) {
+    if (measureLineWidth(ctx, test) <= maxWidth) {
       current = test;
     } else {
       lines.push(current);
@@ -357,7 +362,7 @@ function drawColorfulTitle(
   for (const line of lines) {
     let lineWidth = 0;
     for (const ch of line) {
-      lineWidth += ctx.measureText(ch).width;
+      lineWidth += measureGlyphWidth(ctx, ch);
     }
     let cursor = align === "center" ? x - lineWidth / 2 : x;
     for (const ch of line) {
@@ -368,7 +373,7 @@ function drawColorfulTitle(
         ctx.fillStyle = ONE_WORLD_COLORS.navy;
       }
       ctx.fillText(ch, cursor, lineY);
-      cursor += ctx.measureText(ch).width;
+      cursor += measureGlyphWidth(ctx, ch);
     }
     lineY += lineHeight;
   }
@@ -724,7 +729,7 @@ export function drawOneWorldPersonalPoster(
     ctx.font = owFont(theme, 600, Math.round(22 * scale));
     const tagLines = wrapWords(ctx, tagline, textMaxW);
     for (const line of tagLines.slice(0, 3)) {
-      ctx.fillText(line, textX, textY);
+      fillTextWithSpaces(ctx, line, textX, textY);
       textY += Math.round(28 * scale);
     }
   }
@@ -883,7 +888,7 @@ export function drawOneWorldGroupPoster(
     ctx.font = owFont(theme, 600, Math.round(22 * scale));
     const tagLines = wrapWords(ctx, tagline, textMaxW);
     for (const line of tagLines.slice(0, 3)) {
-      ctx.fillText(line, textX, textY);
+      fillTextWithSpaces(ctx, line, textX, textY);
       textY += Math.round(28 * scale);
     }
   }

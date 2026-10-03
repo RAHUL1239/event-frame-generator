@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   MIDDLE_TAGLINE_COUNT,
   parseMiddleTaglines,
@@ -12,11 +13,16 @@ type Props = {
 };
 
 export function MiddleTaglinesAdmin({ value, onChange }: Props) {
-  const taglines = parseMiddleTaglines(value);
+  const [taglines, setTaglines] = useState(() => parseMiddleTaglines(value));
+
+  useEffect(() => {
+    setTaglines(parseMiddleTaglines(value));
+  }, [value]);
 
   function updateTagline(index: number, text: string) {
     const next = [...taglines];
     next[index] = text;
+    setTaglines(next);
     onChange(serializeMiddleTaglines(next));
   }
 
