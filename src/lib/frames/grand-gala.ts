@@ -8,7 +8,8 @@ const CREAM = "#F3EEE4";
 
 /**
  * Full PNG overlay. Photo composites into the left-center circular hole.
- * Florals, title, and taglines stay as designed — not redrawn.
+ * Florals and title stay as designed. Name and admin taglines paint
+ * on top of the overlay in the right column, above the divider.
  */
 export const grandGalaFrame: PosterFrame = {
   key: "grand-gala",
@@ -57,11 +58,14 @@ export const grandGalaFrame: PosterFrame = {
     }),
     overlayName: {
       xRatio: 0.6,
-      yRatio: 0.7,
+      yRatio: 0.4,
       maxWidthRatio: 0.36,
+      maxBottomRatio: 0.695,
       align: "left",
       color: NAVY,
-      fontSize: 46,
+      taglineColor: SAGE,
+      taglineSize: 26,
+      fontSize: 42,
     },
   },
 };

@@ -8,7 +8,8 @@ const GOLD = "#C9A86C";
 
 /**
  * Full PNG overlay. Photo composites into the left-center circular hole.
- * Waves, title, and taglines stay as designed — not redrawn.
+ * Waves and title stay as designed. Name and admin taglines paint
+ * on top of the overlay in the right column, above the divider.
  */
 export const sunsetSoundFrame: PosterFrame = {
   key: "sunset-sound",
@@ -57,11 +58,14 @@ export const sunsetSoundFrame: PosterFrame = {
     }),
     overlayName: {
       xRatio: 0.62,
-      yRatio: 0.658,
-      maxWidthRatio: 0.36,
+      yRatio: 0.3,
+      maxWidthRatio: 0.34,
+      maxBottomRatio: 0.645,
       align: "left",
       color: PURPLE,
-      fontSize: 46,
+      taglineColor: TERRACOTTA,
+      taglineSize: 26,
+      fontSize: 42,
     },
   },
 };

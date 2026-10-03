@@ -6,15 +6,20 @@ import type {
 import type { FrameFullOverlayConfig } from "../frame-overlays";
 
 export type OverlayNameSlot = {
-  /** Name anchor X as a fraction of canvas width. */
+  /** Copy column X as a fraction of canvas width. */
   xRatio: number;
-  /** Name baseline Y as a fraction of canvas height. */
+  /** First line baseline as a fraction of canvas height. */
   yRatio: number;
   maxWidthRatio: number;
+  /** Keep name and taglines above this Y (divider / footer art). */
+  maxBottomRatio?: number;
   align: "center" | "left";
   color: string;
-  /** Font size in design pixels at 1080. */
+  /** Name size in design pixels at 1080. */
   fontSize: number;
+  taglineColor?: string;
+  /** Tagline size in design pixels at 1080. */
+  taglineSize?: number;
 };
 
 export type FrameLayout =

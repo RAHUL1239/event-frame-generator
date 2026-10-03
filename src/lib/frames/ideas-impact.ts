@@ -8,7 +8,8 @@ const CREAM = "#F6F3EE";
 
 /**
  * Full PNG overlay. Photo composites into the left rounded-rect hole.
- * Title, headline, and taglines stay as designed — not redrawn.
+ * Title stays as designed. Name and admin taglines paint on top of
+ * the overlay in the right column, above the divider.
  */
 export const ideasImpactFrame: PosterFrame = {
   key: "ideas-impact",
@@ -59,11 +60,14 @@ export const ideasImpactFrame: PosterFrame = {
     }),
     overlayName: {
       xRatio: 0.54,
-      yRatio: 0.705,
+      yRatio: 0.3,
       maxWidthRatio: 0.42,
+      maxBottomRatio: 0.7,
       align: "left",
       color: NAVY,
-      fontSize: 46,
+      taglineColor: SLATE,
+      taglineSize: 26,
+      fontSize: 42,
     },
   },
 };

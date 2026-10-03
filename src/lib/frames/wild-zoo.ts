@@ -9,7 +9,8 @@ const GOLD = "#F4B400";
 
 /**
  * Full PNG overlay. Photo composites into the left-center circular hole.
- * Animals, leaves, and baked-in copy stay as designed — not redrawn.
+ * Animals and leaves stay as designed. Name and admin taglines paint
+ * on top of the overlay in the right column, above the location bar.
  */
 export const wildZooFrame: PosterFrame = {
   key: "wild-zoo",
@@ -58,11 +59,14 @@ export const wildZooFrame: PosterFrame = {
     }),
     overlayName: {
       xRatio: 0.54,
-      yRatio: 0.615,
+      yRatio: 0.32,
       maxWidthRatio: 0.42,
+      maxBottomRatio: 0.655,
       align: "left",
       color: GREEN,
-      fontSize: 46,
+      taglineColor: TEAL,
+      taglineSize: 26,
+      fontSize: 42,
     },
   },
 };

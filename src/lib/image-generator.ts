@@ -63,7 +63,7 @@ import {
   isOneWorldLayout,
 } from "./one-world-poster-layout";
 import {
-  drawOverlayHoleName,
+  drawOverlayHoleCopy,
   drawOverlayHolePhoto,
   isOverlayHoleLayout,
 } from "./overlay-hole-layout";
@@ -135,6 +135,42 @@ export type GroupDpRenderInput = GroupPosterRenderInput;
 
 function getEventGenderTagline(event: EventWithOptions, key: string) {
   return event.genderOptions.find((o) => o.key === key)?.tagline ?? "";
+}
+
+function uniqueTaglines(values: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const value of values) {
+    const text = value.trim();
+    const key = text.toLowerCase();
+    if (!text || seen.has(key)) continue;
+    seen.add(key);
+    out.push(text);
+  }
+  return out;
+}
+
+/** Admin middle / gender / footer copy that should appear on a poster. */
+function collectPosterTaglines(
+  event: EventWithOptions,
+  kind: "personal" | "group",
+  includeFooter: boolean,
+  genderMode: "all" | "shared" = "all"
+): string[] {
+  const middle = parseMiddleTaglines(event.middleTaglines);
+  const footer = includeFooter ? event.tagline ?? "" : "";
+  let gender: string[] = [];
+  if (kind === "group") {
+    gender = [getEventGenderTagline(event, "group")];
+  } else {
+    const personal = uniqueTaglines(
+      event.genderOptions
+        .filter((option) => option.key !== "group")
+        .map((option) => option.tagline)
+    );
+    gender = genderMode === "shared" && personal.length !== 1 ? [] : personal;
+  }
+  return uniqueTaglines([...middle, ...gender, footer]);
 }
 
 function frameFont(
@@ -976,8 +1012,11 @@ function drawPersonalNameBlock(
 
   let lineY = nameBottom + Math.round(nameFontSize * 0.45);
   for (const tag of activeTaglines) {
-    fillTextWithSpaces(ctx, tag, padX, lineY);
-    lineY += Math.round(30 * fontScale);
+    const wrapped = splitTextIntoLines(ctx, tag, placement.maxWidth);
+    for (const line of wrapped) {
+      fillTextWithSpaces(ctx, line, padX, lineY);
+      lineY += Math.round(30 * fontScale);
+    }
   }
   return lineY + Math.round(4 * fontScale);
 }
@@ -1593,7 +1632,12 @@ async function drawBmmPersonalPoster(
       photoRadius,
       ringOuterInset
     );
-    const middleTaglines = parseMiddleTaglines(event.middleTaglines);
+    const middleTaglines = collectPosterTaglines(
+      event,
+      "personal",
+      !theme.paint.includeEventTagline,
+      "shared"
+    );
     const attendeeBottomY = drawPersonalBesidePhotoTextStack(
       ctx,
       {
@@ -1674,7 +1718,12 @@ async function drawBmmPersonalPoster(
       160,
       POSTER_W - textX - layout.inset - layoutScale(layout, 24, POSTER_W)
     );
-    const middleTaglines = parseMiddleTaglines(event.middleTaglines);
+    const middleTaglines = collectPosterTaglines(
+      event,
+      "personal",
+      true,
+      "shared"
+    );
     const attendeeBottomY = drawPersonalBesidePhotoTextStack(
       ctx,
       {
@@ -1712,7 +1761,14 @@ async function drawBmmPersonalPoster(
     await paintFrameOverlay(ctx, theme, POSTER_W, POSTER_H);
   }
   if (useOverlayHole) {
-    drawOverlayHoleName(ctx, theme, displayName, POSTER_W, POSTER_H);
+    drawOverlayHoleCopy(
+      ctx,
+      theme,
+      displayName,
+      collectPosterTaglines(event, "personal", true),
+      POSTER_W,
+      POSTER_H
+    );
   }
 }
 
@@ -1856,7 +1912,12 @@ async function drawBmmGroupPoster(
       ) + layoutScale(layout, 16, POSTER_W);
 
     const groupName = input.groupName.trim() || "Our Group";
-    const middleTaglines = parseMiddleTaglines(event.middleTaglines);
+    const middleTaglines = collectPosterTaglines(
+      event,
+      "group",
+      !theme.paint.includeEventTagline,
+      "shared"
+    );
     const middleY = resolveMiddleBesidePhotoY(
       avgPhotoY,
       avgPhotoRadius,
@@ -1954,7 +2015,12 @@ async function drawBmmGroupPoster(
       ) + layoutScale(layout, 16, POSTER_W);
 
     const groupName = input.groupName.trim() || "Our Group";
-    const middleTaglines = parseMiddleTaglines(event.middleTaglines);
+    const middleTaglines = collectPosterTaglines(
+      event,
+      "group",
+      true,
+      "shared"
+    );
     const middleY = resolveMiddleBesidePhotoY(
       avgPhotoY,
       avgPhotoRadius,
@@ -1991,7 +2057,14 @@ async function drawBmmGroupPoster(
     await paintFrameOverlay(ctx, theme, POSTER_W, POSTER_H);
   }
   if (useOverlayHole) {
-    drawOverlayHoleName(ctx, theme, groupName, POSTER_W, POSTER_H);
+    drawOverlayHoleCopy(
+      ctx,
+      theme,
+      groupName,
+      collectPosterTaglines(event, "group", true),
+      POSTER_W,
+      POSTER_H
+    );
   }
 }
 
@@ -2075,7 +2148,12 @@ async function drawPersonalDp(
     120,
     DP_W - textX - layout.inset - layoutScale(layout, scaleCoord(24, DP_W), DP_W)
   );
-  const middleTaglines = parseMiddleTaglines(event.middleTaglines);
+  const middleTaglines = collectPosterTaglines(
+    event,
+    "personal",
+    true,
+    "shared"
+  );
   const attendeeBottomY = drawPersonalBesidePhotoTextStack(
     ctx,
     {
@@ -2182,7 +2260,12 @@ async function drawGroupDp(
     layoutScale(layout, scaleCoord(16, DP_W), DP_W);
 
   const groupName = input.groupName.trim() || "Our Group";
-  const middleTaglines = parseMiddleTaglines(event.middleTaglines);
+  const middleTaglines = collectPosterTaglines(
+    event,
+    "group",
+    true,
+    "shared"
+  );
   const middleY = resolveMiddleBesidePhotoY(
     avgPhotoY,
     avgPhotoRadius,
@@ -2255,7 +2338,14 @@ export async function renderPersonalDpCanvas(
     const displayName = `${input.firstName} ${input.lastName}`.trim();
     drawOverlayHolePhoto(ctx, theme, photo, input.photoCrop, DP_W, DP_H);
     await paintFrameOverlay(ctx, theme, DP_W, DP_H);
-    drawOverlayHoleName(ctx, theme, displayName, DP_W, DP_H);
+    drawOverlayHoleCopy(
+      ctx,
+      theme,
+      displayName,
+      collectPosterTaglines(input.event, "personal", true),
+      DP_W,
+      DP_H
+    );
     return;
   }
   await drawPersonalDp(ctx, input, logo, photo, theme, layout);
@@ -2296,7 +2386,14 @@ export async function renderGroupDpCanvas(
     const groupName = input.groupName.trim() || "Our Group";
     drawOverlayHolePhoto(ctx, theme, photos[0], input.photoCrops[0], DP_W, DP_H);
     await paintFrameOverlay(ctx, theme, DP_W, DP_H);
-    drawOverlayHoleName(ctx, theme, groupName, DP_W, DP_H);
+    drawOverlayHoleCopy(
+      ctx,
+      theme,
+      groupName,
+      collectPosterTaglines(input.event, "group", true),
+      DP_W,
+      DP_H
+    );
     return;
   }
   await drawGroupDp(ctx, input, logo, photos, theme, layout);
