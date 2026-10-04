@@ -397,7 +397,7 @@ export default function HomePage() {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-20 lg:px-6">
-          <h2 className="text-center text-5xl font-extrabold text-gray-900 md:text-6xl">
+          <h2 className="text-center text-6xl font-extrabold leading-tight text-gray-900 md:text-7xl">
             Why organizers use it
           </h2>
           <div className="mt-12 grid gap-10 md:grid-cols-3">
@@ -406,16 +406,16 @@ export default function HomePage() {
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-purple-soft text-brand-purple">
                   {benefitIcon(benefit.icon)}
                 </div>
-                <h3 className="mt-5 text-2xl font-bold text-gray-900">
+                <h3 className="mt-5 text-3xl font-bold leading-snug text-gray-900 md:text-4xl">
                   {benefit.title}
                 </h3>
-                <p className="mt-3 text-lg leading-relaxed text-gray-600">
+                <p className="mt-4 text-2xl leading-relaxed text-gray-600">
                   {benefit.body}
                 </p>
               </article>
             ))}
           </div>
-          <p className="mt-10 text-center text-base text-gray-500">
+          <p className="mt-10 text-center text-xl leading-relaxed text-gray-500 md:text-2xl">
             Guests share on the apps they already use — WhatsApp, Instagram, and
             Facebook.
           </p>
@@ -423,7 +423,7 @@ export default function HomePage() {
 
         <section id="how-it-works" className="scroll-mt-24 bg-slate-50">
           <div className="mx-auto max-w-7xl px-4 py-20 lg:px-6">
-            <h2 className="text-center text-5xl font-extrabold text-gray-900 md:text-6xl">
+            <h2 className="text-center text-6xl font-extrabold leading-tight text-gray-900 md:text-7xl">
               One event. Three simple steps.
             </h2>
             <ol className="mt-14 grid gap-10 md:grid-cols-3">
@@ -431,14 +431,14 @@ export default function HomePage() {
                 <li key={item.step} className="text-center">
                   <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white text-brand-purple shadow-sm ring-1 ring-violet-100">
                     {stepIcon(item.icon)}
-                    <span className="absolute -right-2 -top-2 rounded-full bg-brand-gold px-1.5 text-xs font-bold text-white">
+                    <span className="absolute -right-2 -top-2 rounded-full bg-brand-gold px-2 py-0.5 text-sm font-bold text-white">
                       {item.step}
                     </span>
                   </div>
-                  <h3 className="mt-5 text-2xl font-bold text-gray-900">
+                  <h3 className="mt-5 text-3xl font-bold leading-snug text-gray-900 md:text-4xl">
                     {item.title}
                   </h3>
-                  <p className="mt-3 text-lg leading-relaxed text-gray-600">
+                  <p className="mt-4 text-2xl leading-relaxed text-gray-600">
                     {item.body}
                   </p>
                 </li>
@@ -496,13 +496,13 @@ export default function HomePage() {
 
         <section id="research" className="scroll-mt-24 border-y border-violet-100 bg-white">
           <div className="mx-auto max-w-7xl px-4 py-20 lg:px-6">
-            <p className="text-center text-sm font-bold uppercase tracking-[0.22em] text-brand-purple">
+            <p className="text-center text-base font-bold uppercase tracking-[0.22em] text-brand-purple">
               Published research
             </p>
-            <h2 className="mt-3 text-center text-5xl font-extrabold text-gray-900 md:text-6xl">
+            <h2 className="mt-3 text-center text-6xl font-extrabold leading-tight text-gray-900 md:text-7xl">
               The power of a personal recommendation
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-center text-xl leading-relaxed text-gray-600">
+            <p className="mx-auto mt-6 max-w-4xl text-center text-2xl leading-relaxed text-gray-600">
               Platforms that turn guests into sharers show up in independent
               research on trust and ticket sales. These are the figures behind
               the product.
@@ -513,17 +513,17 @@ export default function HomePage() {
                   <p className="text-7xl font-extrabold text-brand-purple">
                     {item.stat}
                   </p>
-                  <p className="mt-3 text-xl font-medium text-gray-900">
+                  <p className="mt-4 text-3xl font-medium leading-snug text-gray-900 md:text-4xl">
                     {item.label}
                   </p>
-                  <p className="mt-4 text-xl leading-relaxed text-gray-600">
+                  <p className="mt-5 text-2xl leading-relaxed text-gray-600">
                     {item.detail}
                   </p>
                   <a
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-5 inline-block text-lg font-semibold text-brand-purple underline hover:text-brand-purple-dark"
+                    className="mt-5 inline-block text-2xl font-semibold text-brand-purple underline hover:text-brand-purple-dark"
                   >
                     {item.source}
                   </a>
