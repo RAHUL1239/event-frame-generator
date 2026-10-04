@@ -17,6 +17,9 @@ export const sponsorFrame = defineClassicFrame({
     text: "I am a sponsor",
     background: "#D4AF37",
     color: "#1A242F",
+    fontSize: 12,
+    uppercase: true,
+    letterSpacing: 1.1,
   },
   tagline: {
     fontSize: 34,

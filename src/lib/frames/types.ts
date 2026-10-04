@@ -24,9 +24,9 @@ export type FrameTaglinePaint = {
   placement: "slot" | "after-name";
   align: "center" | "left";
   color: string;
-  /** Design pixels at 1080. Larger and bolder than other poster copy. */
+  /** Design pixels at 1080. Each theme sets size/weight relative to the name. */
   fontSize: number;
-  fontWeight: 700 | 800;
+  fontWeight: 500 | 600 | 700 | 800;
   lineHeight?: number;
   /** Extra space between the attendee name and the first tagline (after-name). */
   afterNameGap?: number;
@@ -62,8 +62,10 @@ export type FrameTypography = {
   headlineSize: number;
   headlineLine: number;
   personalNameSize: number;
+  personalNameWeight?: 700 | 800;
   personalTaglineSize: number;
   headerNameSize: number;
+  headerNameWeight?: 600 | 700;
   headerNameLine: number;
   headerVenueSize: number;
   headerHashtagSize: number;
@@ -80,6 +82,11 @@ export type FrameRoleBadge = {
   text: string;
   background: string;
   color: string;
+  /** Design pixels at 1080. Smaller than name and taglines. */
+  fontSize?: number;
+  uppercase?: boolean;
+  /** Extra tracking in design pixels. */
+  letterSpacing?: number;
 };
 
 export type GsHeaderStyle = {

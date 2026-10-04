@@ -17,6 +17,9 @@ export const volunteerFrame = defineClassicFrame({
     text: "I am a volunteer",
     background: "#E85D24",
     color: "#ffffff",
+    fontSize: 12,
+    uppercase: true,
+    letterSpacing: 1.1,
   },
   tagline: {
     fontSize: 34,

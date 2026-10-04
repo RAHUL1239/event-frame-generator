@@ -531,30 +531,34 @@ function fillRoundRect(
 
 function drawRoleBadge(
   ctx: CanvasRenderingContext2D,
-  text: string,
-  background: string,
-  color: string,
+  badge: NonNullable<ResolvedFrameTheme["paint"]["roleBadge"]>,
   x: number,
   centerY: number,
   theme: ResolvedFrameTheme,
   fontScale: number,
   maxRight: number
 ) {
-  const fontSize = Math.round(16 * fontScale);
+  const label = badge.uppercase ? badge.text.toUpperCase() : badge.text;
+  const fontSize = Math.round((badge.fontSize ?? 13) * fontScale);
   ctx.save();
   ctx.font = frameFont(theme, 700, fontSize);
+  if (badge.letterSpacing != null) {
+    (
+      ctx as CanvasRenderingContext2D & { letterSpacing?: string }
+    ).letterSpacing = `${badge.letterSpacing * fontScale}px`;
+  }
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
-  const padX = Math.round(14 * fontScale);
-  const padY = Math.round(7 * fontScale);
-  const textW = ctx.measureText(text).width;
+  const padX = Math.round(12 * fontScale);
+  const padY = Math.round(6 * fontScale);
+  const textW = ctx.measureText(label).width;
   const h = fontSize + padY * 2;
   const w = Math.min(textW + padX * 2, Math.max(40, maxRight - x));
   const y = centerY - h / 2;
-  ctx.fillStyle = background;
+  ctx.fillStyle = badge.background;
   fillRoundRect(ctx, x, y, w, h, h / 2);
-  ctx.fillStyle = color;
-  ctx.fillText(text, x + padX, centerY, w - padX * 2);
+  ctx.fillStyle = badge.color;
+  ctx.fillText(label, x + padX, centerY, w - padX * 2);
   ctx.restore();
 }
 
@@ -595,9 +599,7 @@ function drawBmmHeader(
     }
     drawRoleBadge(
       ctx,
-      badge.text,
-      badge.background,
-      badge.color,
+      badge,
       badgeX,
       logoTop + logoH / 2,
       theme,
@@ -613,7 +615,7 @@ function drawBmmHeader(
   const nameFontSize = Math.round(type.headerNameSize * fontScale);
   const nameLineHeight = Math.round(type.headerNameLine * fontScale);
   const nameMaxWidth = layout.innerW - Math.round(32 * fontScale);
-  ctx.font = frameFont(theme, 700, nameFontSize);
+  ctx.font = frameFont(theme, type.headerNameWeight ?? 700, nameFontSize);
   const nameLines = splitTextIntoLines(ctx, event.name.toUpperCase(), nameMaxWidth);
 
   const titleGap = layoutScale(layout, LOGO_TO_TITLE_GAP, canvasW);
@@ -972,7 +974,11 @@ function drawPersonalNameBlock(
 
   if (upperName) {
     ctx.fillStyle = nameColor;
-    ctx.font = frameFont(theme, 700, nameFontSize);
+    ctx.font = frameFont(
+      theme,
+      theme.paint.type.personalNameWeight ?? 700,
+      nameFontSize
+    );
     const nameLines = splitTextIntoLines(ctx, upperName, placement.maxWidth);
     let lineY = contentY;
     for (const line of nameLines) {
