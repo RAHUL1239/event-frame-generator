@@ -409,7 +409,7 @@ export default function HomePage() {
                 <h3 className="mt-5 text-xl font-bold text-gray-900">
                   {benefit.title}
                 </h3>
-                <p className="mt-3 text-base leading-relaxed text-gray-600">
+                <p className="mt-3 text-lg leading-relaxed text-gray-600">
                   {benefit.body}
                 </p>
               </article>
@@ -438,7 +438,7 @@ export default function HomePage() {
                   <h3 className="mt-5 text-xl font-bold text-gray-900">
                     {item.title}
                   </h3>
-                  <p className="mt-3 text-base leading-relaxed text-gray-600">
+                  <p className="mt-3 text-lg leading-relaxed text-gray-600">
                     {item.body}
                   </p>
                 </li>
@@ -502,7 +502,7 @@ export default function HomePage() {
             <h2 className="mt-3 text-center text-4xl font-extrabold text-gray-900 md:text-5xl">
               The power of a personal recommendation
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-center text-gray-600">
+            <p className="mx-auto mt-4 max-w-2xl text-center text-xl leading-relaxed text-gray-600">
               Platforms that turn guests into sharers show up in independent
               research on trust and ticket sales. These are the figures behind
               the product.
@@ -516,14 +516,14 @@ export default function HomePage() {
                   <p className="mt-3 text-xl font-medium text-gray-900">
                     {item.label}
                   </p>
-                  <p className="mt-4 text-base leading-relaxed text-gray-600">
+                  <p className="mt-4 text-xl leading-relaxed text-gray-600">
                     {item.detail}
                   </p>
                   <a
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-5 inline-block text-base font-semibold text-brand-purple underline hover:text-brand-purple-dark"
+                    className="mt-5 inline-block text-lg font-semibold text-brand-purple underline hover:text-brand-purple-dark"
                   >
                     {item.source}
                   </a>
