@@ -51,7 +51,7 @@ export function isOneWorldLayout(theme: ResolvedFrameTheme): boolean {
 
 function owFont(
   theme: ResolvedFrameTheme,
-  weight: 400 | 600 | 700 | 800,
+  weight: 400 | 500 | 600 | 700 | 800,
   sizePx: number
 ) {
   return posterFont(weight === 800 ? 700 : weight, sizePx, theme.paint.type.fontFamily);
