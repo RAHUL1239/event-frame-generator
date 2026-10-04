@@ -29,7 +29,7 @@ export const wildZooFrame: PosterFrame = {
   overlayKey: "wild-zoo",
   posterTextColor: GREEN,
   overlay: {
-    src: "/frames/wild-about-the-zoo-frame.png?v=2",
+    src: "/frames/wild-about-the-zoo-frame.png?v=3",
     holeShape: "circle",
     holeCenterXRatio: 286.69 / 1024,
     holeCenterYRatio: 414.12 / 1024,
