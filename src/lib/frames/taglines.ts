@@ -11,7 +11,6 @@ export function defaultClassicTagline(
   overrides: Partial<FrameTaglinePaint> = {}
 ): FrameTaglinePaint {
   return {
-    placement: "after-name",
     align: "left",
     color,
     fontSize: 32,
