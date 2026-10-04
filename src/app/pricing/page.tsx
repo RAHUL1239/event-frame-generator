@@ -80,7 +80,7 @@ export default function PricingPage() {
           <p className="text-base font-semibold uppercase tracking-[0.18em] text-brand-gold">
             For event organizers
           </p>
-          <h1 className="mt-4 max-w-4xl text-6xl font-bold leading-tight text-brand-teal md:text-7xl">
+          <h1 className="mt-4 max-w-4xl text-4xl font-bold leading-tight text-brand-teal md:text-5xl">
             One event. One price. Let your guests spread the word.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-gray-700 sm:text-xl">
@@ -112,8 +112,8 @@ export default function PricingPage() {
                 <h2
                   className={
                     plan.featured
-                      ? "text-3xl font-semibold text-brand-gold"
-                      : "text-3xl font-semibold text-brand-teal"
+                      ? "text-2xl font-semibold text-brand-gold"
+                      : "text-2xl font-semibold text-brand-teal"
                   }
                 >
                   {plan.name}
@@ -121,8 +121,8 @@ export default function PricingPage() {
                 <p
                   className={
                     plan.featured
-                      ? "mt-4 text-6xl font-bold text-brand-gold"
-                      : "mt-4 text-5xl font-bold text-brand-teal"
+                      ? "mt-4 text-5xl font-bold text-brand-gold"
+                      : "mt-4 text-4xl font-bold text-brand-teal"
                   }
                 >
                   {plan.price}
@@ -173,12 +173,12 @@ export default function PricingPage() {
 
         <section className="border-y border-brand-cream-dark bg-white">
           <div className="mx-auto max-w-6xl px-6 py-16">
-            <h2 className="text-5xl font-bold text-brand-teal">
+            <h2 className="text-4xl font-bold text-brand-teal">
               How the price works
             </h2>
             <div className="mt-8 grid gap-6 md:grid-cols-2">
               <article className="rounded-2xl border border-brand-cream-dark p-6">
-                <h3 className="text-3xl font-semibold text-brand-teal">
+                <h3 className="text-2xl font-semibold text-brand-teal">
                   One fee covers the event
                 </h3>
                 <p className="mt-3 text-lg leading-relaxed text-gray-700 sm:text-xl">
@@ -188,7 +188,7 @@ export default function PricingPage() {
                 </p>
               </article>
               <article className="rounded-2xl border border-brand-cream-dark p-6">
-                <h3 className="text-3xl font-semibold text-brand-teal">
+                <h3 className="text-2xl font-semibold text-brand-teal">
                   Event size helps us quote larger work
                 </h3>
                 <p className="mt-3 text-lg leading-relaxed text-gray-700 sm:text-xl">
@@ -198,7 +198,7 @@ export default function PricingPage() {
                 </p>
               </article>
               <article className="rounded-2xl border border-brand-cream-dark p-6">
-                <h3 className="text-3xl font-semibold text-brand-teal">
+                <h3 className="text-2xl font-semibold text-brand-teal">
                   Ninety days, then an extension if you need it
                 </h3>
                 <p className="mt-3 text-lg leading-relaxed text-gray-700 sm:text-xl">
@@ -207,7 +207,7 @@ export default function PricingPage() {
                 </p>
               </article>
               <article className="rounded-2xl border border-brand-cream-dark p-6">
-                <h3 className="text-3xl font-semibold text-brand-teal">
+                <h3 className="text-2xl font-semibold text-brand-teal">
                   What guests get
                 </h3>
                 <p className="mt-3 text-lg leading-relaxed text-gray-700 sm:text-xl">
@@ -222,12 +222,12 @@ export default function PricingPage() {
         </section>
 
         <section className="mx-auto max-w-6xl px-6 py-16">
-            <h2 className="text-5xl font-bold text-brand-teal">
+            <h2 className="text-4xl font-bold text-brand-teal">
               Discounts and later plans
             </h2>
           <ul className="mt-8 grid gap-6 md:grid-cols-3">
             <li className="rounded-2xl bg-white p-6 shadow-sm">
-              <p className="text-3xl font-bold text-brand-gold">25% off</p>
+              <p className="text-2xl font-bold text-brand-gold">25% off</p>
               <p className="mt-2 font-semibold text-brand-teal">
                 Nonprofits and community groups
               </p>
@@ -236,7 +236,7 @@ export default function PricingPage() {
               </p>
             </li>
             <li className="rounded-2xl bg-white p-6 shadow-sm">
-              <p className="text-3xl font-bold text-brand-gold">15% off</p>
+              <p className="text-2xl font-bold text-brand-gold">15% off</p>
               <p className="mt-2 font-semibold text-brand-teal">
                 Three-event bundle
               </p>
@@ -245,7 +245,7 @@ export default function PricingPage() {
               </p>
             </li>
             <li className="rounded-2xl bg-white p-6 shadow-sm">
-              <p className="text-3xl font-bold text-brand-gold">Later</p>
+              <p className="text-2xl font-bold text-brand-gold">Later</p>
               <p className="mt-2 font-semibold text-brand-teal">Annual plans</p>
               <p className="mt-3 text-lg leading-relaxed text-gray-700 sm:text-xl">
                 We are not selling annual plans yet. They will come later.
@@ -256,7 +256,7 @@ export default function PricingPage() {
 
         <section className="bg-brand-teal text-brand-cream">
           <div className="mx-auto max-w-6xl px-6 py-16">
-            <h2 className="text-5xl font-bold">Try it before you write</h2>
+            <h2 className="text-4xl font-bold">Try it before you write</h2>
             <p className="mt-4 max-w-2xl text-lg leading-relaxed text-brand-cream/90 sm:text-xl">
               Open the free preview, add a photo and name, and share a sample
               poster. No setup request required.
@@ -272,7 +272,7 @@ export default function PricingPage() {
 
         <section className="bg-brand-teal">
           <div className="mx-auto max-w-6xl px-6 py-16">
-            <h2 className="max-w-xl text-5xl font-bold text-brand-cream">
+            <h2 className="max-w-xl text-4xl font-bold text-brand-cream">
               Ready to set up an event?
             </h2>
             <p className="mt-4 max-w-xl text-lg leading-relaxed text-brand-cream/85 sm:text-xl">

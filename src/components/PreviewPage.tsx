@@ -220,16 +220,16 @@ export function PreviewPage({
 
       <div className="mb-5 rounded-[1.75rem] border-2 border-brand-gold bg-[#f6ecd6] px-6 py-7 text-center shadow-sm">
         <p
-          className="flex items-center justify-center gap-2 text-3xl font-bold leading-tight md:text-4xl"
+          className="flex items-center justify-center gap-2 text-2xl font-bold leading-tight md:text-3xl"
           style={{ color: SHARE_TEAL }}
         >
-          <span aria-hidden className="text-2xl md:text-3xl">
+          <span aria-hidden className="text-xl md:text-2xl">
             🎉
           </span>
           You are participant
         </p>
         <p
-          className="mt-1 text-4xl font-bold tracking-tight md:text-5xl"
+          className="mt-1 text-3xl font-bold tracking-tight md:text-4xl"
           style={{ color: SHARE_TEAL }}
         >
           #{participantNumber.toLocaleString("en-US")}

@@ -43,7 +43,7 @@ export function OrganizerLoginForm({
         onSubmit={handleSubmit}
         className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg"
       >
-        <h1 className="text-3xl font-bold text-brand-teal">{eventName}</h1>
+        <h1 className="text-2xl font-bold text-brand-teal">{eventName}</h1>
         <p className="mt-2 text-lg leading-relaxed text-gray-500 sm:text-xl">
           Sign in to see who has created a poster for this event.
         </p>

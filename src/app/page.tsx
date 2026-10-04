@@ -291,7 +291,7 @@ export default function HomePage() {
               <p className="text-sm font-bold uppercase tracking-[0.22em] text-brand-purple">
                 For event organizers
               </p>
-              <h1 className="mt-4 max-w-xl text-6xl font-extrabold leading-[1.05] tracking-tight text-brand-purple sm:text-7xl lg:text-7xl">
+              <h1 className="mt-4 max-w-xl text-4xl font-extrabold leading-[1.05] tracking-tight text-brand-purple sm:text-5xl lg:text-5xl">
                 Your attendees become your promoters
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-gray-600 sm:text-xl">
@@ -372,7 +372,7 @@ export default function HomePage() {
                 <IconPeople />
               </span>
               <div>
-                <p className="text-5xl font-extrabold text-gray-900">
+                <p className="text-4xl font-extrabold text-gray-900">
                   {formatCount(DISPLAY_ATTENDEES)}
                 </p>
                 <p className="mt-1 text-lg leading-relaxed text-gray-500 sm:text-xl">
@@ -385,7 +385,7 @@ export default function HomePage() {
                 <IconCalendar />
               </span>
               <div>
-                <p className="text-5xl font-extrabold text-gray-900">
+                <p className="text-4xl font-extrabold text-gray-900">
                   {formatCount(DISPLAY_EVENTS)}
                 </p>
                 <p className="mt-1 text-lg leading-relaxed text-gray-500 sm:text-xl">
@@ -397,7 +397,7 @@ export default function HomePage() {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-20 lg:px-6">
-          <h2 className="text-center text-6xl font-extrabold leading-tight text-gray-900 md:text-7xl">
+          <h2 className="text-center text-4xl font-extrabold leading-tight text-gray-900 md:text-5xl">
             Why organizers use it
           </h2>
           <div className="mt-12 grid gap-10 md:grid-cols-3">
@@ -406,7 +406,7 @@ export default function HomePage() {
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-purple-soft text-brand-purple">
                   {benefitIcon(benefit.icon)}
                 </div>
-                <h3 className="mt-5 text-3xl font-bold leading-snug text-gray-900 md:text-4xl">
+                <h3 className="mt-5 text-2xl font-bold leading-snug text-gray-900 md:text-3xl">
                   {benefit.title}
                 </h3>
                 <p className="mt-4 text-lg leading-relaxed text-gray-600 sm:text-xl">
@@ -423,7 +423,7 @@ export default function HomePage() {
 
         <section id="how-it-works" className="scroll-mt-24 bg-slate-50">
           <div className="mx-auto max-w-7xl px-4 py-20 lg:px-6">
-            <h2 className="text-center text-6xl font-extrabold leading-tight text-gray-900 md:text-7xl">
+            <h2 className="text-center text-4xl font-extrabold leading-tight text-gray-900 md:text-5xl">
               One event. Three simple steps.
             </h2>
             <ol className="mt-14 grid gap-10 md:grid-cols-3">
@@ -435,7 +435,7 @@ export default function HomePage() {
                       {item.step}
                     </span>
                   </div>
-                  <h3 className="mt-5 text-3xl font-bold leading-snug text-gray-900 md:text-4xl">
+                  <h3 className="mt-5 text-2xl font-bold leading-snug text-gray-900 md:text-3xl">
                     {item.title}
                   </h3>
                   <p className="mt-4 text-lg leading-relaxed text-gray-600 sm:text-xl">
@@ -449,7 +449,7 @@ export default function HomePage() {
 
         <section id="examples" className="scroll-mt-24">
           <div className="mx-auto max-w-7xl px-4 py-20 lg:px-6">
-            <h2 className="text-center text-5xl font-extrabold text-gray-900 md:text-6xl">
+            <h2 className="text-center text-4xl font-extrabold text-gray-900 md:text-5xl">
               Make every invitation personal. Then share it.
             </h2>
             <div className="mt-12 grid items-end gap-5 sm:grid-cols-2 xl:grid-cols-4">
@@ -499,7 +499,7 @@ export default function HomePage() {
             <p className="text-center text-base font-bold uppercase tracking-[0.22em] text-brand-purple">
               Published research
             </p>
-            <h2 className="mt-3 text-center text-6xl font-extrabold leading-tight text-gray-900 md:text-7xl">
+            <h2 className="mt-3 text-center text-4xl font-extrabold leading-tight text-gray-900 md:text-5xl">
               The power of a personal recommendation
             </h2>
             <p className="mx-auto mt-6 max-w-4xl text-center text-lg leading-relaxed text-gray-600 sm:text-xl">
@@ -510,10 +510,10 @@ export default function HomePage() {
             <div className="mt-12 grid gap-8 md:grid-cols-2">
               {sources.map((item) => (
                 <article key={item.href} className="text-center md:text-left">
-                  <p className="text-7xl font-extrabold text-brand-purple">
+                  <p className="text-6xl font-extrabold text-brand-purple">
                     {item.stat}
                   </p>
-                  <p className="mt-4 text-3xl font-medium leading-snug text-gray-900 md:text-4xl">
+                  <p className="mt-4 text-2xl font-medium leading-snug text-gray-900 md:text-3xl">
                     {item.label}
                   </p>
                   <p className="mt-5 text-lg leading-relaxed text-gray-600 sm:text-xl">
@@ -539,7 +539,7 @@ export default function HomePage() {
               <span className="mt-1 hidden text-brand-purple md:block">
                 <IconShare />
               </span>
-              <h2 className="max-w-xl text-4xl font-extrabold text-gray-900 md:text-5xl">
+              <h2 className="max-w-xl text-3xl font-extrabold text-gray-900 md:text-4xl">
                 Market the next event with the people who are already coming.
               </h2>
             </div>

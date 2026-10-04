@@ -117,7 +117,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
         </span>
 
         <h2
-          className="mt-4 text-4xl font-bold"
+          className="mt-4 text-3xl font-bold"
           style={{ color: event.primaryColor }}
         >
           Enter Your Details

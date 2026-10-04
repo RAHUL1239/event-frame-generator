@@ -11,14 +11,14 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: system-ui, -apple-system, sans-serif;
-  /* Match homepage hero <p>: text-lg / sm:text-xl + leading-relaxed */
-  font-size: 1.375rem;
+  /* Slightly below homepage hero <p> (text-lg / sm:text-xl) */
+  font-size: 1.125rem;
   line-height: 1.625;
 }
 
 @media (min-width: 640px) {
   body {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
   }
 }
 

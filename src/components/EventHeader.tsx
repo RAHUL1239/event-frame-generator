@@ -31,7 +31,7 @@ export function EventHeader({ event }: Props) {
           />
           <div className="min-w-0">
             <h1
-              className="text-3xl font-bold leading-snug md:text-4xl"
+              className="text-2xl font-bold leading-snug md:text-3xl"
               style={{ color: event.accentColor }}
             >
               {event.name}
