@@ -20,10 +20,10 @@ export const elegantGoldFrame = defineClassicFrame({
     contentPadding: 50,
   },
   tagline: {
-    fontSize: 34,
+    fontSize: 30,
     fontWeight: 700,
-    lineHeight: 40,
-    afterNameGap: 56,
+    lineHeight: 50,
+    afterNameGap: 84,
     stackBelowName: true,
     color: "#ffffff",
   },
