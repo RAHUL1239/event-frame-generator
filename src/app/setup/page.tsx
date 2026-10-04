@@ -34,7 +34,7 @@ export default function SetupPage() {
         <p className="text-base font-semibold uppercase tracking-[0.18em] text-brand-gold">
           For event organizers
         </p>
-        <h1 className="mt-4 text-5xl font-bold text-brand-teal">
+        <h1 className="mt-4 text-6xl font-bold text-brand-teal">
           Set up your event
         </h1>
         <p className="mt-4 text-xl leading-relaxed text-gray-700">
@@ -48,7 +48,7 @@ export default function SetupPage() {
         </div>
 
         <section className="mt-12" aria-labelledby="pricing">
-          <h2 id="pricing" className="text-3xl font-bold text-brand-teal">
+          <h2 id="pricing" className="text-4xl font-bold text-brand-teal">
             Pricing
           </h2>
           <p className="mt-2 text-base leading-relaxed text-gray-700">

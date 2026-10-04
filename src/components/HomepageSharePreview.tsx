@@ -42,7 +42,7 @@ export function HomepageSharePreview({
     <figure className="text-center">
       <div className="flex h-full flex-col justify-end rounded-2xl bg-brand-cream p-3 shadow-lg ring-1 ring-black/5 sm:p-4">
         <section className="rounded-[1.35rem] bg-white px-4 py-4 text-left shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
-          <h3 className="text-lg font-bold" style={{ color: SHARE_TEAL }}>
+          <h3 className="text-xl font-bold" style={{ color: SHARE_TEAL }}>
             Share with friends
           </h3>
           <div className="mt-3 flex flex-col gap-2.5">

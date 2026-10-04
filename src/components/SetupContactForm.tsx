@@ -53,7 +53,7 @@ export function SetupContactForm() {
   if (sent) {
     return (
       <div className="rounded-2xl bg-white p-8 shadow-sm">
-        <h2 className="text-3xl font-bold text-brand-teal">Thanks — we got it</h2>
+        <h2 className="text-4xl font-bold text-brand-teal">Thanks — we got it</h2>
         <p className="mt-3 leading-relaxed text-gray-700">
           Your setup request is on its way. We will reach out to you soon.
         </p>
