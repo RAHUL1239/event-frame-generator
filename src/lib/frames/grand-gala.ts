@@ -30,8 +30,8 @@ export const grandGalaFrame: PosterFrame = {
   overlay: {
     src: "/frames/grand-gala-frame.png?v=2",
     holeShape: "circle",
-    holeCenterXRatio: 315.1 / 1024,
-    holeCenterYRatio: 518.35 / 1024,
+    holeCenterXRatio: 314.4 / 1024,
+    holeCenterYRatio: 518.26 / 1024,
     holeRadiusRatio: 270.5 / 1024,
   },
   paint: {
@@ -73,10 +73,10 @@ export const grandGalaFrame: PosterFrame = {
       fontSize: 40,
       fontWeight: 700,
       lineHeight: 46,
-      xRatio: 0.638,
+      xRatio: 0.705,
       yRatio: 0.548,
-      maxWidthRatio: 0.318,
-      maxBottomRatio: 0.665,
+      maxWidthRatio: 0.232,
+      maxBottomRatio: 0.678,
     },
   },
 };
