@@ -8,8 +8,8 @@ const CREAM = "#F7F1E6";
 
 /**
  * Full PNG overlay. Photo composites into the left-center circular hole.
- * Pine, holly, and title stay as designed. Name and admin taglines
- * paint on top of the overlay in the right column, above the divider.
+ * Pine, holly, and title stay as designed. Name stays in the right
+ * column; taglines sit below it, above the artwork divider.
  */
 export const christmasTogetherFrame: PosterFrame = {
   key: "christmas-together",
@@ -60,12 +60,22 @@ export const christmasTogetherFrame: PosterFrame = {
       xRatio: 0.6,
       yRatio: 0.34,
       maxWidthRatio: 0.36,
-      maxBottomRatio: 0.735,
+      maxBottomRatio: 0.52,
       align: "left",
       color: EVERGREEN,
-      taglineColor: BURGUNDY,
-      taglineSize: 26,
       fontSize: 42,
+    },
+    tagline: {
+      placement: "slot",
+      align: "left",
+      color: BURGUNDY,
+      fontSize: 38,
+      fontWeight: 700,
+      lineHeight: 44,
+      xRatio: 0.6,
+      yRatio: 0.56,
+      maxWidthRatio: 0.36,
+      maxBottomRatio: 0.73,
     },
   },
 };

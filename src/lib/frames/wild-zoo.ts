@@ -9,8 +9,9 @@ const GOLD = "#F4B400";
 
 /**
  * Full PNG overlay. Photo composites into the left-center circular hole.
- * Animals and leaves stay as designed. Name and admin taglines paint
- * on top of the overlay in the right column, above the location bar.
+ * Animals and leaves stay as designed. The guest name sits in the right
+ * column. Organizer taglines cover the baked-in sample line
+ * "Big smiles. Wild memories."
  */
 export const wildZooFrame: PosterFrame = {
   key: "wild-zoo",
@@ -61,12 +62,29 @@ export const wildZooFrame: PosterFrame = {
       xRatio: 0.54,
       yRatio: 0.32,
       maxWidthRatio: 0.42,
-      maxBottomRatio: 0.655,
+      maxBottomRatio: 0.5,
       align: "left",
       color: GREEN,
-      taglineColor: TEAL,
-      taglineSize: 26,
       fontSize: 42,
+    },
+    tagline: {
+      placement: "slot",
+      align: "left",
+      color: GREEN,
+      fontSize: 38,
+      fontWeight: 800,
+      lineHeight: 44,
+      xRatio: 0.52,
+      yRatio: 0.545,
+      maxWidthRatio: 0.45,
+      maxBottomRatio: 0.62,
+      cover: {
+        xRatio: 0.5,
+        yRatio: 0.512,
+        widthRatio: 0.48,
+        heightRatio: 0.09,
+        color: CREAM,
+      },
     },
   },
 };

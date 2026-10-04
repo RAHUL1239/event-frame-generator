@@ -18,4 +18,11 @@ export const volunteerFrame = defineClassicFrame({
     background: "#E85D24",
     color: "#ffffff",
   },
+  tagline: {
+    fontSize: 34,
+    fontWeight: 700,
+    lineHeight: 40,
+    afterNameGap: 22,
+    color: "#ffffff",
+  },
 });

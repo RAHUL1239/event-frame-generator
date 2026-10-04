@@ -18,4 +18,11 @@ export const sponsorFrame = defineClassicFrame({
     background: "#D4AF37",
     color: "#1A242F",
   },
+  tagline: {
+    fontSize: 34,
+    fontWeight: 700,
+    lineHeight: 40,
+    afterNameGap: 22,
+    color: "#ffffff",
+  },
 });

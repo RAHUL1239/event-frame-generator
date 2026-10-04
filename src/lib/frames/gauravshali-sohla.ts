@@ -66,8 +66,8 @@ export const gauravshaliSohlaFrame: PosterFrame = {
       hashtagColor: TEAL,
       hashtagSize: 37,
       taglineColor: ORANGE,
-      taglineSize: 30,
-      taglineLine: 36,
+      taglineSize: 34,
+      taglineLine: 40,
     },
     gsFooter: {
       barBounds: "full",
@@ -79,6 +79,15 @@ export const gauravshaliSohlaFrame: PosterFrame = {
       contentBottom: "flyer",
       iconColor: NAVY,
       socialHandleColor: GOLD,
+    },
+    tagline: {
+      placement: "after-name",
+      align: "left",
+      color: NAVY,
+      fontSize: 34,
+      fontWeight: 700,
+      lineHeight: 40,
+      afterNameGap: 22,
     },
   },
 };

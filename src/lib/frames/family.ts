@@ -13,4 +13,11 @@ export const familyFrame = defineClassicFrame({
   },
   borderStyle: "classic",
   photoRingWidth: 8,
+  tagline: {
+    fontSize: 34,
+    fontWeight: 700,
+    lineHeight: 40,
+    afterNameGap: 22,
+    color: "#ffffff",
+  },
 });

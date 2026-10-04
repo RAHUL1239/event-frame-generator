@@ -4,10 +4,12 @@ import type {
   FrameThemeKey,
 } from "../frame-themes";
 import type { FrameFullOverlayConfig } from "../frame-overlays";
+import { defaultClassicTagline } from "./taglines";
 import { DEFAULT_ATTRIBUTION, posterType } from "./typography";
 import type {
   FramePaint,
   FrameRoleBadge,
+  FrameTaglinePaint,
   FrameTypography,
   PosterFrame,
 } from "./types";
@@ -24,6 +26,7 @@ type ClassicFrameInput = {
   posterTextColor?: string;
   layoutProfile?: "default" | "circular";
   type?: Partial<FrameTypography>;
+  tagline?: Partial<FrameTaglinePaint>;
   roleBadge?: FrameRoleBadge;
   logoSize?: number;
 };
@@ -51,6 +54,7 @@ export function defineClassicFrame(def: ClassicFrameInput): PosterFrame {
     headlineColors: def.posterTextColor ? "token-or-poster" : "palette",
     attribution: { ...DEFAULT_ATTRIBUTION },
     type: posterType(def.type),
+    tagline: defaultClassicTagline(posterTextColor, def.tagline),
   };
 
   return { ...def, paint };

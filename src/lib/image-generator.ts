@@ -62,8 +62,9 @@ import {
   drawOneWorldPersonalPoster,
   isOneWorldLayout,
 } from "./one-world-poster-layout";
+import { drawPaintedTaglines } from "./frames/taglines";
 import {
-  drawOverlayHoleCopy,
+  drawOverlayHoleName,
   drawOverlayHolePhoto,
   isOverlayHoleLayout,
 } from "./overlay-hole-layout";
@@ -175,7 +176,7 @@ function collectPosterTaglines(
 
 function frameFont(
   theme: ResolvedFrameTheme,
-  weight: 400 | 500 | 600 | 700 | "bold" | "normal",
+  weight: 400 | 500 | 600 | 700 | 800 | "bold" | "normal",
   sizePx: number
 ) {
   return posterFont(weight, sizePx, theme.paint.type.fontFamily);
@@ -961,7 +962,8 @@ function drawPersonalNameBlock(
   ctx.textBaseline = "alphabetic";
   ctx.direction = "ltr";
   const nameColor = theme.paint.nameColor;
-  const taglineColor = getPosterTextColor(theme);
+  const tagPaint = theme.paint.tagline;
+  const taglineColor = tagPaint?.color ?? getPosterTextColor(theme);
 
   const nameFontSize = Math.round(theme.paint.type.personalNameSize * fontScale);
   const upperName = displayName.trim().toUpperCase();
@@ -981,19 +983,25 @@ function drawPersonalNameBlock(
     }
   }
 
-  if (activeTaglines.length === 0) {
+  if (activeTaglines.length === 0 || tagPaint?.placement === "slot") {
     if (!upperName) return y;
     return nameBottom + Math.round(nameFontSize * 0.28);
   }
 
-  const tagFontSize = Math.round(theme.paint.type.personalTaglineSize * fontScale);
-  const tagGap = layoutScale(layout, 18, canvasW);
+  const tagFontSize = Math.round(
+    (tagPaint?.fontSize ?? theme.paint.type.personalTaglineSize) * fontScale
+  );
+  const tagWeight = tagPaint?.fontWeight ?? 700;
+  const tagGap =
+    tagPaint?.afterNameGap != null
+      ? Math.round(tagPaint.afterNameGap * fontScale)
+      : layoutScale(layout, 18, canvasW);
   ctx.fillStyle = taglineColor;
-  ctx.font = frameFont(theme, 600, tagFontSize);
+  ctx.font = frameFont(theme, tagWeight, tagFontSize);
 
   const nameIsSingleLine = upperName && nameBottom === contentY;
   let tagX = nameIsSingleLine ? padX + nameWidth + tagGap : padX;
-  let fitsOnRow = Boolean(nameIsSingleLine);
+  let fitsOnRow = Boolean(nameIsSingleLine) && !tagPaint?.stackBelowName;
   let totalWidth = nameIsSingleLine ? nameWidth + tagGap : 0;
   for (const tag of activeTaglines) {
     totalWidth += measureLineWidth(ctx, tag) + tagGap;
@@ -1010,12 +1018,19 @@ function drawPersonalNameBlock(
     return contentY + Math.round(Math.max(nameFontSize, tagFontSize) * 0.4);
   }
 
-  let lineY = nameBottom + Math.round(nameFontSize * 0.45);
+  let lineY =
+    nameBottom +
+    (tagPaint?.afterNameGap != null
+      ? Math.round(tagPaint.afterNameGap * fontScale)
+      : Math.round(nameFontSize * 0.45));
+  const tagLineH = Math.round(
+    (tagPaint?.lineHeight ?? Math.max(tagFontSize + 6, 30)) * fontScale
+  );
   for (const tag of activeTaglines) {
     const wrapped = splitTextIntoLines(ctx, tag, placement.maxWidth);
     for (const line of wrapped) {
       fillTextWithSpaces(ctx, line, padX, lineY);
-      lineY += Math.round(30 * fontScale);
+      lineY += tagLineH;
     }
   }
   return lineY + Math.round(4 * fontScale);
@@ -1761,10 +1776,10 @@ async function drawBmmPersonalPoster(
     await paintFrameOverlay(ctx, theme, POSTER_W, POSTER_H);
   }
   if (useOverlayHole) {
-    drawOverlayHoleCopy(
+    drawOverlayHoleName(ctx, theme, displayName, POSTER_W, POSTER_H);
+    drawPaintedTaglines(
       ctx,
       theme,
-      displayName,
       collectPosterTaglines(event, "personal", true),
       POSTER_W,
       POSTER_H
@@ -2057,10 +2072,10 @@ async function drawBmmGroupPoster(
     await paintFrameOverlay(ctx, theme, POSTER_W, POSTER_H);
   }
   if (useOverlayHole) {
-    drawOverlayHoleCopy(
+    drawOverlayHoleName(ctx, theme, groupName, POSTER_W, POSTER_H);
+    drawPaintedTaglines(
       ctx,
       theme,
-      groupName,
       collectPosterTaglines(event, "group", true),
       POSTER_W,
       POSTER_H
@@ -2338,10 +2353,10 @@ export async function renderPersonalDpCanvas(
     const displayName = `${input.firstName} ${input.lastName}`.trim();
     drawOverlayHolePhoto(ctx, theme, photo, input.photoCrop, DP_W, DP_H);
     await paintFrameOverlay(ctx, theme, DP_W, DP_H);
-    drawOverlayHoleCopy(
+    drawOverlayHoleName(ctx, theme, displayName, DP_W, DP_H);
+    drawPaintedTaglines(
       ctx,
       theme,
-      displayName,
       collectPosterTaglines(input.event, "personal", true),
       DP_W,
       DP_H
@@ -2386,10 +2401,10 @@ export async function renderGroupDpCanvas(
     const groupName = input.groupName.trim() || "Our Group";
     drawOverlayHolePhoto(ctx, theme, photos[0], input.photoCrops[0], DP_W, DP_H);
     await paintFrameOverlay(ctx, theme, DP_W, DP_H);
-    drawOverlayHoleCopy(
+    drawOverlayHoleName(ctx, theme, groupName, DP_W, DP_H);
+    drawPaintedTaglines(
       ctx,
       theme,
-      groupName,
       collectPosterTaglines(input.event, "group", true),
       DP_W,
       DP_H

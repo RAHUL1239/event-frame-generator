@@ -9,6 +9,7 @@ import {
   measureGlyphWidth,
   measureLineWidth,
 } from "./canvas-text";
+import { parseMiddleTaglines } from "./middle-taglines";
 import { ONE_WORLD_COLORS } from "./frames/one-world";
 
 const DEFAULT_SHOUT = "CELEBRATE WITH US!";
@@ -58,6 +59,52 @@ function owFont(
 
 function extraBold(theme: ResolvedFrameTheme, sizePx: number) {
   return `800 ${sizePx}px ${theme.paint.type.fontFamily}`;
+}
+
+function uniqueLines(values: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const value of values) {
+    const text = value.trim();
+    const key = text.toLowerCase();
+    if (!text || seen.has(key)) continue;
+    seen.add(key);
+    out.push(text);
+  }
+  return out;
+}
+
+function drawOneWorldTaglines(
+  ctx: CanvasRenderingContext2D,
+  event: EventWithOptions,
+  theme: ResolvedFrameTheme,
+  textX: number,
+  textY: number,
+  textMaxW: number,
+  scale: number
+): number {
+  const slot = theme.paint.tagline;
+  const lines = uniqueLines([
+    ...parseMiddleTaglines(event.middleTaglines),
+    event.tagline ?? "",
+  ]);
+  if (lines.length === 0) return textY;
+
+  const size = Math.round((slot?.fontSize ?? 32) * scale);
+  const lineH = Math.round((slot?.lineHeight ?? 38) * scale);
+  ctx.fillStyle = slot?.color ?? ONE_WORLD_COLORS.navy;
+  ctx.font =
+    slot?.fontWeight === 800
+      ? extraBold(theme, size)
+      : owFont(theme, slot?.fontWeight ?? 700, size);
+  textY += Math.round(10 * scale);
+  for (const tag of lines) {
+    for (const line of wrapWords(ctx, tag, textMaxW).slice(0, 3)) {
+      fillTextWithSpaces(ctx, line, textX, textY);
+      textY += lineH;
+    }
+  }
+  return textY;
 }
 
 type ActionBlock = (typeof DEFAULT_ACTIONS)[number];
@@ -722,17 +769,7 @@ export function drawOneWorldPersonalPoster(
     Math.round(bodyTitleSize * 1.1)
   );
 
-  const tagline = event.tagline?.trim();
-  if (tagline) {
-    textY += Math.round(10 * scale);
-    ctx.fillStyle = "rgba(26, 39, 68, 0.72)";
-    ctx.font = owFont(theme, 600, Math.round(22 * scale));
-    const tagLines = wrapWords(ctx, tagline, textMaxW);
-    for (const line of tagLines.slice(0, 3)) {
-      fillTextWithSpaces(ctx, line, textX, textY);
-      textY += Math.round(28 * scale);
-    }
-  }
+  textY = drawOneWorldTaglines(ctx, event, theme, textX, textY, textMaxW, scale);
 
   if (displayName.trim()) {
     textY += Math.round(8 * scale);
@@ -881,17 +918,7 @@ export function drawOneWorldGroupPoster(
     Math.round(bodyTitleSize * 1.1)
   );
 
-  const tagline = event.tagline?.trim();
-  if (tagline) {
-    textY += Math.round(10 * scale);
-    ctx.fillStyle = "rgba(26, 39, 68, 0.72)";
-    ctx.font = owFont(theme, 600, Math.round(22 * scale));
-    const tagLines = wrapWords(ctx, tagline, textMaxW);
-    for (const line of tagLines.slice(0, 3)) {
-      fillTextWithSpaces(ctx, line, textX, textY);
-      textY += Math.round(28 * scale);
-    }
-  }
+  textY = drawOneWorldTaglines(ctx, event, theme, textX, textY, textMaxW, scale);
 
   const name = groupName.trim() || "Our Group";
   textY += Math.round(8 * scale);

@@ -6,7 +6,7 @@ export const POSTER_FONT_FAMILY =
 let fontsReady: Promise<void> | null = null;
 
 export function posterFont(
-  weight: 400 | 500 | 600 | 700 | "bold" | "normal",
+  weight: 400 | 500 | 600 | 700 | 800 | "bold" | "normal",
   sizePx: number,
   family: string = POSTER_FONT_FAMILY
 ): string {

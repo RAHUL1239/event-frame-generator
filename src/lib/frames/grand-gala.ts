@@ -8,8 +8,9 @@ const CREAM = "#F3EEE4";
 
 /**
  * Full PNG overlay. Photo composites into the left-center circular hole.
- * Florals and title stay as designed. Name and admin taglines paint
- * on top of the overlay in the right column, above the divider.
+ * Florals and title stay as designed. The guest name sits in the right
+ * column. Organizer taglines cover the baked-in sample line
+ * "Good company. Beautiful memories."
  */
 export const grandGalaFrame: PosterFrame = {
   key: "grand-gala",
@@ -60,12 +61,29 @@ export const grandGalaFrame: PosterFrame = {
       xRatio: 0.6,
       yRatio: 0.4,
       maxWidthRatio: 0.36,
-      maxBottomRatio: 0.695,
+      maxBottomRatio: 0.52,
       align: "left",
       color: NAVY,
-      taglineColor: SAGE,
-      taglineSize: 26,
       fontSize: 42,
+    },
+    tagline: {
+      placement: "slot",
+      align: "left",
+      color: SAGE,
+      fontSize: 40,
+      fontWeight: 700,
+      lineHeight: 46,
+      xRatio: 0.575,
+      yRatio: 0.555,
+      maxWidthRatio: 0.38,
+      maxBottomRatio: 0.665,
+      cover: {
+        xRatio: 0.555,
+        yRatio: 0.52,
+        widthRatio: 0.41,
+        heightRatio: 0.14,
+        color: CREAM,
+      },
     },
   },
 };

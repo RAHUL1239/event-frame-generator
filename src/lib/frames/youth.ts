@@ -13,4 +13,11 @@ export const youthFrame = defineClassicFrame({
   },
   borderStyle: "bold",
   photoRingWidth: 12,
+  tagline: {
+    fontSize: 34,
+    fontWeight: 700,
+    lineHeight: 40,
+    afterNameGap: 22,
+    color: "#ffffff",
+  },
 });

@@ -19,4 +19,12 @@ export const elegantGoldFrame = defineClassicFrame({
     holeInsetRatio: 72 / 1080,
     contentPadding: 50,
   },
+  tagline: {
+    fontSize: 34,
+    fontWeight: 700,
+    lineHeight: 40,
+    afterNameGap: 56,
+    stackBelowName: true,
+    color: "#ffffff",
+  },
 });

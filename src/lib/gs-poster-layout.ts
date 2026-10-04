@@ -301,8 +301,8 @@ export function drawGsHeadlineTagline(
   ctx.textAlign = centerX != null ? "center" : "left";
   ctx.textBaseline = "alphabetic";
   ctx.font = posterFont(
-    600,
-    Math.round(size * fontScale),
+    theme?.paint.tagline?.fontWeight ?? 700,
+    Math.round((theme?.paint.tagline?.fontSize ?? size) * fontScale),
     theme?.paint.type.fontFamily
   );
   const lines = splitTextIntoLines(ctx, tagline, maxWidth);

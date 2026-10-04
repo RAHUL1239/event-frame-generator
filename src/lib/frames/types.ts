@@ -6,20 +6,44 @@ import type {
 import type { FrameFullOverlayConfig } from "../frame-overlays";
 
 export type OverlayNameSlot = {
-  /** Copy column X as a fraction of canvas width. */
+  /** Name column X as a fraction of canvas width. */
   xRatio: number;
-  /** First line baseline as a fraction of canvas height. */
+  /** Name baseline as a fraction of canvas height. */
   yRatio: number;
   maxWidthRatio: number;
-  /** Keep name and taglines above this Y (divider / footer art). */
+  /** Keep the name above this Y (divider / footer art). */
   maxBottomRatio?: number;
   align: "center" | "left";
   color: string;
   /** Name size in design pixels at 1080. */
   fontSize: number;
-  taglineColor?: string;
-  /** Tagline size in design pixels at 1080. */
-  taglineSize?: number;
+};
+
+/** Per-frame tagline layout. Overlay frames use a slot; classic/GS stack after the name. */
+export type FrameTaglinePaint = {
+  placement: "slot" | "after-name";
+  align: "center" | "left";
+  color: string;
+  /** Design pixels at 1080. Larger and bolder than other poster copy. */
+  fontSize: number;
+  fontWeight: 700 | 800;
+  lineHeight?: number;
+  /** Extra space between the attendee name and the first tagline (after-name). */
+  afterNameGap?: number;
+  /** Always stack taglines under the name instead of sitting on the same row. */
+  stackBelowName?: boolean;
+  xRatio?: number;
+  yRatio?: number;
+  maxWidthRatio?: number;
+  maxBottomRatio?: number;
+  /** Paint over baked-in sample copy before drawing organizer taglines. */
+  cover?: {
+    xRatio: number;
+    yRatio: number;
+    widthRatio: number;
+    heightRatio: number;
+    color: string;
+  };
 };
 
 export type FrameLayout =
@@ -127,6 +151,8 @@ export type FramePaint = {
   gsFooter?: GsFooterStyle;
   /** Guest name drawn after the PNG overlay, in a safe empty area. */
   overlayName?: OverlayNameSlot;
+  /** Each theme owns tagline size, weight, and placement. */
+  tagline: FrameTaglinePaint;
 };
 
 export type PosterFrame = {
