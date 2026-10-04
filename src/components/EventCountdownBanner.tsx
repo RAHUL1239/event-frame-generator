@@ -17,7 +17,7 @@ export function EventCountdownBanner({
 
   return (
     <p
-      className="rounded-xl px-4 py-3 text-center text-sm font-bold md:text-base"
+      className="rounded-xl px-4 py-3 text-center text-base font-bold md:text-lg"
       style={{
         backgroundColor: `${accentColor}22`,
         color: primaryColor,

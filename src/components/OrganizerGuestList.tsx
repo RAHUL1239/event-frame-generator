@@ -51,8 +51,8 @@ export function OrganizerGuestList({
       <header className="border-b bg-white px-6 py-4">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl font-bold text-brand-teal">{eventName}</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-brand-teal">{eventName}</h1>
+            <p className="text-base text-gray-500">
               {guests.length} {guests.length === 1 ? "poster" : "posters"} created
             </p>
           </div>
@@ -60,7 +60,7 @@ export function OrganizerGuestList({
             type="button"
             onClick={handleSignOut}
             disabled={signingOut}
-            className="rounded-lg border px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-60"
+            className="rounded-lg border px-4 py-2 text-base text-gray-600 hover:bg-gray-50 disabled:opacity-60"
           >
             {signingOut ? "Signing out..." : "Sign out"}
           </button>
@@ -74,9 +74,9 @@ export function OrganizerGuestList({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name"
-            className="w-full max-w-xs rounded-lg border px-3 py-2 text-sm"
+            className="w-full max-w-xs rounded-lg border px-3 py-2 text-base"
           />
-          <label className="flex items-center gap-2 text-sm">
+          <label className="flex items-center gap-2 text-base">
             <span className="text-gray-500">Sort by</span>
             <select
               value={sortBy}
@@ -90,7 +90,7 @@ export function OrganizerGuestList({
         </div>
 
         <div className="overflow-hidden rounded-xl border bg-white">
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-base">
             <thead className="border-b bg-gray-50">
               <tr>
                 <th className="px-4 py-3 font-medium">Name</th>

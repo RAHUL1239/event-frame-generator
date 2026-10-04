@@ -11,6 +11,15 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: system-ui, -apple-system, sans-serif;
+  font-size: 1.125rem; /* 18px — website UI, not poster canvas */
+  line-height: 1.6;
+}
+
+button,
+input,
+select,
+textarea {
+  font-size: inherit;
 }
 
 details > summary {

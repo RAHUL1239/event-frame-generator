@@ -55,10 +55,10 @@ export default function PricingPage() {
     <div className="min-h-screen bg-white text-gray-900">
       <header className="border-b border-violet-100/80 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-6">
-          <Link href="/" className="text-lg font-bold tracking-tight text-brand-teal">
+          <Link href="/" className="text-xl font-bold tracking-tight text-brand-teal">
             RSVPShare
           </Link>
-          <nav className="flex items-center gap-6 text-sm">
+          <nav className="flex items-center gap-6 text-base">
             <Link href="/pricing" className="font-medium text-brand-teal hover:underline">
               Pricing
             </Link>
@@ -77,18 +77,18 @@ export default function PricingPage() {
 
       <main>
         <section className="mx-auto max-w-6xl px-6 pb-12 pt-16 md:pt-24">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-brand-gold">
+          <p className="text-base font-semibold uppercase tracking-[0.18em] text-brand-gold">
             For event organizers
           </p>
-          <h1 className="mt-4 max-w-4xl text-4xl font-bold leading-tight text-brand-teal md:text-6xl">
+          <h1 className="mt-4 max-w-4xl text-5xl font-bold leading-tight text-brand-teal md:text-6xl">
             One event. One price. Let your guests spread the word.
           </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-gray-700">
+          <p className="mt-6 max-w-2xl text-xl leading-relaxed text-gray-700">
             RSVPShare is a one-time fee per event. Guests create a poster with
             their photo and name, then share it with people they know. There is
             no charge per poster or per share.
           </p>
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-gray-600">
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-gray-600">
             At launch, the $199 setup is the main offer for most organizers.
           </p>
         </section>
@@ -105,15 +105,15 @@ export default function PricingPage() {
                 }
               >
                 {plan.featured && (
-                  <p className="absolute -top-3 left-6 rounded-full bg-brand-gold px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-teal">
+                  <p className="absolute -top-3 left-6 rounded-full bg-brand-gold px-3 py-1 text-sm font-semibold uppercase tracking-wide text-brand-teal">
                     Main offer
                   </p>
                 )}
                 <h2
                   className={
                     plan.featured
-                      ? "text-xl font-semibold text-brand-gold"
-                      : "text-xl font-semibold text-brand-teal"
+                      ? "text-2xl font-semibold text-brand-gold"
+                      : "text-2xl font-semibold text-brand-teal"
                   }
                 >
                   {plan.name}
@@ -130,8 +130,8 @@ export default function PricingPage() {
                 <p
                   className={
                     plan.featured
-                      ? "mt-1 text-sm text-brand-cream/80"
-                      : "mt-1 text-sm text-gray-500"
+                      ? "mt-1 text-base text-brand-cream/80"
+                      : "mt-1 text-base text-gray-500"
                   }
                 >
                   {plan.priceNote}
@@ -148,8 +148,8 @@ export default function PricingPage() {
                 <ul
                   className={
                     plan.featured
-                      ? "mt-6 flex-1 space-y-2 text-sm text-brand-cream/90"
-                      : "mt-6 flex-1 space-y-2 text-sm text-gray-700"
+                      ? "mt-6 flex-1 space-y-2 text-base text-brand-cream/90"
+                      : "mt-6 flex-1 space-y-2 text-base text-gray-700"
                   }
                 >
                   {plan.features.map((feature) => (
@@ -173,12 +173,12 @@ export default function PricingPage() {
 
         <section className="border-y border-brand-cream-dark bg-white">
           <div className="mx-auto max-w-6xl px-6 py-16">
-            <h2 className="text-3xl font-bold text-brand-teal">
+            <h2 className="text-4xl font-bold text-brand-teal">
               How the price works
             </h2>
             <div className="mt-8 grid gap-6 md:grid-cols-2">
               <article className="rounded-2xl border border-brand-cream-dark p-6">
-                <h3 className="text-xl font-semibold text-brand-teal">
+                <h3 className="text-2xl font-semibold text-brand-teal">
                   One fee covers the event
                 </h3>
                 <p className="mt-3 leading-relaxed text-gray-700">
@@ -188,7 +188,7 @@ export default function PricingPage() {
                 </p>
               </article>
               <article className="rounded-2xl border border-brand-cream-dark p-6">
-                <h3 className="text-xl font-semibold text-brand-teal">
+                <h3 className="text-2xl font-semibold text-brand-teal">
                   Event size helps us quote larger work
                 </h3>
                 <p className="mt-3 leading-relaxed text-gray-700">
@@ -198,7 +198,7 @@ export default function PricingPage() {
                 </p>
               </article>
               <article className="rounded-2xl border border-brand-cream-dark p-6">
-                <h3 className="text-xl font-semibold text-brand-teal">
+                <h3 className="text-2xl font-semibold text-brand-teal">
                   Ninety days, then an extension if you need it
                 </h3>
                 <p className="mt-3 leading-relaxed text-gray-700">
@@ -207,7 +207,7 @@ export default function PricingPage() {
                 </p>
               </article>
               <article className="rounded-2xl border border-brand-cream-dark p-6">
-                <h3 className="text-xl font-semibold text-brand-teal">
+                <h3 className="text-2xl font-semibold text-brand-teal">
                   What guests get
                 </h3>
                 <p className="mt-3 leading-relaxed text-gray-700">
@@ -222,9 +222,9 @@ export default function PricingPage() {
         </section>
 
         <section className="mx-auto max-w-6xl px-6 py-16">
-          <h2 className="text-3xl font-bold text-brand-teal">
-            Discounts and later plans
-          </h2>
+            <h2 className="text-4xl font-bold text-brand-teal">
+              Discounts and later plans
+            </h2>
           <ul className="mt-8 grid gap-6 md:grid-cols-3">
             <li className="rounded-2xl bg-white p-6 shadow-sm">
               <p className="text-2xl font-bold text-brand-gold">25% off</p>
@@ -256,8 +256,8 @@ export default function PricingPage() {
 
         <section className="bg-brand-teal text-brand-cream">
           <div className="mx-auto max-w-6xl px-6 py-16">
-            <h2 className="text-3xl font-bold">Try it before you write</h2>
-            <p className="mt-4 max-w-2xl text-lg leading-relaxed text-brand-cream/90">
+            <h2 className="text-4xl font-bold">Try it before you write</h2>
+            <p className="mt-4 max-w-2xl text-xl leading-relaxed text-brand-cream/90">
               Open the free preview, add a photo and name, and share a sample
               poster. No setup request required.
             </p>
@@ -272,7 +272,7 @@ export default function PricingPage() {
 
         <section className="bg-brand-teal">
           <div className="mx-auto max-w-6xl px-6 py-16">
-            <h2 className="max-w-xl text-3xl font-bold text-brand-cream">
+            <h2 className="max-w-xl text-4xl font-bold text-brand-cream">
               Ready to set up an event?
             </h2>
             <p className="mt-4 max-w-xl text-brand-cream/85">
@@ -289,7 +289,7 @@ export default function PricingPage() {
         </section>
       </main>
 
-      <footer className="mx-auto max-w-6xl px-6 py-8 text-sm text-gray-500">
+      <footer className="mx-auto max-w-6xl px-6 py-8 text-base text-gray-500">
         <p>RSVPShare · Posters your guests share for you</p>
       </footer>
     </div>

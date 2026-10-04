@@ -108,7 +108,7 @@ export function PhotoCropEditor({
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
           />
-          <p className="mt-2 text-xs text-gray-500">
+          <p className="mt-2 text-sm text-gray-500">
             Drag to reposition · matches final frame
           </p>
         </div>
@@ -122,10 +122,10 @@ export function PhotoCropEditor({
               className="max-h-32 w-full object-contain"
             />
           </div>
-          <p className="text-xs text-gray-500">Original photo (not cropped)</p>
+          <p className="text-sm text-gray-500">Original photo (not cropped)</p>
 
           <div>
-            <label className="mb-1 flex items-center justify-between text-xs font-medium text-gray-500">
+            <label className="mb-1 flex items-center justify-between text-sm font-medium text-gray-500">
               <span>Zoom</span>
               <span>{Math.round(crop.scale * 100)}%</span>
             </label>
@@ -145,7 +145,7 @@ export function PhotoCropEditor({
           <button
             type="button"
             onClick={() => onCropChange(DEFAULT_PHOTO_CROP)}
-            className="text-xs text-gray-500 underline hover:text-gray-700"
+            className="text-sm text-gray-500 underline hover:text-gray-700"
           >
             Reset position
           </button>
@@ -153,7 +153,7 @@ export function PhotoCropEditor({
       </div>
 
       {!loaded && (
-        <p className="text-xs text-gray-400">Loading preview…</p>
+        <p className="text-sm text-gray-400">Loading preview…</p>
       )}
     </div>
   );

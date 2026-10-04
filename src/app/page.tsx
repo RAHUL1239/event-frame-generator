@@ -219,10 +219,10 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 lg:px-6">
           <Link href="/" className="flex items-center gap-2 font-bold tracking-tight text-brand-purple">
             <LogoMark />
-            <span className="text-lg">RSVPShare</span>
+            <span className="text-xl">RSVPShare</span>
           </Link>
 
-          <nav className="hidden items-center gap-7 text-sm font-medium text-gray-600 lg:flex">
+          <nav className="hidden items-center gap-7 text-base font-medium text-gray-600 lg:flex">
             <a href="#how-it-works" className="hover:text-brand-purple">
               How it works
             </a>
@@ -238,40 +238,40 @@ export default function HomePage() {
           </nav>
 
           <div className="hidden items-center gap-4 lg:flex">
-            <Link href="/admin" className="text-sm font-medium text-gray-600 hover:text-brand-purple">
+            <Link href="/admin" className="text-base font-medium text-gray-600 hover:text-brand-purple">
               Organizer sign-in
             </Link>
             <Link
               href="/setup"
-              className="rounded-full bg-brand-purple px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-purple-dark"
+              className="rounded-full bg-brand-purple px-5 py-2.5 text-base font-semibold text-white shadow-sm hover:bg-brand-purple-dark"
             >
               Set up your event
             </Link>
           </div>
 
           <details className="relative lg:hidden">
-            <summary className="cursor-pointer list-none rounded-full border border-violet-200 px-3 py-1.5 text-sm font-semibold text-brand-purple">
+            <summary className="cursor-pointer list-none rounded-full border border-violet-200 px-3 py-1.5 text-base font-semibold text-brand-purple">
               Menu
             </summary>
             <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-violet-100 bg-white p-3 shadow-xl">
-              <a href="#how-it-works" className="block rounded-lg px-3 py-2 text-sm hover:bg-brand-purple-soft">
+              <a href="#how-it-works" className="block rounded-lg px-3 py-2 text-base hover:bg-brand-purple-soft">
                 How it works
               </a>
-              <a href="#examples" className="block rounded-lg px-3 py-2 text-sm hover:bg-brand-purple-soft">
+              <a href="#examples" className="block rounded-lg px-3 py-2 text-base hover:bg-brand-purple-soft">
                 Examples
               </a>
-              <a href="#research" className="block rounded-lg px-3 py-2 text-sm hover:bg-brand-purple-soft">
+              <a href="#research" className="block rounded-lg px-3 py-2 text-base hover:bg-brand-purple-soft">
                 Research
               </a>
-              <Link href="/pricing" className="block rounded-lg px-3 py-2 text-sm hover:bg-brand-purple-soft">
+              <Link href="/pricing" className="block rounded-lg px-3 py-2 text-base hover:bg-brand-purple-soft">
                 Pricing
               </Link>
-              <Link href="/admin" className="block rounded-lg px-3 py-2 text-sm hover:bg-brand-purple-soft">
+              <Link href="/admin" className="block rounded-lg px-3 py-2 text-base hover:bg-brand-purple-soft">
                 Organizer sign-in
               </Link>
               <Link
                 href="/setup"
-                className="mt-1 block rounded-full bg-brand-purple px-3 py-2 text-center text-sm font-semibold text-white"
+                className="mt-1 block rounded-full bg-brand-purple px-3 py-2 text-center text-base font-semibold text-white"
               >
                 Set up your event
               </Link>
@@ -288,13 +288,13 @@ export default function HomePage() {
 
           <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 pb-10 pt-12 lg:grid-cols-[1.05fr_0.95fr] lg:px-6 lg:pb-6 lg:pt-16">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-brand-purple">
+              <p className="text-sm font-bold uppercase tracking-[0.22em] text-brand-purple">
                 For event organizers
               </p>
-              <h1 className="mt-4 max-w-xl text-4xl font-extrabold leading-[1.05] tracking-tight text-brand-purple sm:text-5xl lg:text-6xl">
+              <h1 className="mt-4 max-w-xl text-5xl font-extrabold leading-[1.05] tracking-tight text-brand-purple sm:text-6xl lg:text-6xl">
                 Your attendees become your promoters
               </h1>
-              <p className="mt-6 max-w-xl text-base leading-relaxed text-gray-600 sm:text-lg">
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-gray-600 sm:text-xl">
                 RSVPShare creates custom frames for your event. Guests add their
                 name and photo and create their event posters. They share their
                 posters on social media and messaging apps. Your event reaches
@@ -304,25 +304,25 @@ export default function HomePage() {
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <Link
                   href="/setup"
-                  className="rounded-full bg-brand-purple px-6 py-3 text-sm font-semibold text-white shadow-md shadow-violet-200 hover:bg-brand-purple-dark"
+                  className="rounded-full bg-brand-purple px-6 py-3 text-base font-semibold text-white shadow-md shadow-violet-200 hover:bg-brand-purple-dark"
                 >
                   Set up your event
                 </Link>
                 <Link
                   href="/event/try-out"
-                  className="rounded-full border-2 border-brand-purple px-6 py-3 text-sm font-semibold text-brand-purple hover:bg-brand-purple-soft"
+                  className="rounded-full border-2 border-brand-purple px-6 py-3 text-base font-semibold text-brand-purple hover:bg-brand-purple-soft"
                 >
                   Try a sample
                 </Link>
               </div>
-              <p className="mt-5 flex max-w-md items-start gap-2 text-sm text-gray-500">
+              <p className="mt-5 flex max-w-md items-start gap-2 text-base text-gray-500">
                 <span className="mt-0.5 text-brand-gold">
                   <IconGift />
                 </span>
                 RSVPShare is free for non-profit organizations and for events
                 with fewer than 50 attendees.
               </p>
-              <p className="mt-3 flex max-w-md items-start gap-2 text-sm text-gray-500">
+              <p className="mt-3 flex max-w-md items-start gap-2 text-base text-gray-500">
                 <span className="mt-0.5 text-brand-gold">
                   <IconGift />
                 </span>
@@ -375,7 +375,7 @@ export default function HomePage() {
                 <p className="text-4xl font-extrabold text-gray-900">
                   {formatCount(DISPLAY_ATTENDEES)}
                 </p>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-base text-gray-500">
                   attendees have used RSVPShare
                 </p>
               </div>
@@ -388,7 +388,7 @@ export default function HomePage() {
                 <p className="text-4xl font-extrabold text-gray-900">
                   {formatCount(DISPLAY_EVENTS)}
                 </p>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-base text-gray-500">
                   events have used RSVPShare
                 </p>
               </div>
@@ -397,7 +397,7 @@ export default function HomePage() {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-20 lg:px-6">
-          <h2 className="text-center text-3xl font-extrabold text-gray-900 md:text-4xl">
+          <h2 className="text-center text-4xl font-extrabold text-gray-900 md:text-5xl">
             Why organizers use it
           </h2>
           <div className="mt-12 grid gap-10 md:grid-cols-3">
@@ -406,16 +406,16 @@ export default function HomePage() {
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-purple-soft text-brand-purple">
                   {benefitIcon(benefit.icon)}
                 </div>
-                <h3 className="mt-5 text-lg font-bold text-gray-900">
+                <h3 className="mt-5 text-xl font-bold text-gray-900">
                   {benefit.title}
                 </h3>
-                <p className="mt-3 text-sm leading-relaxed text-gray-600">
+                <p className="mt-3 text-base leading-relaxed text-gray-600">
                   {benefit.body}
                 </p>
               </article>
             ))}
           </div>
-          <p className="mt-10 text-center text-sm text-gray-500">
+          <p className="mt-10 text-center text-base text-gray-500">
             Guests share on the apps they already use — WhatsApp, Instagram, and
             Facebook.
           </p>
@@ -423,7 +423,7 @@ export default function HomePage() {
 
         <section id="how-it-works" className="scroll-mt-24 bg-slate-50">
           <div className="mx-auto max-w-7xl px-4 py-20 lg:px-6">
-            <h2 className="text-center text-3xl font-extrabold text-gray-900 md:text-4xl">
+            <h2 className="text-center text-4xl font-extrabold text-gray-900 md:text-5xl">
               One event. Three simple steps.
             </h2>
             <ol className="mt-14 grid gap-10 md:grid-cols-3">
@@ -431,14 +431,14 @@ export default function HomePage() {
                 <li key={item.step} className="text-center">
                   <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white text-brand-purple shadow-sm ring-1 ring-violet-100">
                     {stepIcon(item.icon)}
-                    <span className="absolute -right-2 -top-2 rounded-full bg-brand-gold px-1.5 text-[10px] font-bold text-white">
+                    <span className="absolute -right-2 -top-2 rounded-full bg-brand-gold px-1.5 text-xs font-bold text-white">
                       {item.step}
                     </span>
                   </div>
-                  <h3 className="mt-5 text-lg font-bold text-gray-900">
+                  <h3 className="mt-5 text-xl font-bold text-gray-900">
                     {item.title}
                   </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-gray-600">
+                  <p className="mt-3 text-base leading-relaxed text-gray-600">
                     {item.body}
                   </p>
                 </li>
@@ -449,7 +449,7 @@ export default function HomePage() {
 
         <section id="examples" className="scroll-mt-24">
           <div className="mx-auto max-w-7xl px-4 py-20 lg:px-6">
-            <h2 className="text-center text-3xl font-extrabold text-gray-900 md:text-4xl">
+            <h2 className="text-center text-4xl font-extrabold text-gray-900 md:text-5xl">
               Make every invitation personal. Then share it.
             </h2>
             <div className="mt-12 grid items-end gap-5 sm:grid-cols-2 xl:grid-cols-4">
@@ -465,10 +465,10 @@ export default function HomePage() {
                     />
                   </div>
                   <figcaption className="mt-3">
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-base font-semibold text-gray-900">
                       {example.event}
                     </p>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-base text-gray-500">
                       {example.guest} · {example.caption}
                     </p>
                   </figcaption>
@@ -481,7 +481,7 @@ export default function HomePage() {
                 instagramHref={invitationUrl}
               />
             </div>
-            <p className="mt-8 text-center text-sm text-gray-500">
+            <p className="mt-8 text-center text-base text-gray-500">
               Want to try out RSVPShare?{" "}
               <Link
                 href="/event/try-out"
@@ -496,10 +496,10 @@ export default function HomePage() {
 
         <section id="research" className="scroll-mt-24 border-y border-violet-100 bg-white">
           <div className="mx-auto max-w-7xl px-4 py-20 lg:px-6">
-            <p className="text-center text-xs font-bold uppercase tracking-[0.22em] text-brand-purple">
+            <p className="text-center text-sm font-bold uppercase tracking-[0.22em] text-brand-purple">
               Published research
             </p>
-            <h2 className="mt-3 text-center text-3xl font-extrabold text-gray-900 md:text-4xl">
+            <h2 className="mt-3 text-center text-4xl font-extrabold text-gray-900 md:text-5xl">
               The power of a personal recommendation
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-center text-gray-600">
@@ -513,17 +513,17 @@ export default function HomePage() {
                   <p className="text-6xl font-extrabold text-brand-purple">
                     {item.stat}
                   </p>
-                  <p className="mt-3 text-lg font-medium text-gray-900">
+                  <p className="mt-3 text-xl font-medium text-gray-900">
                     {item.label}
                   </p>
-                  <p className="mt-4 text-sm leading-relaxed text-gray-600">
+                  <p className="mt-4 text-base leading-relaxed text-gray-600">
                     {item.detail}
                   </p>
                   <a
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-5 inline-block text-sm font-semibold text-brand-purple underline hover:text-brand-purple-dark"
+                    className="mt-5 inline-block text-base font-semibold text-brand-purple underline hover:text-brand-purple-dark"
                   >
                     {item.source}
                   </a>
@@ -539,7 +539,7 @@ export default function HomePage() {
               <span className="mt-1 hidden text-brand-purple md:block">
                 <IconShare />
               </span>
-              <h2 className="max-w-xl text-2xl font-extrabold text-gray-900 md:text-3xl">
+              <h2 className="max-w-xl text-3xl font-extrabold text-gray-900 md:text-4xl">
                 Market the next event with the people who are already coming.
               </h2>
             </div>
@@ -554,7 +554,7 @@ export default function HomePage() {
       </main>
 
       <footer className="border-t border-violet-100">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-gray-500 sm:flex-row lg:px-6">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 text-base text-gray-500 sm:flex-row lg:px-6">
           <div>
             <p className="font-semibold text-gray-700">RSVPShare</p>
             <p className="mt-1">Posters your guests share for you</p>

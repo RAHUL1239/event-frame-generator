@@ -37,15 +37,15 @@ export default function AdminLoginPage() {
         onSubmit={handleSubmit}
         className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg"
       >
-        <h1 className="text-2xl font-bold text-brand-teal">RSVPShare</h1>
-        <p className="mt-1 text-sm text-gray-500">Admin login</p>
-        <p className="mt-2 text-sm text-gray-500">
+        <h1 className="text-3xl font-bold text-brand-teal">RSVPShare</h1>
+        <p className="mt-1 text-base text-gray-500">Admin login</p>
+        <p className="mt-2 text-base text-gray-500">
           Sign in to manage events and view submissions
         </p>
 
         <div className="mt-6 space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium">Email</label>
+            <label className="mb-1 block text-base font-medium">Email</label>
             <input
               type="email"
               value={email}
@@ -55,7 +55,7 @@ export default function AdminLoginPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Password</label>
+            <label className="mb-1 block text-base font-medium">Password</label>
             <input
               type="password"
               value={password}
@@ -65,7 +65,7 @@ export default function AdminLoginPage() {
             />
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-base text-red-600">{error}</p>}
 
           <button
             type="submit"

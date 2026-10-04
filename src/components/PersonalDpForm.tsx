@@ -107,7 +107,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
     <form onSubmit={handleSubmit} className="mx-auto max-w-2xl">
       <div className="rounded-2xl bg-white p-6 shadow-lg md:p-10">
         <span
-          className="inline-block rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-wide"
+          className="inline-block rounded-full px-4 py-1 text-sm font-semibold uppercase tracking-wide"
           style={{
             backgroundColor: `${event.accentColor}22`,
             color: event.primaryColor,
@@ -117,7 +117,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
         </span>
 
         <h2
-          className="mt-4 text-3xl font-bold"
+          className="mt-4 text-4xl font-bold"
           style={{ color: event.primaryColor }}
         >
           Enter Your Details
@@ -137,7 +137,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
         <div className="mt-8 space-y-6">
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+              <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-gray-500">
                 First Name *
               </label>
               <input
@@ -149,7 +149,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
               />
             </div>
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+              <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-gray-500">
                 Last Name *
               </label>
               <input
@@ -163,7 +163,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-gray-500">
               Your Photo *
             </label>
             <input
@@ -183,7 +183,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
                 <span className="font-medium text-gray-700">
                   Click to upload photo
                 </span>
-                <span className="mt-1 text-sm text-gray-500">
+                <span className="mt-1 text-base text-gray-500">
                   JPG, PNG, or WebP
                 </span>
               </button>
@@ -200,13 +200,13 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
                   attendeeCount={attendeeCount}
                 />
                 <div className="mt-3 flex items-center justify-between gap-3 border-t border-gray-200 pt-3">
-                  <span className="truncate text-sm text-gray-600">
+                  <span className="truncate text-base text-gray-600">
                     {photo?.name}
                   </span>
                   <button
                     type="button"
                     onClick={() => fileRef.current?.click()}
-                    className="shrink-0 text-sm font-medium underline"
+                    className="shrink-0 text-base font-medium underline"
                     style={{ color: event.primaryColor }}
                   >
                     Change photo
@@ -214,7 +214,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
                 </div>
               </div>
             )}
-            <p className="mt-2 text-xs text-gray-500">
+            <p className="mt-2 text-sm text-gray-500">
               Use a photo at least 1000×1000 pixels with the face toward the
               center. A phone photo is usually enough; very small pictures look
               soft.
@@ -231,7 +231,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
           ) : null}
 
           <div
-            className="rounded-xl px-4 py-3 text-sm"
+            className="rounded-xl px-4 py-3 text-base"
             style={{ backgroundColor: `${event.accentColor}22` }}
           >
             <span className="mr-2">⚠️</span>
@@ -241,7 +241,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
           </div>
 
           {error && (
-            <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">
+            <p className="rounded-lg bg-red-50 px-4 py-2 text-base text-red-600">
               {error}
             </p>
           )}
@@ -249,7 +249,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl py-4 text-lg font-bold text-white transition hover:opacity-90 disabled:opacity-60"
+            className="w-full rounded-xl py-4 text-xl font-bold text-white transition hover:opacity-90 disabled:opacity-60"
             style={{
               backgroundColor: event.primaryColor,
               color: event.accentColor,

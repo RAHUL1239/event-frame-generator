@@ -42,7 +42,7 @@ export function HomepageSharePreview({
     <figure className="text-center">
       <div className="flex h-full flex-col justify-end rounded-2xl bg-brand-cream p-3 shadow-lg ring-1 ring-black/5 sm:p-4">
         <section className="rounded-[1.35rem] bg-white px-4 py-4 text-left shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
-          <h3 className="text-base font-bold" style={{ color: SHARE_TEAL }}>
+          <h3 className="text-lg font-bold" style={{ color: SHARE_TEAL }}>
             Share with friends
           </h3>
           <div className="mt-3 flex flex-col gap-2.5">
@@ -71,8 +71,8 @@ export function HomepageSharePreview({
         </section>
       </div>
       <figcaption className="mt-3">
-        <p className="text-sm font-semibold text-gray-900">Then they share it</p>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="text-base font-semibold text-gray-900">Then they share it</p>
+        <p className="mt-1 text-base text-gray-500">
           WhatsApp · Facebook · Instagram · Copy link
         </p>
       </figcaption>
@@ -97,7 +97,7 @@ function ShareLink({
       onClick={onClick}
       target={onClick ? undefined : "_blank"}
       rel={onClick ? undefined : "noopener noreferrer"}
-      className="block w-full rounded-full px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm transition hover:opacity-90 active:scale-[0.99]"
+      className="block w-full rounded-full px-4 py-2.5 text-center text-base font-semibold text-white shadow-sm transition hover:opacity-90 active:scale-[0.99]"
       style={{ backgroundColor: color }}
     >
       {label}

@@ -24,7 +24,7 @@ export function FrameThemePicker({
 
   return (
     <div>
-      <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+      <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-gray-500">
         Frame style *
       </label>
       <ul className="space-y-2">
@@ -36,7 +36,7 @@ export function FrameThemePicker({
               <button
                 type="button"
                 onClick={() => onChange(key)}
-                className={`flex w-full items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition ${
+                className={`flex w-full items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-base font-medium transition ${
                   selected
                     ? "border-brand-teal bg-white shadow-sm"
                     : "border-transparent bg-brand-cream text-gray-800 hover:bg-brand-cream-dark"

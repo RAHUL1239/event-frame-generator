@@ -31,12 +31,12 @@ export function EventHeader({ event }: Props) {
           />
           <div className="min-w-0">
             <h1
-              className="text-2xl font-bold leading-snug md:text-3xl"
+              className="text-3xl font-bold leading-snug md:text-4xl"
               style={{ color: event.accentColor }}
             >
               {event.name}
             </h1>
-            <p className="mt-1 text-sm uppercase tracking-wider text-white/90 md:mt-4">
+            <p className="mt-1 text-base uppercase tracking-wider text-white/90 md:mt-4">
               {event.subtitle}
             </p>
           </div>

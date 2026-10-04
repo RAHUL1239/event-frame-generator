@@ -202,7 +202,7 @@ export function PreviewPage({
     <div className="mx-auto max-w-md px-4 py-8">
       {toast && (
         <div
-          className="fixed bottom-6 left-1/2 z-50 max-w-md -translate-x-1/2 rounded-xl px-5 py-3 text-sm text-white shadow-lg"
+          className="fixed bottom-6 left-1/2 z-50 max-w-md -translate-x-1/2 rounded-xl px-5 py-3 text-base text-white shadow-lg"
           style={{ backgroundColor: SHARE_TEAL }}
         >
           {toast}
@@ -212,7 +212,7 @@ export function PreviewPage({
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <Link
           href={backPath}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50"
         >
           ← Edit
         </Link>
@@ -220,7 +220,7 @@ export function PreviewPage({
 
       <div className="mb-5 rounded-[1.75rem] border-2 border-brand-gold bg-[#f6ecd6] px-6 py-7 text-center shadow-sm">
         <p
-          className="flex items-center justify-center gap-2 text-[1.65rem] font-bold leading-tight md:text-3xl"
+          className="flex items-center justify-center gap-2 text-3xl font-bold leading-tight md:text-4xl"
           style={{ color: SHARE_TEAL }}
         >
           <span aria-hidden className="text-2xl md:text-3xl">
@@ -234,21 +234,21 @@ export function PreviewPage({
         >
           #{participantNumber.toLocaleString("en-US")}
         </p>
-        <p className="mt-4 text-sm leading-relaxed text-gray-600">
+        <p className="mt-4 text-base leading-relaxed text-gray-600">
           Share your poster and invite friends to join the celebration!
         </p>
       </div>
 
       <section className="mb-8 rounded-[1.75rem] bg-white px-6 py-7 shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
-        <h2 className="text-xl font-bold" style={{ color: SHARE_TEAL }}>
+        <h2 className="text-2xl font-bold" style={{ color: SHARE_TEAL }}>
           Share with friends
         </h2>
-        <p className="mt-2 text-sm leading-relaxed text-gray-600">
+        <p className="mt-2 text-base leading-relaxed text-gray-600">
           Share your poster and invite friends to create their own frame.
         </p>
 
         {onLocalhost && (
-          <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
             Running on localhost — invitation links are not included in shares.
             Use &quot;Share image&quot; on mobile or deploy to test link sharing.
           </p>
@@ -311,7 +311,7 @@ function ShareButton({
     <button
       type="button"
       onClick={onClick}
-      className="w-full rounded-full px-6 py-3.5 text-center text-base font-semibold text-white shadow-sm transition hover:opacity-90 active:scale-[0.99]"
+      className="w-full rounded-full px-6 py-3.5 text-center text-lg font-semibold text-white shadow-sm transition hover:opacity-90 active:scale-[0.99]"
       style={{ backgroundColor: color }}
     >
       {label}
@@ -344,10 +344,10 @@ function PreviewCard({
         className="px-6 py-4 text-white"
         style={{ backgroundColor: accentColor }}
       >
-        <h3 className="text-lg font-bold" style={{ color: primaryColor }}>
+        <h3 className="text-xl font-bold" style={{ color: primaryColor }}>
           {title}
         </h3>
-        <p className="text-sm opacity-80" style={{ color: primaryColor }}>
+        <p className="text-base opacity-80" style={{ color: primaryColor }}>
           {subtitle}
         </p>
       </div>
@@ -380,12 +380,12 @@ function PreviewCard({
         <button
           type="button"
           onClick={onShareMore}
-          className="rounded-xl border-2 py-3 text-sm font-semibold transition hover:bg-gray-50"
+          className="rounded-xl border-2 py-3 text-base font-semibold transition hover:bg-gray-50"
           style={{ borderColor: primaryColor, color: primaryColor }}
         >
           Share image
         </button>
-        <p className="text-center text-xs text-gray-500">
+        <p className="text-center text-sm text-gray-500">
           Use the share buttons above, or download to save a copy.
         </p>
       </div>

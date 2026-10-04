@@ -160,14 +160,14 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
     <form onSubmit={handleSubmit} className="mx-auto max-w-2xl">
       <div className="rounded-2xl bg-white p-6 shadow-lg md:p-10">
         <span
-          className="inline-block rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-wide"
+          className="inline-block rounded-full px-4 py-1 text-sm font-semibold uppercase tracking-wide"
           style={{ backgroundColor: `${event.accentColor}22`, color: event.primaryColor }}
         >
           Create your poster
         </span>
 
         <h2
-          className="mt-4 text-3xl font-bold"
+          className="mt-4 text-4xl font-bold"
           style={{ color: event.primaryColor }}
         >
           Enter Group Details
@@ -178,7 +178,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
 
         <div className="mt-8 space-y-6">
           <div>
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-gray-500">
               Group Size
             </label>
             <div className="inline-flex rounded-xl bg-brand-cream p-1">
@@ -187,7 +187,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
                   key={count}
                   type="button"
                   onClick={() => setMemberCount(count)}
-                  className={`rounded-lg px-5 py-2 text-sm font-medium transition ${
+                  className={`rounded-lg px-5 py-2 text-base font-medium transition ${
                     memberCount === count
                       ? "bg-white shadow text-brand-teal"
                       : "text-gray-600"
@@ -200,10 +200,10 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-gray-500">
               Member Photos *
             </label>
-            <p className="mb-2 text-xs text-gray-500">
+            <p className="mb-2 text-sm text-gray-500">
               Use photos at least 1000×1000 pixels with faces toward the center.
               A phone photo is usually enough; very small pictures look soft.
             </p>
@@ -242,7 +242,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
                     ) : (
                       <>
                         <span className="text-2xl text-gray-400">↑</span>
-                        <span className="mt-2 text-xs text-gray-500">
+                        <span className="mt-2 text-sm text-gray-500">
                           Member {i + 1}
                         </span>
                       </>
@@ -254,7 +254,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-gray-500">
               Group Name
             </label>
             <input
@@ -282,7 +282,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
           )}
 
           <div
-            className="rounded-xl px-4 py-3 text-sm"
+            className="rounded-xl px-4 py-3 text-base"
             style={{ backgroundColor: `${event.accentColor}22` }}
           >
             <span className="mr-2">⚠️</span>
@@ -300,7 +300,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
           ) : null}
 
           {error && (
-            <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">
+            <p className="rounded-lg bg-red-50 px-4 py-2 text-base text-red-600">
               {error}
             </p>
           )}
@@ -308,7 +308,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl py-4 text-lg font-bold text-white transition hover:opacity-90 disabled:opacity-60"
+            className="w-full rounded-xl py-4 text-xl font-bold text-white transition hover:opacity-90 disabled:opacity-60"
             style={{ backgroundColor: event.primaryColor, color: event.accentColor }}
           >
             {getGenerateFrameLabel(loading)}

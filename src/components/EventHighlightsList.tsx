@@ -17,7 +17,7 @@ export function EventHighlightsList({
   if (items.length === 0) return null;
 
   return (
-    <ul className={`space-y-2 text-sm text-gray-700 ${className}`}>
+    <ul className={`space-y-2 text-base text-gray-700 ${className}`}>
       {items.map((item, index) => (
         <li key={`${index}-${item}`} className="flex items-start gap-2">
           <span
