@@ -30,6 +30,17 @@ export type FrameTaglinePaint = {
   lineHeight?: number;
   /** Extra space between the attendee name and the first tagline (after-name). */
   afterNameGap?: number;
+  /**
+   * Extra space after the event-tagline block, before "I'm attending" / the name.
+   * When set, after-name copy paints as distinct event / attending / closing blocks.
+   */
+  afterEventGap?: number;
+  /** Extra space after the attending/name block, before the closing line. */
+  beforeClosingGap?: number;
+  /** Closing/footer line size. Defaults to fontSize. */
+  closingFontSize?: number;
+  closingFontWeight?: 500 | 600 | 700 | 800;
+  closingLineHeight?: number;
   /** Always stack taglines under the name instead of sitting on the same row. */
   stackBelowName?: boolean;
   xRatio?: number;

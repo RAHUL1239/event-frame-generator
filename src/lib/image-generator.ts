@@ -151,6 +151,34 @@ function uniqueTaglines(values: string[]): string[] {
   return out;
 }
 
+type PosterCopyBlocks = {
+  event: string[];
+  attending: string[];
+  closing: string;
+};
+
+function collectPosterCopyBlocks(
+  event: EventWithOptions,
+  kind: "personal" | "group",
+  includeFooter: boolean,
+  genderMode: "all" | "shared" = "all"
+): PosterCopyBlocks {
+  const eventLines = uniqueTaglines(parseMiddleTaglines(event.middleTaglines));
+  let attending: string[] = [];
+  if (kind === "group") {
+    attending = uniqueTaglines([getEventGenderTagline(event, "group")]);
+  } else {
+    const personal = uniqueTaglines(
+      event.genderOptions
+        .filter((option) => option.key !== "group")
+        .map((option) => option.tagline)
+    );
+    attending = genderMode === "shared" && personal.length !== 1 ? [] : personal;
+  }
+  const closing = includeFooter ? (event.tagline ?? "").trim() : "";
+  return { event: eventLines, attending, closing };
+}
+
 /** Admin middle / gender / footer copy that should appear on a poster. */
 function collectPosterTaglines(
   event: EventWithOptions,
@@ -158,20 +186,18 @@ function collectPosterTaglines(
   includeFooter: boolean,
   genderMode: "all" | "shared" = "all"
 ): string[] {
-  const middle = parseMiddleTaglines(event.middleTaglines);
-  const footer = includeFooter ? event.tagline ?? "" : "";
-  let gender: string[] = [];
-  if (kind === "group") {
-    gender = [getEventGenderTagline(event, "group")];
-  } else {
-    const personal = uniqueTaglines(
-      event.genderOptions
-        .filter((option) => option.key !== "group")
-        .map((option) => option.tagline)
-    );
-    gender = genderMode === "shared" && personal.length !== 1 ? [] : personal;
-  }
-  return uniqueTaglines([...middle, ...gender, footer]);
+  const blocks = collectPosterCopyBlocks(
+    event,
+    kind,
+    includeFooter,
+    genderMode
+  );
+  return uniqueTaglines([...blocks.event, ...blocks.attending, blocks.closing]);
+}
+
+function usesGroupedTaglineBlocks(theme: ResolvedFrameTheme): boolean {
+  const tagPaint = theme.paint.tagline;
+  return tagPaint?.afterEventGap != null || tagPaint?.beforeClosingGap != null;
 }
 
 function frameFont(
@@ -941,6 +967,142 @@ type MiddleSectionPlacement = {
   align?: "left" | "center";
 };
 
+function drawGroupedClassicCopy(
+  ctx: CanvasRenderingContext2D,
+  displayName: string,
+  blocks: PosterCopyBlocks,
+  y: number,
+  theme: ResolvedFrameTheme,
+  placement: MiddleSectionPlacement,
+  fontScale = 1
+): number {
+  const padX =
+    placement.align === "center"
+      ? placement.contentX - placement.maxWidth / 2
+      : placement.contentX;
+  const tagPaint = theme.paint.tagline;
+  const taglineColor = tagPaint?.color ?? getPosterTextColor(theme);
+  const nameColor = theme.paint.nameColor;
+  const closingKey = blocks.closing.trim().toLowerCase();
+  const attendingKeys = new Set(
+    blocks.attending.map((line) => line.trim().toLowerCase()).filter(Boolean)
+  );
+  const attendingLines = blocks.attending.filter(
+    (line) => line.trim().toLowerCase() !== closingKey
+  );
+  const eventLines = blocks.event.filter((line) => {
+    const key = line.trim().toLowerCase();
+    return key !== closingKey && !attendingKeys.has(key);
+  });
+  const closing = blocks.closing.trim();
+  const upperName = displayName.trim().toUpperCase();
+
+  const eventSize = Math.round(
+    (tagPaint?.fontSize ?? theme.paint.type.personalTaglineSize) * fontScale
+  );
+  const eventWeight = tagPaint?.fontWeight ?? 600;
+  const eventLineH = Math.round(
+    (tagPaint?.lineHeight ?? Math.max(eventSize + 8, 30)) * fontScale
+  );
+  const nameSize = Math.round(theme.paint.type.personalNameSize * fontScale);
+  const nameWeight = theme.paint.type.personalNameWeight ?? 700;
+  const nameLineH = Math.round(nameSize * 1.08);
+  const closingSize = Math.round(
+    (tagPaint?.closingFontSize ?? tagPaint?.fontSize ?? eventSize) * fontScale
+  );
+  const closingWeight = tagPaint?.closingFontWeight ?? 700;
+  const closingLineH = Math.round(
+    (tagPaint?.closingLineHeight ?? Math.max(closingSize + 10, 36)) * fontScale
+  );
+  const afterEventGap = Math.round((tagPaint?.afterEventGap ?? 42) * fontScale);
+  const beforeClosingGap = Math.round(
+    (tagPaint?.beforeClosingGap ?? 46) * fontScale
+  );
+  const afterNameGap = Math.round((tagPaint?.afterNameGap ?? 22) * fontScale);
+
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+  ctx.direction = "ltr";
+
+  let lastBaseline: number | null = null;
+  let lastLineH = eventLineH;
+
+  const drawWrapped = (
+    text: string,
+    size: number,
+    weight: 500 | 600 | 700 | 800,
+    color: string,
+    lineH: number,
+    gapBefore: number
+  ) => {
+    ctx.fillStyle = color;
+    ctx.font = frameFont(theme, weight, size);
+    const lines = splitTextIntoLines(ctx, text, placement.maxWidth);
+    let lineY =
+      lastBaseline == null ? y : lastBaseline + lastLineH + gapBefore;
+    for (const line of lines) {
+      fillTextWithSpaces(ctx, line, padX, lineY);
+      lastBaseline = lineY;
+      lastLineH = lineH;
+      lineY += lineH;
+    }
+  };
+
+  for (const line of eventLines) {
+    drawWrapped(line, eventSize, eventWeight, taglineColor, eventLineH, 0);
+  }
+
+  const attendingGap = eventLines.length > 0 ? afterEventGap : 0;
+  for (let i = 0; i < attendingLines.length; i++) {
+    drawWrapped(
+      attendingLines[i],
+      eventSize,
+      eventWeight,
+      taglineColor,
+      eventLineH,
+      i === 0 ? attendingGap : 0
+    );
+  }
+
+  if (upperName) {
+    const nameGap =
+      attendingLines.length > 0
+        ? afterNameGap
+        : eventLines.length > 0
+          ? afterEventGap
+          : 0;
+    ctx.font = frameFont(theme, nameWeight, nameSize);
+    const nameLines = splitTextIntoLines(ctx, upperName, placement.maxWidth);
+    let lineY =
+      lastBaseline == null ? y : lastBaseline + lastLineH + nameGap;
+    ctx.fillStyle = nameColor;
+    for (const line of nameLines) {
+      fillTextWithSpaces(ctx, line, padX, lineY);
+      lastBaseline = lineY;
+      lastLineH = nameLineH;
+      lineY += nameLineH;
+    }
+  }
+
+  if (closing) {
+    const closingGap =
+      eventLines.length > 0 || attendingLines.length > 0 || upperName
+        ? beforeClosingGap
+        : 0;
+    drawWrapped(
+      closing,
+      closingSize,
+      closingWeight,
+      taglineColor,
+      closingLineH,
+      closingGap
+    );
+  }
+
+  if (lastBaseline == null) return y;
+  return lastBaseline + Math.round(8 * fontScale);
+}
+
 function drawPersonalNameBlock(
   ctx: CanvasRenderingContext2D,
   displayName: string,
@@ -950,8 +1112,21 @@ function drawPersonalNameBlock(
   canvasW: number,
   theme: ResolvedFrameTheme,
   placement: MiddleSectionPlacement,
-  fontScale = 1
+  fontScale = 1,
+  copyBlocks?: PosterCopyBlocks
 ): number {
+  if (copyBlocks && usesGroupedTaglineBlocks(theme)) {
+    return drawGroupedClassicCopy(
+      ctx,
+      displayName,
+      copyBlocks,
+      y,
+      theme,
+      placement,
+      fontScale
+    );
+  }
+
   const padX =
     placement.align === "center"
       ? placement.contentX - placement.maxWidth / 2
@@ -1051,7 +1226,8 @@ function drawMiddleSectionWithName(
   canvasW: number,
   theme: ResolvedFrameTheme,
   placement: MiddleSectionPlacement,
-  fontScale = 1
+  fontScale = 1,
+  copyBlocks?: PosterCopyBlocks
 ): number {
   const lineStart = layoutX(layout, scaleCoord(36, canvasW), canvasW);
   const lineEnd = layoutX(layout, canvasW - scaleCoord(36, canvasW), canvasW);
@@ -1073,7 +1249,8 @@ function drawMiddleSectionWithName(
     canvasW,
     theme,
     placement,
-    fontScale
+    fontScale,
+    copyBlocks
   );
 }
 
@@ -1085,6 +1262,7 @@ function drawPersonalBesidePhotoTextStack(
     gsTagline?: string;
     displayName: string;
     middleTaglines: string[];
+    copyBlocks?: PosterCopyBlocks;
   },
   layoutCtx: {
     textX: number;
@@ -1127,6 +1305,13 @@ function drawPersonalBesidePhotoTextStack(
   let nameY =
     photoY - Math.round(photoRadius * 0.18) + Math.round(nameFontSize * 0.35);
   nameY = Math.max(photoTopY + Math.round(nameFontSize * 0.82), nameY);
+  if (usesGroupedTaglineBlocks(theme)) {
+    const firstSize = Math.round(
+      (theme.paint.tagline?.fontSize ??
+        theme.paint.type.personalTaglineSize) * fontScale
+    );
+    nameY = photoTopY + firstSize;
+  }
   if (theme.paint.nameLift) {
     nameY -= Math.round(theme.paint.nameLift * fontScale);
   }
@@ -1140,7 +1325,8 @@ function drawPersonalBesidePhotoTextStack(
     canvasW,
     theme,
     placement,
-    fontScale
+    fontScale,
+    input.copyBlocks
   );
 
   let textY = nameBottom + gap;
@@ -1653,12 +1839,17 @@ async function drawBmmPersonalPoster(
       photoRadius,
       ringOuterInset
     );
-    const middleTaglines = collectPosterTaglines(
+    const copyBlocks = collectPosterCopyBlocks(
       event,
       "personal",
       !theme.paint.includeEventTagline,
       "shared"
     );
+    const middleTaglines = uniqueTaglines([
+      ...copyBlocks.event,
+      ...copyBlocks.attending,
+      copyBlocks.closing,
+    ]);
     const attendeeBottomY = drawPersonalBesidePhotoTextStack(
       ctx,
       {
@@ -1666,6 +1857,7 @@ async function drawBmmPersonalPoster(
         gsTagline: event.tagline,
         displayName,
         middleTaglines,
+        copyBlocks,
       },
       {
         textX,
@@ -1739,18 +1931,24 @@ async function drawBmmPersonalPoster(
       160,
       POSTER_W - textX - layout.inset - layoutScale(layout, 24, POSTER_W)
     );
-    const middleTaglines = collectPosterTaglines(
+    const copyBlocks = collectPosterCopyBlocks(
       event,
       "personal",
       true,
       "shared"
     );
+    const middleTaglines = uniqueTaglines([
+      ...copyBlocks.event,
+      ...copyBlocks.attending,
+      copyBlocks.closing,
+    ]);
     const attendeeBottomY = drawPersonalBesidePhotoTextStack(
       ctx,
       {
         headline,
         displayName,
         middleTaglines,
+        copyBlocks,
       },
       {
         textX,
@@ -1933,12 +2131,17 @@ async function drawBmmGroupPoster(
       ) + layoutScale(layout, 16, POSTER_W);
 
     const groupName = input.groupName.trim() || "Our Group";
-    const middleTaglines = collectPosterTaglines(
+    const copyBlocks = collectPosterCopyBlocks(
       event,
       "group",
       !theme.paint.includeEventTagline,
       "shared"
     );
+    const middleTaglines = uniqueTaglines([
+      ...copyBlocks.event,
+      ...copyBlocks.attending,
+      copyBlocks.closing,
+    ]);
     const middleY = resolveMiddleBesidePhotoY(
       avgPhotoY,
       avgPhotoRadius,
@@ -1956,7 +2159,9 @@ async function drawBmmGroupPoster(
       layout,
       POSTER_W,
       theme,
-      { contentX: photoCenterX, maxWidth: groupMaxWidth, align: "center" }
+      { contentX: photoCenterX, maxWidth: groupMaxWidth, align: "center" },
+      1,
+      copyBlocks
     );
     const blockBottomY = Math.max(contentBottomY, photoBottom);
 
@@ -2036,12 +2241,17 @@ async function drawBmmGroupPoster(
       ) + layoutScale(layout, 16, POSTER_W);
 
     const groupName = input.groupName.trim() || "Our Group";
-    const middleTaglines = collectPosterTaglines(
+    const copyBlocks = collectPosterCopyBlocks(
       event,
       "group",
       true,
       "shared"
     );
+    const middleTaglines = uniqueTaglines([
+      ...copyBlocks.event,
+      ...copyBlocks.attending,
+      copyBlocks.closing,
+    ]);
     const middleY = resolveMiddleBesidePhotoY(
       avgPhotoY,
       avgPhotoRadius,
@@ -2059,7 +2269,9 @@ async function drawBmmGroupPoster(
       layout,
       POSTER_W,
       theme,
-      { contentX: photoCenterX, maxWidth: groupMaxWidth, align: "center" }
+      { contentX: photoCenterX, maxWidth: groupMaxWidth, align: "center" },
+      1,
+      copyBlocks
     );
     const blockBottomY = Math.max(contentBottomY, photoBottom);
 
@@ -2169,18 +2381,24 @@ async function drawPersonalDp(
     120,
     DP_W - textX - layout.inset - layoutScale(layout, scaleCoord(24, DP_W), DP_W)
   );
-  const middleTaglines = collectPosterTaglines(
+  const copyBlocks = collectPosterCopyBlocks(
     event,
     "personal",
     true,
     "shared"
   );
+  const middleTaglines = uniqueTaglines([
+    ...copyBlocks.event,
+    ...copyBlocks.attending,
+    copyBlocks.closing,
+  ]);
   const attendeeBottomY = drawPersonalBesidePhotoTextStack(
     ctx,
     {
       headline,
       displayName,
       middleTaglines,
+      copyBlocks,
     },
     {
       textX,
@@ -2281,12 +2499,17 @@ async function drawGroupDp(
     layoutScale(layout, scaleCoord(16, DP_W), DP_W);
 
   const groupName = input.groupName.trim() || "Our Group";
-  const middleTaglines = collectPosterTaglines(
+  const copyBlocks = collectPosterCopyBlocks(
     event,
     "group",
     true,
     "shared"
   );
+  const middleTaglines = uniqueTaglines([
+    ...copyBlocks.event,
+    ...copyBlocks.attending,
+    copyBlocks.closing,
+  ]);
   const middleY = resolveMiddleBesidePhotoY(
     avgPhotoY,
     avgPhotoRadius,
@@ -2305,7 +2528,8 @@ async function drawGroupDp(
     DP_W,
     theme,
     { contentX: photoCenterX, maxWidth: groupMaxWidth, align: "center" },
-    fontScale
+    fontScale,
+    copyBlocks
   );
   const blockBottomY = Math.max(contentBottomY, photoBottom);
 
