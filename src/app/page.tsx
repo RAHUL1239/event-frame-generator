@@ -452,7 +452,7 @@ export default function HomePage() {
             <h2 className="text-center text-3xl font-extrabold text-gray-900 md:text-4xl">
               Make every invitation personal. Then share it.
             </h2>
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-12 grid items-end gap-5 sm:grid-cols-2 xl:grid-cols-4">
               {examples.map((example) => (
                 <figure key={example.src} className="text-center">
                   <div className="overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-black/5">
@@ -461,10 +461,10 @@ export default function HomePage() {
                       alt={`${example.event} sample poster for ${example.guest}`}
                       width={800}
                       height={800}
-                      className="h-auto w-full"
+                      className="aspect-square h-auto w-full object-cover object-top"
                     />
                   </div>
-                  <figcaption className="mt-4">
+                  <figcaption className="mt-3">
                     <p className="text-sm font-semibold text-gray-900">
                       {example.event}
                     </p>
