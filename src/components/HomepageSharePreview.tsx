@@ -71,8 +71,8 @@ export function HomepageSharePreview({
         </section>
       </div>
       <figcaption className="mt-3">
-        <p className="text-base font-semibold text-gray-900">Then they share it</p>
-        <p className="mt-1 text-base text-gray-500">
+        <p className="text-lg font-semibold leading-relaxed text-gray-900 sm:text-xl">Then they share it</p>
+        <p className="mt-1 text-lg leading-relaxed text-gray-500 sm:text-xl">
           WhatsApp · Facebook · Instagram · Copy link
         </p>
       </figcaption>

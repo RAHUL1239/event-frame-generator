@@ -83,12 +83,12 @@ export default function PricingPage() {
           <h1 className="mt-4 max-w-4xl text-6xl font-bold leading-tight text-brand-teal md:text-7xl">
             One event. One price. Let your guests spread the word.
           </h1>
-          <p className="mt-6 max-w-2xl text-xl leading-relaxed text-gray-700">
+          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-gray-700 sm:text-xl">
             RSVPShare is a one-time fee per event. Guests create a poster with
             their photo and name, then share it with people they know. There is
             no charge per poster or per share.
           </p>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-gray-600">
+          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-gray-600 sm:text-xl">
             At launch, the $199 setup is the main offer for most organizers.
           </p>
         </section>
@@ -130,8 +130,8 @@ export default function PricingPage() {
                 <p
                   className={
                     plan.featured
-                      ? "mt-1 text-base text-brand-cream/80"
-                      : "mt-1 text-base text-gray-500"
+                      ? "mt-1 text-lg leading-relaxed text-brand-cream/80 sm:text-xl"
+                      : "mt-1 text-lg leading-relaxed text-gray-500 sm:text-xl"
                   }
                 >
                   {plan.priceNote}
@@ -139,8 +139,8 @@ export default function PricingPage() {
                 <p
                   className={
                     plan.featured
-                      ? "mt-4 leading-relaxed text-brand-cream/90"
-                      : "mt-4 leading-relaxed text-gray-700"
+                      ? "mt-4 text-lg leading-relaxed text-brand-cream/90 sm:text-xl"
+                      : "mt-4 text-lg leading-relaxed text-gray-700 sm:text-xl"
                   }
                 >
                   {plan.summary}
@@ -148,8 +148,8 @@ export default function PricingPage() {
                 <ul
                   className={
                     plan.featured
-                      ? "mt-6 flex-1 space-y-2 text-base text-brand-cream/90"
-                      : "mt-6 flex-1 space-y-2 text-base text-gray-700"
+                      ? "mt-6 flex-1 space-y-2 text-lg leading-relaxed text-brand-cream/90 sm:text-xl"
+                      : "mt-6 flex-1 space-y-2 text-lg leading-relaxed text-gray-700 sm:text-xl"
                   }
                 >
                   {plan.features.map((feature) => (
@@ -181,7 +181,7 @@ export default function PricingPage() {
                 <h3 className="text-3xl font-semibold text-brand-teal">
                   One fee covers the event
                 </h3>
-                <p className="mt-3 leading-relaxed text-gray-700">
+                <p className="mt-3 text-lg leading-relaxed text-gray-700 sm:text-xl">
                   You pay once for the event. Guests do not pay to make a
                   poster or to share it. We do not charge by the poster or by
                   the share.
@@ -191,7 +191,7 @@ export default function PricingPage() {
                 <h3 className="text-3xl font-semibold text-brand-teal">
                   Event size helps us quote larger work
                 </h3>
-                <p className="mt-3 leading-relaxed text-gray-700">
+                <p className="mt-3 text-lg leading-relaxed text-gray-700 sm:text-xl">
                   Guest count does not add extra price bands. We ask about
                   event size so we can see when a large or sponsored event
                   needs more designs or setup support.
@@ -201,7 +201,7 @@ export default function PricingPage() {
                 <h3 className="text-3xl font-semibold text-brand-teal">
                   Ninety days, then an extension if you need it
                 </h3>
-                <p className="mt-3 leading-relaxed text-gray-700">
+                <p className="mt-3 text-lg leading-relaxed text-gray-700 sm:text-xl">
                   Each event stays available for 90 days. If the date moves or
                   you want the page up longer, we can extend it.
                 </p>
@@ -210,7 +210,7 @@ export default function PricingPage() {
                 <h3 className="text-3xl font-semibold text-brand-teal">
                   What guests get
                 </h3>
-                <p className="mt-3 leading-relaxed text-gray-700">
+                <p className="mt-3 text-lg leading-relaxed text-gray-700 sm:text-xl">
                   A public event link, their photo and name on the poster, and
                   tools to share it on social apps and messaging. That is the
                   product: people they know see the invitation from someone
@@ -231,7 +231,7 @@ export default function PricingPage() {
               <p className="mt-2 font-semibold text-brand-teal">
                 Nonprofits and community groups
               </p>
-              <p className="mt-3 leading-relaxed text-gray-700">
+              <p className="mt-3 text-lg leading-relaxed text-gray-700 sm:text-xl">
                 Tell us when you write. We apply the discount on the event fee.
               </p>
             </li>
@@ -240,14 +240,14 @@ export default function PricingPage() {
               <p className="mt-2 font-semibold text-brand-teal">
                 Three-event bundle
               </p>
-              <p className="mt-3 leading-relaxed text-gray-700">
+              <p className="mt-3 text-lg leading-relaxed text-gray-700 sm:text-xl">
                 Book three events together and save 15% on those event fees.
               </p>
             </li>
             <li className="rounded-2xl bg-white p-6 shadow-sm">
               <p className="text-3xl font-bold text-brand-gold">Later</p>
               <p className="mt-2 font-semibold text-brand-teal">Annual plans</p>
-              <p className="mt-3 leading-relaxed text-gray-700">
+              <p className="mt-3 text-lg leading-relaxed text-gray-700 sm:text-xl">
                 We are not selling annual plans yet. They will come later.
               </p>
             </li>
@@ -257,7 +257,7 @@ export default function PricingPage() {
         <section className="bg-brand-teal text-brand-cream">
           <div className="mx-auto max-w-6xl px-6 py-16">
             <h2 className="text-5xl font-bold">Try it before you write</h2>
-            <p className="mt-4 max-w-2xl text-xl leading-relaxed text-brand-cream/90">
+            <p className="mt-4 max-w-2xl text-lg leading-relaxed text-brand-cream/90 sm:text-xl">
               Open the free preview, add a photo and name, and share a sample
               poster. No setup request required.
             </p>
@@ -275,7 +275,7 @@ export default function PricingPage() {
             <h2 className="max-w-xl text-5xl font-bold text-brand-cream">
               Ready to set up an event?
             </h2>
-            <p className="mt-4 max-w-xl text-brand-cream/85">
+            <p className="mt-4 max-w-xl text-lg leading-relaxed text-brand-cream/85 sm:text-xl">
               Send a few details and we will follow up. Mention nonprofit,
               community, or a three-event bundle if that applies.
             </p>
@@ -289,7 +289,7 @@ export default function PricingPage() {
         </section>
       </main>
 
-      <footer className="mx-auto max-w-6xl px-6 py-8 text-base text-gray-500">
+      <footer className="mx-auto max-w-6xl px-6 py-8 text-lg leading-relaxed text-gray-500 sm:text-xl">
         <p>RSVPShare · Posters your guests share for you</p>
       </footer>
     </div>

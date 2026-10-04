@@ -36,7 +36,7 @@ export function EventHeader({ event }: Props) {
             >
               {event.name}
             </h1>
-            <p className="mt-1 text-base uppercase tracking-wider text-white/90 md:mt-4">
+            <p className="mt-1 text-lg uppercase leading-relaxed tracking-wider text-white/90 sm:text-xl md:mt-4">
               {event.subtitle}
             </p>
           </div>

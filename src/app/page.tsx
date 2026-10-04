@@ -315,14 +315,14 @@ export default function HomePage() {
                   Try a sample
                 </Link>
               </div>
-              <p className="mt-5 flex max-w-md items-start gap-2 text-base text-gray-500">
+              <p className="mt-5 flex max-w-md items-start gap-2 text-lg leading-relaxed text-gray-500 sm:text-xl">
                 <span className="mt-0.5 text-brand-gold">
                   <IconGift />
                 </span>
                 RSVPShare is free for non-profit organizations and for events
                 with fewer than 50 attendees.
               </p>
-              <p className="mt-3 flex max-w-md items-start gap-2 text-base text-gray-500">
+              <p className="mt-3 flex max-w-md items-start gap-2 text-lg leading-relaxed text-gray-500 sm:text-xl">
                 <span className="mt-0.5 text-brand-gold">
                   <IconGift />
                 </span>
@@ -375,7 +375,7 @@ export default function HomePage() {
                 <p className="text-5xl font-extrabold text-gray-900">
                   {formatCount(DISPLAY_ATTENDEES)}
                 </p>
-                <p className="mt-1 text-base text-gray-500">
+                <p className="mt-1 text-lg leading-relaxed text-gray-500 sm:text-xl">
                   attendees have used RSVPShare
                 </p>
               </div>
@@ -388,7 +388,7 @@ export default function HomePage() {
                 <p className="text-5xl font-extrabold text-gray-900">
                   {formatCount(DISPLAY_EVENTS)}
                 </p>
-                <p className="mt-1 text-base text-gray-500">
+                <p className="mt-1 text-lg leading-relaxed text-gray-500 sm:text-xl">
                   events have used RSVPShare
                 </p>
               </div>
@@ -409,13 +409,13 @@ export default function HomePage() {
                 <h3 className="mt-5 text-3xl font-bold leading-snug text-gray-900 md:text-4xl">
                   {benefit.title}
                 </h3>
-                <p className="mt-4 text-2xl leading-relaxed text-gray-600">
+                <p className="mt-4 text-lg leading-relaxed text-gray-600 sm:text-xl">
                   {benefit.body}
                 </p>
               </article>
             ))}
           </div>
-          <p className="mt-10 text-center text-xl leading-relaxed text-gray-500 md:text-2xl">
+          <p className="mt-10 text-center text-lg leading-relaxed text-gray-500 sm:text-xl">
             Guests share on the apps they already use — WhatsApp, Instagram, and
             Facebook.
           </p>
@@ -438,7 +438,7 @@ export default function HomePage() {
                   <h3 className="mt-5 text-3xl font-bold leading-snug text-gray-900 md:text-4xl">
                     {item.title}
                   </h3>
-                  <p className="mt-4 text-2xl leading-relaxed text-gray-600">
+                  <p className="mt-4 text-lg leading-relaxed text-gray-600 sm:text-xl">
                     {item.body}
                   </p>
                 </li>
@@ -465,10 +465,10 @@ export default function HomePage() {
                     />
                   </div>
                   <figcaption className="mt-3">
-                    <p className="text-base font-semibold text-gray-900">
+                    <p className="text-lg font-semibold leading-relaxed text-gray-900 sm:text-xl">
                       {example.event}
                     </p>
-                    <p className="mt-1 text-base text-gray-500">
+                    <p className="mt-1 text-lg leading-relaxed text-gray-500 sm:text-xl">
                       {example.guest} · {example.caption}
                     </p>
                   </figcaption>
@@ -481,7 +481,7 @@ export default function HomePage() {
                 instagramHref={invitationUrl}
               />
             </div>
-            <p className="mt-8 text-center text-base text-gray-500">
+            <p className="mt-8 text-center text-lg leading-relaxed text-gray-500 sm:text-xl">
               Want to try out RSVPShare?{" "}
               <Link
                 href="/event/try-out"
@@ -502,7 +502,7 @@ export default function HomePage() {
             <h2 className="mt-3 text-center text-6xl font-extrabold leading-tight text-gray-900 md:text-7xl">
               The power of a personal recommendation
             </h2>
-            <p className="mx-auto mt-6 max-w-4xl text-center text-2xl leading-relaxed text-gray-600">
+            <p className="mx-auto mt-6 max-w-4xl text-center text-lg leading-relaxed text-gray-600 sm:text-xl">
               Platforms that turn guests into sharers show up in independent
               research on trust and ticket sales. These are the figures behind
               the product.
@@ -516,14 +516,14 @@ export default function HomePage() {
                   <p className="mt-4 text-3xl font-medium leading-snug text-gray-900 md:text-4xl">
                     {item.label}
                   </p>
-                  <p className="mt-5 text-2xl leading-relaxed text-gray-600">
+                  <p className="mt-5 text-lg leading-relaxed text-gray-600 sm:text-xl">
                     {item.detail}
                   </p>
                   <a
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-5 inline-block text-2xl font-semibold text-brand-purple underline hover:text-brand-purple-dark"
+                    className="mt-5 inline-block text-lg font-semibold leading-relaxed text-brand-purple underline hover:text-brand-purple-dark sm:text-xl"
                   >
                     {item.source}
                   </a>
@@ -554,7 +554,7 @@ export default function HomePage() {
       </main>
 
       <footer className="border-t border-violet-100">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 text-base text-gray-500 sm:flex-row lg:px-6">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 text-lg leading-relaxed text-gray-500 sm:flex-row sm:text-xl lg:px-6">
           <div>
             <p className="font-semibold text-gray-700">RSVPShare</p>
             <p className="mt-1">Posters your guests share for you</p>

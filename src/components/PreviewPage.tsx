@@ -234,7 +234,7 @@ export function PreviewPage({
         >
           #{participantNumber.toLocaleString("en-US")}
         </p>
-        <p className="mt-4 text-base leading-relaxed text-gray-600">
+        <p className="mt-4 text-lg leading-relaxed text-gray-600 sm:text-xl">
           Share your poster and invite friends to join the celebration!
         </p>
       </div>
@@ -243,12 +243,12 @@ export function PreviewPage({
         <h2 className="text-2xl font-bold" style={{ color: SHARE_TEAL }}>
           Share with friends
         </h2>
-        <p className="mt-2 text-base leading-relaxed text-gray-600">
+        <p className="mt-2 text-lg leading-relaxed text-gray-600 sm:text-xl">
           Share your poster and invite friends to create their own frame.
         </p>
 
         {onLocalhost && (
-          <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-lg leading-relaxed text-amber-900 sm:text-xl">
             Running on localhost — invitation links are not included in shares.
             Use &quot;Share image&quot; on mobile or deploy to test link sharing.
           </p>
@@ -347,7 +347,7 @@ function PreviewCard({
         <h3 className="text-xl font-bold" style={{ color: primaryColor }}>
           {title}
         </h3>
-        <p className="text-base opacity-80" style={{ color: primaryColor }}>
+        <p className="text-lg leading-relaxed opacity-80 sm:text-xl" style={{ color: primaryColor }}>
           {subtitle}
         </p>
       </div>
@@ -385,7 +385,7 @@ function PreviewCard({
         >
           Share image
         </button>
-        <p className="text-center text-sm text-gray-500">
+        <p className="text-center text-lg leading-relaxed text-gray-500 sm:text-xl">
           Use the share buttons above, or download to save a copy.
         </p>
       </div>

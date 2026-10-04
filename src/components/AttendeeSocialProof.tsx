@@ -13,7 +13,7 @@ export function AttendeeSocialProof({
 
   return (
     <div
-      className="rounded-xl px-4 py-3 text-center text-base text-gray-600"
+      className="rounded-xl px-4 py-3 text-center text-lg leading-relaxed text-gray-600 sm:text-xl"
       style={{
         backgroundColor: `${accentColor}18`,
         borderColor: accentColor,

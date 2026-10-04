@@ -172,7 +172,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
         >
           Enter Group Details
         </h2>
-        <p className="mt-2 text-gray-600">
+        <p className="mt-2 text-lg leading-relaxed text-gray-600 sm:text-xl">
           Add your group info, member photos, and choose a frame style.
         </p>
 
@@ -203,7 +203,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
             <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-gray-500">
               Member Photos *
             </label>
-            <p className="mb-2 text-sm text-gray-500">
+            <p className="mb-2 text-lg leading-relaxed text-gray-500 sm:text-xl">
               Use photos at least 1000×1000 pixels with faces toward the center.
               A phone photo is usually enough; very small pictures look soft.
             </p>
@@ -282,7 +282,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
           )}
 
           <div
-            className="rounded-xl px-4 py-3 text-base"
+            className="rounded-xl px-4 py-3 text-lg leading-relaxed sm:text-xl"
             style={{ backgroundColor: `${event.accentColor}22` }}
           >
             <span className="mr-2">⚠️</span>
@@ -300,7 +300,7 @@ export function GroupDpForm({ event, slug, attendeeCount }: Props) {
           ) : null}
 
           {error && (
-            <p className="rounded-lg bg-red-50 px-4 py-2 text-base text-red-600">
+            <p className="rounded-lg bg-red-50 px-4 py-2 text-lg leading-relaxed text-red-600 sm:text-xl">
               {error}
             </p>
           )}

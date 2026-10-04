@@ -54,7 +54,7 @@ export function SetupContactForm() {
     return (
       <div className="rounded-2xl bg-white p-8 shadow-sm">
         <h2 className="text-4xl font-bold text-brand-teal">Thanks — we got it</h2>
-        <p className="mt-3 leading-relaxed text-gray-700">
+        <p className="mt-3 text-lg leading-relaxed text-gray-700 sm:text-xl">
           Your setup request is on its way. We will reach out to you soon.
         </p>
       </div>
@@ -67,7 +67,7 @@ export function SetupContactForm() {
       className="rounded-2xl bg-white p-6 shadow-sm md:p-8"
     >
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="block text-base font-medium text-gray-700">
+        <label className="block text-lg font-medium leading-relaxed text-gray-700 sm:text-xl">
           Your name *
           <input
             type="text"
@@ -77,7 +77,7 @@ export function SetupContactForm() {
             required
           />
         </label>
-        <label className="block text-base font-medium text-gray-700">
+        <label className="block text-lg font-medium leading-relaxed text-gray-700 sm:text-xl">
           Email *
           <input
             type="email"
@@ -87,7 +87,7 @@ export function SetupContactForm() {
             required
           />
         </label>
-        <label className="block text-base font-medium text-gray-700">
+        <label className="block text-lg font-medium leading-relaxed text-gray-700 sm:text-xl">
           Phone *
           <input
             type="tel"
@@ -99,7 +99,7 @@ export function SetupContactForm() {
             required
           />
         </label>
-        <label className="block text-base font-medium text-gray-700">
+        <label className="block text-lg font-medium leading-relaxed text-gray-700 sm:text-xl">
           Organization *
           <input
             type="text"
@@ -109,7 +109,7 @@ export function SetupContactForm() {
             required
           />
         </label>
-        <label className="block text-base font-medium text-gray-700">
+        <label className="block text-lg font-medium leading-relaxed text-gray-700 sm:text-xl">
           Event name *
           <input
             type="text"
@@ -119,7 +119,7 @@ export function SetupContactForm() {
             required
           />
         </label>
-        <label className="block text-base font-medium text-gray-700">
+        <label className="block text-lg font-medium leading-relaxed text-gray-700 sm:text-xl">
           Event date
           <input
             type="text"
@@ -129,7 +129,7 @@ export function SetupContactForm() {
             className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2 outline-none focus:border-brand-teal"
           />
         </label>
-        <label className="block text-base font-medium text-gray-700">
+        <label className="block text-lg font-medium leading-relaxed text-gray-700 sm:text-xl">
           Event location
           <input
             type="text"
@@ -141,7 +141,7 @@ export function SetupContactForm() {
         </label>
       </div>
 
-      <label className="mt-4 block text-base font-medium text-gray-700">
+      <label className="mt-4 block text-lg font-medium leading-relaxed text-gray-700 sm:text-xl">
         Message
         <textarea
           value={values.message}
@@ -153,7 +153,7 @@ export function SetupContactForm() {
       </label>
 
       {error && (
-        <p className="mt-4 rounded-lg bg-red-50 px-4 py-2 text-base text-red-700">
+        <p className="mt-4 rounded-lg bg-red-50 px-4 py-2 text-lg leading-relaxed text-red-700 sm:text-xl">
           {error}
         </p>
       )}

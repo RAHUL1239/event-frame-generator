@@ -36,7 +36,7 @@ export function FrameThemePicker({
               <button
                 type="button"
                 onClick={() => onChange(key)}
-                className={`flex w-full items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-base font-medium transition ${
+                className={`flex w-full items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-lg font-medium leading-relaxed transition sm:text-xl ${
                   selected
                     ? "border-brand-teal bg-white shadow-sm"
                     : "border-transparent bg-brand-cream text-gray-800 hover:bg-brand-cream-dark"

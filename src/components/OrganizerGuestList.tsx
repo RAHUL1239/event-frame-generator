@@ -52,7 +52,7 @@ export function OrganizerGuestList({
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold text-brand-teal">{eventName}</h1>
-            <p className="text-base text-gray-500">
+            <p className="text-lg leading-relaxed text-gray-500 sm:text-xl">
               {guests.length} {guests.length === 1 ? "poster" : "posters"} created
             </p>
           </div>
@@ -74,9 +74,9 @@ export function OrganizerGuestList({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name"
-            className="w-full max-w-xs rounded-lg border px-3 py-2 text-base"
+            className="w-full max-w-xs rounded-lg border px-3 py-2 text-lg leading-relaxed sm:text-xl"
           />
-          <label className="flex items-center gap-2 text-base">
+          <label className="flex items-center gap-2 text-lg leading-relaxed sm:text-xl">
             <span className="text-gray-500">Sort by</span>
             <select
               value={sortBy}
@@ -90,7 +90,7 @@ export function OrganizerGuestList({
         </div>
 
         <div className="overflow-hidden rounded-xl border bg-white">
-          <table className="w-full text-left text-base">
+          <table className="w-full text-left text-lg leading-relaxed sm:text-xl">
             <thead className="border-b bg-gray-50">
               <tr>
                 <th className="px-4 py-3 font-medium">Name</th>

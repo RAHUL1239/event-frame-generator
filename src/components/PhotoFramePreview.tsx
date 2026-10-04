@@ -151,7 +151,7 @@ export function PhotoFramePreview({
         />
         {rendering && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg bg-white/60">
-            <p className="text-sm text-gray-500">Updating preview…</p>
+            <p className="text-lg leading-relaxed text-gray-500 sm:text-xl">Updating preview…</p>
           </div>
         )}
       </div>

@@ -44,13 +44,13 @@ export function OrganizerLoginForm({
         className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg"
       >
         <h1 className="text-3xl font-bold text-brand-teal">{eventName}</h1>
-        <p className="mt-2 text-base text-gray-500">
+        <p className="mt-2 text-lg leading-relaxed text-gray-500 sm:text-xl">
           Sign in to see who has created a poster for this event.
         </p>
 
         <div className="mt-6 space-y-4">
           <div>
-            <label className="mb-1 block text-base font-medium">Username</label>
+            <label className="mb-1 block text-lg font-medium leading-relaxed sm:text-xl">Username</label>
             <input
               type="text"
               value={username}
@@ -61,7 +61,7 @@ export function OrganizerLoginForm({
             />
           </div>
           <div>
-            <label className="mb-1 block text-base font-medium">Password</label>
+            <label className="mb-1 block text-lg font-medium leading-relaxed sm:text-xl">Password</label>
             <input
               type="password"
               value={password}
@@ -72,7 +72,7 @@ export function OrganizerLoginForm({
             />
           </div>
 
-          {error && <p className="text-base text-red-600">{error}</p>}
+          {error && <p className="text-lg leading-relaxed text-red-600 sm:text-xl">{error}</p>}
 
           <button
             type="submit"

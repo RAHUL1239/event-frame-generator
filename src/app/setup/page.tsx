@@ -37,7 +37,7 @@ export default function SetupPage() {
         <h1 className="mt-4 text-6xl font-bold text-brand-teal">
           Set up your event
         </h1>
-        <p className="mt-4 text-xl leading-relaxed text-gray-700">
+        <p className="mt-4 text-lg leading-relaxed text-gray-700 sm:text-xl">
           Share a few details and we will help you get a guest poster page
           ready. RSVPShare is free for non-profit organizations and for events
           with fewer than 50 attendees.
@@ -51,13 +51,13 @@ export default function SetupPage() {
           <h2 id="pricing" className="text-4xl font-bold text-brand-teal">
             Pricing
           </h2>
-          <p className="mt-2 text-base leading-relaxed text-gray-700">
+          <p className="mt-2 text-lg leading-relaxed text-gray-700 sm:text-xl">
             One-time fee per event. Guests create and share posters at no
             charge.
           </p>
 
           <div className="mt-5 overflow-x-auto rounded-2xl bg-white shadow-sm">
-            <table className="w-full min-w-[28rem] text-left text-base">
+            <table className="w-full min-w-[28rem] text-left text-lg leading-relaxed sm:text-xl">
               <thead>
                 <tr className="border-b border-brand-cream-dark text-brand-teal">
                   <th className="px-5 py-3 font-semibold">Option</th>
@@ -113,7 +113,7 @@ export default function SetupPage() {
             </table>
           </div>
 
-          <p className="mt-4 text-base text-gray-600">
+          <p className="mt-4 text-lg leading-relaxed text-gray-600 sm:text-xl">
             Discounts available for nonprofits and community groups.
           </p>
         </section>

@@ -122,7 +122,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
         >
           Enter Your Details
         </h2>
-        <p className="mt-2 text-gray-600">
+        <p className="mt-2 text-lg leading-relaxed text-gray-600 sm:text-xl">
           Fill in your info, upload your photo, and choose a frame style.
         </p>
 
@@ -183,7 +183,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
                 <span className="font-medium text-gray-700">
                   Click to upload photo
                 </span>
-                <span className="mt-1 text-base text-gray-500">
+                <span className="mt-1 text-lg leading-relaxed text-gray-500 sm:text-xl">
                   JPG, PNG, or WebP
                 </span>
               </button>
@@ -200,13 +200,13 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
                   attendeeCount={attendeeCount}
                 />
                 <div className="mt-3 flex items-center justify-between gap-3 border-t border-gray-200 pt-3">
-                  <span className="truncate text-base text-gray-600">
+                  <span className="truncate text-lg leading-relaxed text-gray-600 sm:text-xl">
                     {photo?.name}
                   </span>
                   <button
                     type="button"
                     onClick={() => fileRef.current?.click()}
-                    className="shrink-0 text-base font-medium underline"
+                    className="shrink-0 text-lg font-medium leading-relaxed underline sm:text-xl"
                     style={{ color: event.primaryColor }}
                   >
                     Change photo
@@ -214,7 +214,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
                 </div>
               </div>
             )}
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-2 text-lg leading-relaxed text-gray-500 sm:text-xl">
               Use a photo at least 1000×1000 pixels with the face toward the
               center. A phone photo is usually enough; very small pictures look
               soft.
@@ -231,7 +231,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
           ) : null}
 
           <div
-            className="rounded-xl px-4 py-3 text-base"
+            className="rounded-xl px-4 py-3 text-lg leading-relaxed sm:text-xl"
             style={{ backgroundColor: `${event.accentColor}22` }}
           >
             <span className="mr-2">⚠️</span>
@@ -241,7 +241,7 @@ export function PersonalDpForm({ event, slug, attendeeCount }: Props) {
           </div>
 
           {error && (
-            <p className="rounded-lg bg-red-50 px-4 py-2 text-base text-red-600">
+            <p className="rounded-lg bg-red-50 px-4 py-2 text-lg leading-relaxed text-red-600 sm:text-xl">
               {error}
             </p>
           )}

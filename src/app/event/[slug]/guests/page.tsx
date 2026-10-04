@@ -30,7 +30,7 @@ export default async function EventGuestsPage({
       <main className="flex min-h-screen items-center justify-center bg-white px-4">
         <div className="max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
           <h1 className="text-3xl font-bold text-brand-teal">{event.name}</h1>
-          <p className="mt-3 text-base text-gray-600">
+          <p className="mt-3 text-lg leading-relaxed text-gray-600 sm:text-xl">
             An organizer login has not been set up for this event yet.
           </p>
         </div>

@@ -10,7 +10,7 @@ export function EventFooter({ event }: { event: EventWithOptions }) {
       <p className="px-4 text-xl font-medium" style={{ color: event.accentColor }}>
         {event.tagline}
       </p>
-      <p className="mt-2 text-base text-white/80">
+      <p className="mt-2 text-lg leading-relaxed text-white/80 sm:text-xl">
         {event.name} · {event.dateLabel}
       </p>
       <Link
