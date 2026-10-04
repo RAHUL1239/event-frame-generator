@@ -60,6 +60,28 @@ export function fillTextWithSpaces(
   ctx.textAlign = prevAlign;
 }
 
+function breakLongWord(
+  ctx: CanvasRenderingContext2D,
+  word: string,
+  maxWidth: number,
+  lines: string[]
+): string {
+  if (!word) return "";
+  if (measureLineWidth(ctx, word) <= maxWidth) return word;
+
+  let chunk = "";
+  for (const ch of word) {
+    const test = chunk + ch;
+    if (chunk && measureLineWidth(ctx, test) > maxWidth) {
+      lines.push(chunk);
+      chunk = ch;
+    } else {
+      chunk = test;
+    }
+  }
+  return chunk;
+}
+
 export function splitTextIntoLines(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -74,27 +96,15 @@ export function splitTextIntoLines(
     const trimmed = paragraph.trim();
     if (!trimmed) continue;
 
-    if (trimmed.includes(" ")) {
-      let line = "";
-      for (const word of trimmed.split(/\s+/)) {
-        const test = line ? `${line} ${word}` : word;
-        if (measureLineWidth(ctx, test) > maxWidth && line) {
-          lines.push(line);
-          line = word;
-        } else {
-          line = test;
-        }
-      }
-      if (line) lines.push(line);
-      continue;
-    }
-
     let line = "";
-    for (const char of trimmed) {
-      const test = line + char;
-      if (measureLineWidth(ctx, test) > maxWidth && line) {
+    const words = trimmed.includes(" ") ? trimmed.split(/\s+/) : [trimmed];
+    for (const word of words) {
+      const test = line ? `${line} ${word}` : word;
+      if (line && measureLineWidth(ctx, test) > maxWidth) {
         lines.push(line);
-        line = char;
+        line = breakLongWord(ctx, word, maxWidth, lines);
+      } else if (!line && measureLineWidth(ctx, word) > maxWidth) {
+        line = breakLongWord(ctx, word, maxWidth, lines);
       } else {
         line = test;
       }

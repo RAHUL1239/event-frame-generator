@@ -8,9 +8,9 @@ const CREAM = "#F3EEE4";
 
 /**
  * Full PNG overlay. Photo composites into the left-center circular hole.
- * Florals and title stay as designed. The guest name sits in the right
- * column. Organizer taglines cover the baked-in sample line
- * "Good company. Beautiful memories."
+ * Florals and title stay as designed. The guest name sits under the
+ * photo, above the footer. Organizer taglines replace the erased
+ * "Good company. Beautiful memories." line.
  */
 export const grandGalaFrame: PosterFrame = {
   key: "grand-gala",
@@ -28,7 +28,7 @@ export const grandGalaFrame: PosterFrame = {
   overlayKey: "grand-gala",
   posterTextColor: NAVY,
   overlay: {
-    src: "/frames/grand-gala-frame.png?v=1",
+    src: "/frames/grand-gala-frame.png?v=2",
     holeShape: "circle",
     holeCenterXRatio: 315.1 / 1024,
     holeCenterYRatio: 518.35 / 1024,
@@ -58,13 +58,13 @@ export const grandGalaFrame: PosterFrame = {
       personalNameSize: 46,
     }),
     overlayName: {
-      xRatio: 0.6,
-      yRatio: 0.4,
-      maxWidthRatio: 0.36,
-      maxBottomRatio: 0.52,
-      align: "left",
+      xRatio: 0.5,
+      yRatio: 0.818,
+      maxWidthRatio: 0.72,
+      maxBottomRatio: 0.836,
+      align: "center",
       color: NAVY,
-      fontSize: 42,
+      fontSize: 36,
     },
     tagline: {
       placement: "slot",
@@ -75,15 +75,8 @@ export const grandGalaFrame: PosterFrame = {
       lineHeight: 46,
       xRatio: 0.638,
       yRatio: 0.548,
-      maxWidthRatio: 0.300,
+      maxWidthRatio: 0.318,
       maxBottomRatio: 0.665,
-      cover: {
-        xRatio: 0.620,
-        yRatio: 0.508,
-        widthRatio: 0.335,
-        heightRatio: 0.155,
-        color: CREAM,
-      },
     },
   },
 };

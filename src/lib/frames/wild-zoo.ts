@@ -9,9 +9,9 @@ const GOLD = "#F4B400";
 
 /**
  * Full PNG overlay. Photo composites into the left-center circular hole.
- * Animals and leaves stay as designed. The guest name sits in the right
- * column. Organizer taglines cover the baked-in sample line
- * "Big smiles. Wild memories."
+ * Animals and leaves stay as designed. The guest name sits in the cream
+ * field above the location bar (right of the lion). Organizer taglines
+ * replace the erased "Big smiles. Wild memories." line.
  */
 export const wildZooFrame: PosterFrame = {
   key: "wild-zoo",
@@ -29,7 +29,7 @@ export const wildZooFrame: PosterFrame = {
   overlayKey: "wild-zoo",
   posterTextColor: GREEN,
   overlay: {
-    src: "/frames/wild-about-the-zoo-frame.png?v=1",
+    src: "/frames/wild-about-the-zoo-frame.png?v=2",
     holeShape: "circle",
     holeCenterXRatio: 286.69 / 1024,
     holeCenterYRatio: 414.12 / 1024,
@@ -59,13 +59,13 @@ export const wildZooFrame: PosterFrame = {
       personalNameSize: 46,
     }),
     overlayName: {
-      xRatio: 0.54,
-      yRatio: 0.32,
+      xRatio: 0.74,
+      yRatio: 0.628,
       maxWidthRatio: 0.42,
-      maxBottomRatio: 0.5,
-      align: "left",
+      maxBottomRatio: 0.688,
+      align: "center",
       color: GREEN,
-      fontSize: 42,
+      fontSize: 44,
     },
     tagline: {
       placement: "slot",
@@ -78,13 +78,6 @@ export const wildZooFrame: PosterFrame = {
       yRatio: 0.538,
       maxWidthRatio: 0.415,
       maxBottomRatio: 0.618,
-      cover: {
-        xRatio: 0.528,
-        yRatio: 0.488,
-        widthRatio: 0.455,
-        heightRatio: 0.128,
-        color: "#FFFEF8",
-      },
     },
   },
 };

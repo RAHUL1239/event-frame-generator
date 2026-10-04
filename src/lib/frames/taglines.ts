@@ -68,12 +68,16 @@ export function drawPaintedTaglines(
   ctx.fillStyle = slot.color;
   ctx.font = font;
 
+  // Wrap a few px early and never pass maxWidth into fillText — that
+  // constraint can scale/clip a line and leave the first glyph behind.
+  const wrapWidth = Math.max(64, maxWidth - 6);
+
   let lineY = startY;
   for (const tag of active) {
-    const wrapped = splitTextIntoLines(ctx, tag, maxWidth).slice(0, 3);
+    const wrapped = splitTextIntoLines(ctx, tag, wrapWidth).slice(0, 3);
     for (const line of wrapped) {
       if (lineY > maxBottom) break;
-      fillTextWithSpaces(ctx, line, x, lineY, maxWidth);
+      fillTextWithSpaces(ctx, line, x, lineY);
       lineY += lineH;
     }
     if (lineY > maxBottom) break;

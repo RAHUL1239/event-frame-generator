@@ -65,19 +65,38 @@ export function drawOverlayHoleName(
   if (!slot || !label) return;
 
   const holePad = Math.round(0.028 * width);
-  const minX = overlayHoleRight(theme, width, height) + holePad;
-  const maxRight = width - Math.round(0.04 * width);
+  const sidePad = Math.round(0.04 * width);
+  const maxRight = width - sidePad;
+  const startY = slot.yRatio * height;
+  const maxBottom = (slot.maxBottomRatio ?? 0.7) * height;
 
   let x = slot.xRatio * width;
   let maxWidth = slot.maxWidthRatio * width;
-  if (slot.align === "left" && x < minX) {
-    maxWidth -= minX - x;
-    x = minX;
-  }
-  maxWidth = Math.max(80, Math.min(maxWidth, maxRight - x));
 
-  const startY = slot.yRatio * height;
-  const maxBottom = (slot.maxBottomRatio ?? 0.7) * height;
+  if (slot.align === "center") {
+    const half = maxWidth / 2;
+    const left = Math.max(sidePad, x - half);
+    const right = Math.min(maxRight, x + half);
+    maxWidth = Math.max(80, right - left);
+    x = (left + right) / 2;
+  } else {
+    const hole = getOverlayPhotoSlot(theme.overlayKey ?? theme.key, width, height);
+    let minX = sidePad;
+    if (hole?.shape === "circle") {
+      const holeBottom = hole.y + hole.radius;
+      // Names under the circle may span the photo width. Only shove
+      // text right when the baseline still sits beside the hole.
+      if (startY < holeBottom + 0.012 * height) {
+        minX = Math.max(minX, overlayHoleRight(theme, width, height) + holePad);
+      }
+    }
+    if (x < minX) {
+      maxWidth -= minX - x;
+      x = minX;
+    }
+    maxWidth = Math.max(80, Math.min(maxWidth, maxRight - x));
+  }
+
   let size = Math.round((slot.fontSize * width) / 1080);
   const fontFamily = theme.paint.type.fontFamily;
   const upper = label.toUpperCase();
@@ -104,7 +123,7 @@ export function drawOverlayHoleName(
   ctx.font = font;
   for (const line of lines) {
     if (lineY > maxBottom) break;
-    fillTextWithSpaces(ctx, line, x, lineY, maxWidth);
+    fillTextWithSpaces(ctx, line, x, lineY);
     lineY += lineH();
   }
   ctx.restore();
